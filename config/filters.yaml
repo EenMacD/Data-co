@@ -1,0 +1,35 @@
+# config/filters.yaml
+
+# This file defines the search criteria for finding companies.
+# It's designed to be simple, like a filter bar.
+
+search_criteria:
+  name: "glasgow_construction_active"
+  selection:
+    locality: "Glasgow"
+    company_status: "active"
+    industry_codes:
+      # SIC codes for Construction of buildings, Civil engineering, Specialised construction activities
+      include: ["41", "42", "43"]
+    limit: 20
+
+# --- Technical Configuration ---
+# You shouldn't need to change the settings below unless you're
+# changing the data source or the script's behavior.
+
+technical_config:
+  bulk_download:
+    url_template: "http://download.companieshouse.gov.uk/BasicCompanyDataAsOneFile-{date}.zip"
+    date_format: "%Y-%m-%d"
+    date_override: "2025-10-01" # As requested, for Oct 1st, 2025
+  api_enrichment:
+    enabled: true
+    endpoints:
+      - "company_profile"
+      - "officers"
+      - "persons-with-significant-control"
+    request_rate_per_minute: 50
+  storage:
+    # `{name}` will be replaced with the search name from above, 
+    # e.g., "glasgow_construction_active"
+    base_path: "project_data/{name}"
