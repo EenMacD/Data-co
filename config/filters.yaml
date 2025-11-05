@@ -29,6 +29,12 @@ technical_config:
       - "officers"
       - "persons-with-significant-control"
     request_rate_per_minute: 50
+  financials_scan:
+    enabled: false           # set to true to run the collation step
+    window_days: 365         # scan period for filings
+    download_documents: true # fetch filings via CH Document API before parsing
+    parse_ixbrl: true        # parse iXBRL .html
+    parse_xbrl: true         # parse XBRL .xml
   storage:
     # `{name}` will be replaced with the search name from above, 
     # e.g., "glasgow_construction_active"

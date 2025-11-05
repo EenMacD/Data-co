@@ -13,4 +13,8 @@ python3 Data-injestion-workflows/Bulk-request-workflow/bulk-main.py
 echo "Starting API enrichment..."
 python3 Data-injestion-workflows/Api-request-workflow/api-main.py
 
+# Collation: financial data extraction (guarded by config flag).
+echo "Starting data collation (financials)..."
+python3 Data-collation-process/financials_collation.py
+
 echo "Workflow complete."
