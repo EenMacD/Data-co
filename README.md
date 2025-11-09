@@ -186,6 +186,26 @@ Use these prompt templates to drive conversations with Codex or write runbooks. 
 
 ---
 
+## Financials Collation
+
+The `Data-collation-process/financials_collation.py` script collates financial data for companies.
+
+### OCR Fallback for PDFs
+
+Some financial documents are provided as scanned images within PDF files, without a text layer. In these cases, the standard XBRL/iXBRL parsing will fail. The collation script includes an OCR (Optical Character Recognition) fallback to handle these documents.
+
+The OCR pipeline involves the following steps:
+
+1.  **Image Extraction**: Each page of the PDF is converted to a high-resolution image.
+2.  **Tesseract OCR**: The `tesseract` engine processes each image to extract text and layout information.
+3.  **Table Parsing**: The OCR output is parsed to identify and extract financial facts, such as turnover, profit, assets, and liabilities.
+
+This fallback is triggered automatically when no data is extracted from XBRL/iXBRL sources. The extracted data is marked with `"source": "ocr"` in the output JSON.
+
+**Note:** This process requires `tesseract` to be installed on the system.
+
+---
+
 ## 5. Building the Linked Data Model
 
 ### 5.1 Core Tables

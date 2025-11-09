@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from zipfile import ZipFile
+from urllib.parse import urljoin
 
 import pandas as pd
 import requests
@@ -20,6 +21,8 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
 from ingestion_config.loader import load_config  # noqa: E402
+
+DOCUMENT_API_BASE = "https://document-api.company-information.service.gov.uk"
 
 
 # -----------------
@@ -151,9 +154,7 @@ def _download_document(session: requests.Session, item: Dict[str, Any], out_dir:
     if not meta_url:
         return None
     try:
-        meta = session.get(
-            f"https://document-api.company-information.service.gov.uk{meta_url}", timeout=30
-        )
+        meta = session.get(urljoin(DOCUMENT_API_BASE, meta_url), timeout=30)
         meta.raise_for_status()
         d = meta.json()
         content_link = (d.get("links") or {}).get("document")
@@ -161,13 +162,13 @@ def _download_document(session: requests.Session, item: Dict[str, Any], out_dir:
             return None
         # prefer PDF; fall back to default
         resp = session.get(
-            f"https://document-api.company-information.service.gov.uk{content_link}",
+            urljoin(DOCUMENT_API_BASE, content_link),
             headers={"Accept": "application/pdf"},
             timeout=60,
         )
         if resp.status_code == 406:
             resp = session.get(
-                f"https://document-api.company-information.service.gov.uk{content_link}", timeout=60
+                urljoin(DOCUMENT_API_BASE, content_link), timeout=60
             )
         resp.raise_for_status()
         ctype = resp.headers.get("Content-Type", "").lower()
@@ -302,7 +303,7 @@ _IX_NONFRACTION_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 _IX_CONTEXT_RE = re.compile(
-    r"<xbrli:context\s+[^>]*?id=\"(?P<id>[^\"]+)\"[^>]*?>.*?(?:<xbrli:endDate>(?P<end>[^<]+)</xbrli:endDate>|<xbrli:instant>(?P<inst>[^<]+)</xbrli:instant)).*?</xbrli:context>",
+    r"<xbrli:context\s+[^>]*?id=\"(?P<id>[^\"]+)\"[^>]*?>.*?(?:<xbrli:endDate>(?P<end>[^<]+)</xbrli:endDate>|<xbrli:instant>(?P<inst>[^<]+)</xbrli:instant>).*?</xbrli:context>",
     re.IGNORECASE | re.DOTALL,
 )
 
@@ -345,6 +346,20 @@ def _parse_ixbrl_html(path: Path) -> List[Tuple[str, Dict[str, float]]]:
             bucket[canonical] = val
 
     return [(k, v) for k, v in out.items()]
+
+
+def _parse_pdf_ocr(path: Path) -> List[Tuple[str, Dict[str, float]]]:
+    """
+    Extracts financial facts from a PDF using an OCR pipeline.
+    This is a fallback for when XBRL/iXBRL parsing fails.
+    """
+    print(f"      - Attempting OCR for {path.name}...")
+    # TODO: Implement the OCR pipeline
+    # 1. Convert PDF to images (e.g., using pdftoppm or a Python library)
+    # 2. Run Tesseract on each image
+    # 3. Parse the Tesseract output (TSV) to extract financial facts
+    # 4. Return a list of (period_end, facts) tuples
+    return []
 
 
 # -----------------
@@ -421,7 +436,8 @@ def run() -> None:
         # Parse documents present
         periods: Dict[str, Dict[str, float]] = {}
         parsed_sources: List[str] = []
-        for doc_path in docs_dir.glob("**/*"):
+        doc_paths = list(docs_dir.glob("**/*"))
+        for doc_path in doc_paths:
             if doc_path.suffix.lower() == ".xml" and parse_xbrl:
                 for period_end, facts in _parse_xbrl_xml(doc_path):
                     bucket = periods.setdefault(period_end, {})
@@ -434,6 +450,17 @@ def run() -> None:
                     for k, v in facts.items():
                         bucket.setdefault(k, v)
                 parsed_sources.append("ixbrl")
+
+        if not parsed_sources:
+            for doc_path in doc_paths:
+                if doc_path.suffix.lower() == ".pdf":
+                    ocr_results = _parse_pdf_ocr(doc_path)
+                    if ocr_results:
+                        for period_end, facts in ocr_results:
+                            bucket = periods.setdefault(period_end, {})
+                            for k, v in facts.items():
+                                bucket.setdefault(k, v)
+                        parsed_sources.append("ocr")
 
         # Build output JSON structure (foreign key to company)
         out_obj: Dict[str, Any] = {

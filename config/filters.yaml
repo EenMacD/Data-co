@@ -11,7 +11,7 @@ search_criteria:
     industry_codes:
       # SIC codes for Construction of buildings, Civil engineering, Specialised construction activities
       include: ["41", "42", "43"]
-    limit: 20
+    limit: 10
 
 # --- Technical Configuration ---
 # You shouldn't need to change the settings below unless you're
@@ -30,7 +30,7 @@ technical_config:
       - "persons-with-significant-control"
     request_rate_per_minute: 50
   financials_scan:
-    enabled: false           # set to true to run the collation step
+    enabled: true            # set to true to run the collation step
     window_days: 365         # scan period for filings
     download_documents: true # fetch filings via CH Document API before parsing
     parse_ixbrl: true        # parse iXBRL .html
