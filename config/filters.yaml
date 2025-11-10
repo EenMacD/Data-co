@@ -31,10 +31,28 @@ technical_config:
     request_rate_per_minute: 50
   financials_scan:
     enabled: true            # set to true to run the collation step
-    window_days: 365         # scan period for filings
+    # You can choose either window_years or window_days; window_years takes precedence if set
+    window_years: 5          # scan the last N years of filings (approximate, 365*N days)
+    window_days: 365         # or scan period in days
     download_documents: true # fetch filings via CH Document API before parsing
+    merge_enriched: true     # include API-enriched data inside aggregated financial JSON
     parse_ixbrl: true        # parse iXBRL .html
     parse_xbrl: true         # parse XBRL .xml
+    # Output naming/placement
+    output_naming:
+      # Define the folder name using both name and number to guarantee uniqueness
+      folder_template: "{company_name}_{company_number}"
+      # Fallback if folder_template is not set: folder_by can be company_name | company_number
+      folder_by: company_name
+      aggregated_template: "Historical-financial-performance-{company_name}.json"
+      yearly_template: "{year}, {company_name}.json"
+    # Collation filters (optional): list or comma-separated string of keys to include
+    # fields: [turnover, profit_loss, operating_profit, cash, total_assets, net_assets, total_liabilities]
+    # Post-collation cleanup
+    cleanup:
+      remove_documents: true        # remove downloaded filings under financials/*/documents
+      remove_financials_dir: true   # remove project_data/{name}/financials tree after run
+      remove_raw_dir: true          # remove project_data/{name}/raw tree after run
   storage:
     # `{name}` will be replaced with the search name from above, 
     # e.g., "glasgow_construction_active"

@@ -4,6 +4,7 @@ import shutil
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+from typing import Optional
 from urllib.parse import urlparse
 from urllib.request import urlopen
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -62,7 +63,7 @@ def _build_url(bulk_config: dict) -> str:
     return template.replace("{date}", dt.strftime(date_format))
 
 
-def _download_to_raw(url: str, raw_root: Path) -> Path | None:
+def _download_to_raw(url: str, raw_root: Path) -> Optional[Path]:
     try:
         filename = Path(urlparse(url).path).name
         destination = raw_root / "company_profile" / filename

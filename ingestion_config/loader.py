@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import yaml
 
@@ -11,14 +11,14 @@ CONFIG_PATH = Path(__file__).resolve().parents[1] / "config" / "filters.yaml"
 class ConfigError(RuntimeError):
     """Raised when the ingestion configuration file is missing or invalid."""
 
-@dataclass(slots=True)
+@dataclass
 class AppConfig:
     """Materialised configuration for the application."""
 
     search_criteria: Dict[str, Any]
     technical_config: Dict[str, Any]
 
-def load_config(config_path: Path | None = None) -> AppConfig:
+def load_config(config_path: Optional[Path] = None) -> AppConfig:
     """
     Load the YAML configuration and return the resolved configuration.
     """
