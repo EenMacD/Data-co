@@ -4,3 +4,4 @@ python-dotenv
 PyYAML
 pytesseract
 pdf2image
+psycopg2-binary
