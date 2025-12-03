@@ -7,10 +7,16 @@ import os
 from contextlib import contextmanager
 from typing import Generator
 
+import json
 import psycopg2
 from psycopg2 import pool
-from psycopg2.extras import RealDictCursor
+from psycopg2.extras import RealDictCursor, Json
+from psycopg2.extensions import register_adapter
 from dotenv import load_dotenv
+
+# Register JSON adapter for dict types only
+# Note: Lists are NOT auto-converted to JSON to allow PostgreSQL array types
+register_adapter(dict, Json)
 
 # Load environment variables
 load_dotenv()

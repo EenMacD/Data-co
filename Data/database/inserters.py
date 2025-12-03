@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from psycopg2.extras import execute_values
+from psycopg2.extras import execute_values, Json
 
 from database.connection import get_staging_db
 
@@ -94,7 +94,7 @@ class StagingInserter:
             "region": company_data.get("region"),
             "country": company_data.get("country"),
             "sic_codes": company_data.get("sic_codes", []),
-            "raw_data": raw,
+            "raw_data": Json(raw),  # Explicitly convert dict to JSONB
         }
 
         result = self.db.execute(query, params, fetch=True)
@@ -137,7 +137,7 @@ class StagingInserter:
                 address.get("locality"),
                 address.get("postal_code"),
                 address.get("country"),
-                officer,  # raw_data as JSONB
+                Json(officer),  # Explicitly convert dict to JSONB
             ))
 
         query = """

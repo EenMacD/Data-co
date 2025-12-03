@@ -5,8 +5,11 @@ import json
 import os
 import sys
 import time
+import threading
 from pathlib import Path
 from zipfile import ZipFile
+from collections import deque
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pandas as pd
 import requests
@@ -22,6 +25,81 @@ from database.inserters import (
     parse_companies_house_officer,
     parse_companies_house_psc,
 )
+from incremental_enrichment import get_incremental_work_plan, print_work_plan
+
+
+class RateLimiter:
+    """Thread-safe rate limiter for concurrent API requests."""
+
+    def __init__(self, max_per_minute):
+        self.max_per_minute = max_per_minute
+        self.timestamps = deque()
+        self.lock = threading.Lock()
+        self.total_requests = 0
+
+    def wait_if_needed(self):
+        """Block if rate limit would be exceeded, ensuring thread-safe operation."""
+        while True:
+            sleep_time = 0
+            with self.lock:
+                now = time.time()
+                # Remove timestamps older than 1 minute
+                while self.timestamps and self.timestamps[0] < now - 60:
+                    self.timestamps.popleft()
+
+                # If we can make a request, record it and return
+                if len(self.timestamps) < self.max_per_minute:
+                    self.timestamps.append(now)
+                    self.total_requests += 1
+                    return
+
+                # Calculate wait time - need to wait until oldest request expires
+                if self.timestamps:
+                    sleep_time = max(0, 60 - (now - self.timestamps[0]) + 0.1)
+
+            # Sleep OUTSIDE the lock to allow other threads to proceed
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+            else:
+                # Small sleep to prevent busy-waiting
+                time.sleep(0.01)
+            
+            if sleep_time > 1.0:
+                print(f"[RateLimiter] Pausing for {sleep_time:.1f} seconds to respect rate limit...")
+
+
+def fetch_company_data(company_info, api_key, endpoints, rate_limiter):
+    """
+    Fetch API data for a single company with rate limiting.
+
+    Args:
+        company_info: Dict with company data (must have CompanyNumber and CompanyName keys)
+        api_key: Companies House API key
+        endpoints: List of API endpoints to call
+        rate_limiter: RateLimiter instance for coordinating requests across threads
+
+    Returns:
+        Tuple of (company_info, api_responses) where api_responses is a dict of endpoint -> response
+    """
+    company_number = company_info["CompanyNumber"]
+    company_name = company_info["CompanyName"]
+
+    session = requests.Session()
+    session.auth = (api_key, "")
+
+    api_responses = {}
+    for endpoint in endpoints:
+        rate_limiter.wait_if_needed()
+        url = f"https://api.companieshouse.gov.uk/company/{company_number}/{endpoint}"
+        try:
+            response = session.get(url, timeout=30)
+            response.raise_for_status()
+            api_responses[endpoint] = response.json()
+        except requests.exceptions.RequestException as e:
+            api_responses[endpoint] = {"error": str(e)}
+
+    session.close()  # Clean up session
+    return company_info, api_responses
 
 
 def run_api_enrichment_to_db() -> None:
@@ -50,77 +128,122 @@ def run_api_enrichment_to_db() -> None:
 
     api_config = tech_config.get("api_enrichment", {})
     endpoints = api_config.get("endpoints", [])
-    rate_limit = api_config.get("request_rate_per_minute", 60)
-    sleep_interval = 60.0 / rate_limit
+    rate_limit = api_config.get("request_rate_per_minute", 120)
+    incremental_mode = api_config.get("incremental_mode", False)
+    max_workers = 60  # Number of concurrent workers
 
-    # Initialize database inserter
+    # Initialize database inserter and rate limiter
     inserter = StagingInserter(search_name)
+    rate_limiter = RateLimiter(rate_limit)
 
-    session = requests.Session()
-    session.auth = (api_key, "")
+    # Extract SIC codes BEFORE converting to dict to preserve list type
+    companies_df["sic_codes_extracted"] = companies_df.apply(_extract_sic_codes, axis=1)
+
+    # Convert DataFrame to list of dicts for parallel processing
+    companies = companies_df.to_dict('records')
+
+    # Handle incremental mode
+    if incremental_mode:
+        print("\n[api] INCREMENTAL MODE ENABLED")
+        enabled_features = {
+            'fetch_officers': 'officers' in endpoints or 'persons-with-significant-control' in endpoints,
+            'fetch_financials': False  # Will be enabled when financial workflow is ready
+        }
+
+        work_plan = get_incremental_work_plan(companies, enabled_features)
+        print_work_plan(work_plan)
+
+        # Only process new companies + companies that need updates
+        companies_to_process = work_plan['new_companies']
+
+        # For companies needing updates, we'll fetch only missing endpoints
+        print(f"  - Skipping {work_plan['stats']['up_to_date']} companies that are up-to-date")
+
+    else:
+        companies_to_process = companies
+        work_plan = None
+
+    total_companies = len(companies_to_process)
+
+    print(f"  - Processing {total_companies} companies with {max_workers} concurrent workers")
+    print(f"  - Rate limit: {rate_limit} requests/minute")
 
     try:
-        for i, row in companies_df.iterrows():
-            company_number = row["CompanyNumber"]
-            company_name = row["CompanyName"]
-            print(
-                f"  ({i + 1}/{len(companies_df)}) Processing company: {company_number} ({company_name})"
-            )
-
-            # Collect all API responses for this company
-            api_responses = {}
-
-            for endpoint in endpoints:
-                url = f"https://api.companieshouse.gov.uk/company/{company_number}/{endpoint}"
-                try:
-                    response = session.get(url)
-                    response.raise_for_status()
-                    api_responses[endpoint] = response.json()
-                    print(f"    ✓ Fetched {endpoint}")
-                except requests.exceptions.RequestException as e:
-                    print(f"    ✗ Failed to fetch {endpoint}: {e}")
-                    api_responses[endpoint] = {"error": str(e)}
-                time.sleep(sleep_interval)
-
-            # Insert company into staging database
-            company_data = {
-                "company_number": company_number,
-                "company_name": company_name,
-                "company_status": row.get("CompanyStatus", "unknown"),
-                "locality": row.get("RegAddress.PostTown"),
-                "postal_code": row.get("RegAddress.PostCode"),
-                "region": row.get("RegAddress.County"),
-                "country": row.get("RegAddress.Country"),
-                "sic_codes": _extract_sic_codes(row),
-                "raw_data": api_responses,  # Store all API responses as JSONB
+        # Use ThreadPoolExecutor for concurrent processing
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all fetch tasks
+            futures = {
+                executor.submit(
+                    fetch_company_data,
+                    company,
+                    api_key,
+                    endpoints,
+                    rate_limiter
+                ): idx for idx, company in enumerate(companies_to_process)
             }
 
-            staging_company_id = inserter.insert_company(company_data)
+            # Process results as they complete
+            completed = 0
+            start_time = time.time()
+            for future in as_completed(futures):
+                idx = futures[future]
+                try:
+                    company_info, api_responses = future.result()
+                    company_number = company_info["CompanyNumber"]
+                    company_name = company_info["CompanyName"]
 
-            if not staging_company_id:
-                print(f"    ! Company {company_number} already exists in this batch")
-                continue
+                    completed += 1
+                    elapsed = time.time() - start_time
+                    rate = completed / elapsed if elapsed > 0 else 0
+                    eta = (total_companies - completed) / rate if rate > 0 else 0
 
-            # Parse and insert officers
-            officers = []
-            if "officers" in api_responses and "error" not in api_responses["officers"]:
-                officers = parse_companies_house_officer(
-                    api_responses["officers"], company_number
-                )
+                    print(
+                        f"  ({completed}/{total_companies}) Completed API fetch: {company_number} ({company_name}) "
+                        f"[{rate:.1f} companies/sec, ETA: {eta/60:.1f} min]"
+                    )
 
-            # Parse and insert PSCs
-            if (
-                "persons-with-significant-control" in api_responses
-                and "error" not in api_responses["persons-with-significant-control"]
-            ):
-                pscs = parse_companies_house_psc(
-                    api_responses["persons-with-significant-control"], company_number
-                )
-                officers.extend(pscs)
+                    # Insert company into staging database
+                    company_data = {
+                        "company_number": company_number,
+                        "company_name": company_name,
+                        "company_status": company_info.get("CompanyStatus", "unknown"),
+                        "locality": company_info.get("RegAddress.PostTown"),
+                        "postal_code": company_info.get("RegAddress.PostCode"),
+                        "region": company_info.get("RegAddress.County"),
+                        "country": company_info.get("RegAddress.Country"),
+                        "sic_codes": company_info.get("sic_codes_extracted", []),
+                        "raw_data": api_responses,  # Store all API responses as JSONB
+                    }
 
-            if officers:
-                officer_count = inserter.insert_officers(staging_company_id, officers)
-                print(f"    ✓ Inserted {officer_count} officers/PSCs")
+                    staging_company_id = inserter.insert_company(company_data)
+
+                    if not staging_company_id:
+                        print(f"    ! Company {company_number} already exists in this batch")
+                        continue
+
+                    # Parse and insert officers
+                    officers = []
+                    if "officers" in api_responses and "error" not in api_responses["officers"]:
+                        officers = parse_companies_house_officer(
+                            api_responses["officers"], company_number
+                        )
+
+                    # Parse and insert PSCs
+                    if (
+                        "persons-with-significant-control" in api_responses
+                        and "error" not in api_responses["persons-with-significant-control"]
+                    ):
+                        pscs = parse_companies_house_psc(
+                            api_responses["persons-with-significant-control"], company_number
+                        )
+                        officers.extend(pscs)
+
+                    if officers:
+                        officer_count = inserter.insert_officers(staging_company_id, officers)
+                        print(f"    ✓ Inserted {officer_count} officers/PSCs")
+
+                except Exception as e:
+                    print(f"    ✗ Error processing company at index {idx}: {e}")
 
         # Mark batch as complete
         inserter.complete_batch(status="completed")
@@ -230,6 +353,8 @@ def _find_and_filter_companies(criteria: dict, tech_config: dict) -> pd.DataFram
     if limit:
         print(f"  - Applying limit of {limit} companies.")
         final_df = final_df.head(limit)
+    else:
+        print(f"  - No limit configured (processing all {len(final_df)} matches)")
 
     # Return more columns for database insertion
     return_cols = ["CompanyNumber", "CompanyName"]
