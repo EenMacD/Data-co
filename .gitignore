@@ -1,0 +1,26 @@
+# Environment variables with sensitive credentials
+.env
+
+# Node modules
+node_modules/
+
+# Python virtual environment
+Data/lib/
+Data/bin/
+Data/include/
+Data/pyvenv.cfg
+__pycache__/
+*.pyc
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
