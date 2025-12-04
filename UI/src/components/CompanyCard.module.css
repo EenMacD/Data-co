@@ -1,0 +1,174 @@
+.card {
+    display: flex;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+    border-color: #cbd5e1;
+}
+
+.imageContainer {
+    width: 220px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-right: 1px solid #e2e8f0;
+}
+
+.placeholderImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 0.875rem;
+}
+
+.content {
+    flex: 1;
+    padding: 1.125rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.375rem;
+}
+
+.companyName {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.01em;
+}
+
+.industry {
+    font-size: 0.8125rem;
+    color: #64748b;
+    font-weight: 400;
+}
+
+.value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #0f172a;
+    text-align: right;
+    letter-spacing: -0.01em;
+}
+
+.valueLabel {
+    font-size: 0.6875rem;
+    color: #64748b;
+    font-weight: 500;
+    display: block;
+    margin-top: 2px;
+    letter-spacing: 0;
+}
+
+.detailsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.875rem;
+    margin: 1rem 0 0.875rem 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.detailItem {
+    display: flex;
+    flex-direction: column;
+}
+
+.detailLabel {
+    font-size: 0.6875rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.detailValue {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #0f172a;
+    letter-spacing: -0.005em;
+}
+
+.description {
+    font-size: 0.8125rem;
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: auto;
+    margin-top: 0.5rem;
+}
+
+.footer {
+    margin-top: 0.875rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.updateTime {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-weight: 400;
+}
+
+.status {
+    padding: 0.25rem 0.625rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.6875rem;
+    letter-spacing: 0.01em;
+}
+
+.statusActive {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+@media (max-width: 768px) {
+    .card {
+        flex-direction: column;
+    }
+
+    .imageContainer {
+        width: 100%;
+        height: 180px;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .content {
+        padding: 1rem;
+    }
+
+    .companyName {
+        font-size: 1rem;
+    }
+
+    .value {
+        font-size: 1rem;
+    }
+}

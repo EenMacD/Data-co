@@ -1,0 +1,35 @@
+search_criteria:
+  name: glasgow_all_companies
+  selection:
+    locality: Glasgow
+technical_config:
+  bulk_download:
+    url_template: http://download.companieshouse.gov.uk/BasicCompanyDataAsOneFile-{date}.zip
+    date_format: '%Y-%m-%d'
+    date_override: '2025-10-01'
+  api_enrichment:
+    enabled: true
+    incremental_mode: true
+    endpoints:
+    - officers
+    - persons-with-significant-control
+    request_rate_per_minute: 120
+  financials_scan:
+    enabled: true
+    window_years: 5
+    window_days: 365
+    download_documents: true
+    merge_enriched: true
+    parse_ixbrl: true
+    parse_xbrl: true
+    output_naming:
+      folder_template: '{company_name}_{company_number}'
+      folder_by: company_name
+      aggregated_template: Historical-financial-performance-{company_name}.json
+      yearly_template: '{year}, {company_name}.json'
+    cleanup:
+      remove_documents: true
+      remove_financials_dir: true
+      remove_raw_dir: true
+  storage:
+    base_path: project_data/{name}

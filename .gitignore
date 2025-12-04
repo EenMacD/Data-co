@@ -1,6 +1,26 @@
-# Created by venv; see https://docs.python.org/3/library/venv.html
-lib/
+# Environment variables with sensitive credentials
 .env
-*.log
-Data-injestion-workflows/Api-request-workflow/output/
- ingestion_config/__pycache__/
+
+# Node modules
+node_modules/
+
+# Python virtual environment
+Data/lib/
+Data/bin/
+Data/include/
+Data/pyvenv.cfg
+__pycache__/
+*.pyc
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store

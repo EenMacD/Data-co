@@ -1,0 +1,73 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    height: 80px;
+    background-color: var(--bg-light);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-purple);
+    letter-spacing: -1px;
+}
+
+.navLinks {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.link {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: color 0.2s;
+    cursor: pointer;
+}
+
+.link:hover {
+    color: var(--primary-purple);
+}
+
+.actions {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.actionLink {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.actionLink:hover {
+    color: var(--primary-purple);
+}
+
+.signIn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    background-color: transparent;
+    border: 1px solid var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.signIn:hover {
+    background-color: var(--bg-off-white);
+    border-color: var(--primary-purple);
+    color: var(--primary-purple);
+}
