@@ -11,18 +11,22 @@ echo "║  Two-database architecture (staging + production)      ║"
 echo "╚════════════════════════════════════════════════════════╝"
 echo ""
 
-# Load environment variables
-if [ -f .env ]; then
-    echo "✓ Found .env file"
-    export $(cat .env | grep -v '^#' | xargs)
+# Load environment variables (skip if already set by docker-compose)
+if [ -z "$STAGING_DB_HOST" ]; then
+    if [ -f .env ]; then
+        echo "✓ Found .env file"
+        export $(cat .env | grep -v '^#' | xargs)
+    else
+        echo "✗ .env file not found"
+        echo "  Please copy .env.example to .env and configure it first"
+        echo ""
+        echo "  cp .env.example .env"
+        echo "  nano .env"
+        echo ""
+        exit 1
+    fi
 else
-    echo "✗ .env file not found"
-    echo "  Please copy .env.example to .env and configure it first"
-    echo ""
-    echo "  cp .env.example .env"
-    echo "  nano .env"
-    echo ""
-    exit 1
+    echo "✓ Using environment variables from Docker"
 fi
 
 # Check if PostgreSQL is installed
@@ -47,22 +51,22 @@ create_database() {
 
     echo "→ Checking if database '$db_name' exists..."
 
-    if psql -lqt | cut -d \| -f 1 | grep -qw "$db_name"; then
+    if PGPASSWORD=$STAGING_DB_PASSWORD psql -h "$STAGING_DB_HOST" -U "$STAGING_DB_USER" -lqt | cut -d \| -f 1 | grep -qw "$db_name"; then
         echo "  ℹ Database '$db_name' already exists"
         read -p "  Do you want to drop and recreate it? (y/N): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             echo "  Dropping database '$db_name'..."
-            dropdb "$db_name" || echo "  (ignoring error)"
+            PGPASSWORD=$STAGING_DB_PASSWORD dropdb -h "$STAGING_DB_HOST" -U "$STAGING_DB_USER" "$db_name" || echo "  (ignoring error)"
             echo "  Creating database '$db_name'..."
-            createdb "$db_name" -O "$db_user"
+            PGPASSWORD=$STAGING_DB_PASSWORD createdb -h "$STAGING_DB_HOST" -U "$STAGING_DB_USER" "$db_name" -O "$db_user"
         else
             echo "  Keeping existing database"
             return
         fi
     else
         echo "  Creating database '$db_name'..."
-        createdb "$db_name" -O "$db_user"
+        PGPASSWORD=$STAGING_DB_PASSWORD createdb -h "$STAGING_DB_HOST" -U "$STAGING_DB_USER" "$db_name" -O "$db_user"
     fi
 
     echo "  ✓ Database '$db_name' ready"
@@ -80,7 +84,7 @@ apply_schema() {
         exit 1
     fi
 
-    psql -d "$db_name" -f "$schema_file" -q
+    PGPASSWORD=$STAGING_DB_PASSWORD psql -h "$STAGING_DB_HOST" -U "$STAGING_DB_USER" -d "$db_name" -f "$schema_file" -q
 
     if [ $? -eq 0 ]; then
         echo "  ✓ Schema applied successfully"

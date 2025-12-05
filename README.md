@@ -43,6 +43,47 @@ This will open **3 separate terminal windows**, one for each component:
 
 ---
 
+---
+
+## 🐳 Running with Docker
+
+This project can be easily run using Docker Desktop. This will start the API, UI, Database, and a Data Worker container.
+
+### Prerequisites
+- Docker Desktop installed
+
+### Quick Start
+1. **Start the application stack:**
+   ```bash
+   docker-compose up --build
+   ```
+
+2. **Initialize the database:**
+   Open a new terminal and run:
+   ```bash
+   docker exec -it data-co-worker /app/setup_databases.sh
+   ```
+
+3. **Access the application:**
+   - **UI:** [http://localhost:3000](http://localhost:3000)
+   - **API:** [http://localhost:8080/api/health](http://localhost:8080/api/health)
+   - **Data UI:** [http://localhost:5000](http://localhost:5000)
+
+### Component Details
+- **API**: Go application running on port 8080.
+- **UI**: Next.js application running on port 3000.
+- **Database**: Postgres 15 running on port 5432.
+- **Data Worker**: Python environment for running data ingestion scripts.
+- **Data UI**: Flask application for managing data ingestion (port 5000).
+
+### Running Data Ingestion
+To run data ingestion scripts, execute them inside the `data-worker` container:
+```bash
+docker exec -it data-co-worker python Data-injestion-workflows/Api-request-workflow/api-main-db.py
+```
+
+---
+
 ## Project Components
 
 For detailed development instructions, refer to the specific READMEs:

@@ -1,0 +1,98 @@
+services:
+  # 1. Database Service (Postgres)
+  db:
+    image: postgres:15
+    container_name: data-co-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: staging
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"  # Changed to 5433 to avoid conflict with local PostgreSQL on 5432
+    networks:
+      - data-co-network
+
+  # 2. API Service (Go)
+  api:
+    build: ./API
+    container_name: data-co-api
+    ports:
+      - "8080:8080"
+    environment:
+      - STAGING_DB_HOST=db
+      - STAGING_DB_PORT=5432
+      - STAGING_DB_NAME=staging
+      - STAGING_DB_USER=postgres
+      - STAGING_DB_PASSWORD=password
+      - STAGING_DB_SSLMODE=disable
+      - API_PORT=8080
+    depends_on:
+      - db
+    networks:
+      - data-co-network
+
+  # 3. UI Service (Next.js)
+  ui:
+    build: ./UI
+    container_name: data-co-ui
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080/api
+    depends_on:
+      - api
+    networks:
+      - data-co-network
+
+  # 4. Data Worker Service (Python)
+  # Used for running ingestion scripts and database setup
+  data-worker:
+    build: ./Data
+    container_name: data-co-worker
+    environment:
+      - STAGING_DB_HOST=db
+      - STAGING_DB_PORT=5432
+      - STAGING_DB_NAME=staging
+      - STAGING_DB_USER=postgres
+      - STAGING_DB_PASSWORD=password
+      - PRODUCTION_DB_NAME=production
+      - PRODUCTION_DB_USER=postgres
+    depends_on:
+      - db
+    volumes:
+      - ./Data:/app
+    networks:
+      - data-co-network
+
+  # 5. Data UI Service (Flask)
+  data-ui:
+    build: ./Data
+    container_name: data-co-ui-flask
+    command: python ui/app.py
+    ports:
+      - "5000:5000"
+    environment:
+      - STAGING_DB_HOST=db
+      - STAGING_DB_PORT=5432
+      - STAGING_DB_NAME=staging
+      - STAGING_DB_USER=postgres
+      - STAGING_DB_PASSWORD=password
+      - PRODUCTION_DB_NAME=production
+      - PRODUCTION_DB_USER=postgres
+      - FLASK_APP=ui/app.py
+      - FLASK_DEBUG=1
+    depends_on:
+      - db
+    volumes:
+      - ./Data:/app
+    networks:
+      - data-co-network
+
+networks:
+  data-co-network:
+    driver: bridge
+
+volumes:
+  postgres-data:

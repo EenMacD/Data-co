@@ -5,3 +5,4 @@ PyYAML
 pytesseract
 pdf2image
 psycopg2-binary
+Flask==3.0.0
