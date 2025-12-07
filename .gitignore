@@ -24,3 +24,7 @@ build/
 
 # OS files
 .DS_Store
+
+# company data files
+Data/project_data/glasgow_all_companies/raw/
+
