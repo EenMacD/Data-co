@@ -26,6 +26,8 @@ Then edit `.env` with your actual database credentials:
 - Update `PRODUCTION_DB_USER` and `PRODUCTION_DB_PASSWORD` with the same credentials
 - Update `COMPANIES_HOUSE_API_KEY` if you have one
 
+> **Note:** The `.env` file is git-ignored and will not be overwritten when you pull new code. Each developer maintains their own local `.env` file.
+
 ### 3. Start Everything
 Run the master script from the project root:
 
@@ -53,18 +55,24 @@ This project can be easily run using Docker Desktop. This will start the API, UI
 - Docker Desktop installed
 
 ### Quick Start
-1. **Start the application stack:**
+1. **Configure environment (first time only):**
+   ```bash
+   cp .env.example .env
+   # Edit .env if you want to customize POSTGRES_USER/POSTGRES_PASSWORD
+   ```
+
+2. **Start the application stack:**
    ```bash
    docker-compose up --build
    ```
 
-2. **Initialize the database:**
+3. **Initialize the database:**
    Open a new terminal and run:
    ```bash
    docker exec -it data-co-worker /app/setup_databases.sh
    ```
 
-3. **Access the application:**
+4. **Access the application:**
    - **UI:** [http://localhost:3000](http://localhost:3000)
    - **API:** [http://localhost:8080/api/health](http://localhost:8080/api/health)
    - **Data UI:** [http://localhost:5000](http://localhost:5000)

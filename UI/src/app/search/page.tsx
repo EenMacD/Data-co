@@ -18,7 +18,6 @@ export default function SearchPage() {
     const [employees, setEmployees] = useState('');
     const [profitability, setProfitability] = useState('');
     const [companySize, setCompanySize] = useState('');
-    const [companyAge, setCompanyAge] = useState('');
     const [companyStatus, setCompanyStatus] = useState('active');
     const [netAssets, setNetAssets] = useState('');
     const [debtLevel, setDebtLevel] = useState('');
@@ -46,7 +45,6 @@ export default function SearchPage() {
                 employees: employees || undefined,
                 profitability: profitability || undefined,
                 companySize: companySize || undefined,
-                companyAge: companyAge || undefined,
                 companyStatus: companyStatus || 'active',
                 netAssets: netAssets || undefined,
                 debtLevel: debtLevel || undefined,
@@ -262,20 +260,6 @@ export default function SearchPage() {
                                         </select>
                                     </div>
                                     <div className={styles.filterGroup}>
-                                        <label>Company Age</label>
-                                        <select
-                                            value={companyAge}
-                                            onChange={(e) => setCompanyAge(e.target.value)}
-                                        >
-                                            <option value="">Select...</option>
-                                            <option value="0-2">0-2 years</option>
-                                            <option value="3-5">3-5 years</option>
-                                            <option value="6-10">6-10 years</option>
-                                            <option value="11-20">11-20 years</option>
-                                            <option value="21+">21+ years</option>
-                                        </select>
-                                    </div>
-                                    <div className={styles.filterGroup}>
                                         <label>Company Status</label>
                                         <select
                                             value={companyStatus}
@@ -359,7 +343,6 @@ export default function SearchPage() {
                                         setEmployees('');
                                         setProfitability('');
                                         setCompanySize('');
-                                        setCompanyAge('');
                                         setCompanyStatus('active');
                                         setNetAssets('');
                                         setDebtLevel('');
@@ -397,7 +380,6 @@ export default function SearchPage() {
                         setEmployees('');
                         setProfitability('');
                         setCompanySize('');
-                        setCompanyAge('');
                         setCompanyStatus('active');
                         setNetAssets('');
                         setDebtLevel('');

@@ -1,90 +1,122 @@
 services:
-  # 1. Database Service (Postgres)
-  db:
+  # 1. Staging Database (Postgres)
+  db-staging:
     image: postgres:15
-    container_name: data-co-db
+    container_name: data-co-db-staging
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: staging
+      POSTGRES_USER: ${STAGING_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${STAGING_DB_PASSWORD:-password}
+      POSTGRES_DB: ${STAGING_DB_NAME:-staging}
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-staging-data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"  # Changed to 5433 to avoid conflict with local PostgreSQL on 5432
+      - "${STAGING_DB_PORT:-5432}:5432"
     networks:
       - data-co-network
 
-  # 2. API Service (Go)
+  # 2. Production Database (Postgres)
+  db-production:
+    image: postgres:15
+    container_name: data-co-db-production
+    environment:
+      POSTGRES_USER: ${PRODUCTION_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${PRODUCTION_DB_PASSWORD:-password}
+      POSTGRES_DB: ${PRODUCTION_DB_NAME:-production}
+    volumes:
+      - postgres-production-data:/var/lib/postgresql/data
+    ports:
+      - "${PRODUCTION_DB_PORT:-5433}:5432"
+    networks:
+      - data-co-network
+
+  # 3. API Service (Go)
   api:
     build: ./API
     container_name: data-co-api
     ports:
-      - "8080:8080"
+      - "${API_PORT:-8080}:8080"
     environment:
-      - STAGING_DB_HOST=db
+      - STAGING_DB_HOST=db-staging
       - STAGING_DB_PORT=5432
-      - STAGING_DB_NAME=staging
-      - STAGING_DB_USER=postgres
-      - STAGING_DB_PASSWORD=password
+      - STAGING_DB_NAME=${STAGING_DB_NAME:-staging}
+      - STAGING_DB_USER=${STAGING_DB_USER:-postgres}
+      - STAGING_DB_PASSWORD=${STAGING_DB_PASSWORD:-password}
       - STAGING_DB_SSLMODE=disable
+      - PRODUCTION_DB_HOST=db-production
+      - PRODUCTION_DB_PORT=5432
+      - PRODUCTION_DB_NAME=${PRODUCTION_DB_NAME:-production}
+      - PRODUCTION_DB_USER=${PRODUCTION_DB_USER:-postgres}
+      - PRODUCTION_DB_PASSWORD=${PRODUCTION_DB_PASSWORD:-password}
       - API_PORT=8080
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001}
     depends_on:
-      - db
+      - db-staging
+      - db-production
     networks:
       - data-co-network
 
-  # 3. UI Service (Next.js)
+  # 4. UI Service (Next.js)
   ui:
-    build: ./UI
+    build:
+      context: ./UI
+      args:
+        - NEXT_PUBLIC_API_URL=http://${HOST_IP:-localhost}:${API_PORT:-8080}/api
     container_name: data-co-ui
     ports:
-      - "3000:3000"
+      - "${UI_PORT:-3000}:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8080/api
+      - NEXT_PUBLIC_API_URL=http://${HOST_IP:-localhost}:${API_PORT:-8080}/api
     depends_on:
       - api
     networks:
       - data-co-network
 
-  # 4. Data Worker Service (Python)
-  # Used for running ingestion scripts and database setup
+  # 5. Data Worker Service (Python)
   data-worker:
     build: ./Data
     container_name: data-co-worker
     environment:
-      - STAGING_DB_HOST=db
+      - STAGING_DB_HOST=db-staging
       - STAGING_DB_PORT=5432
-      - STAGING_DB_NAME=staging
-      - STAGING_DB_USER=postgres
-      - STAGING_DB_PASSWORD=password
-      - PRODUCTION_DB_NAME=production
-      - PRODUCTION_DB_USER=postgres
+      - STAGING_DB_NAME=${STAGING_DB_NAME:-staging}
+      - STAGING_DB_USER=${STAGING_DB_USER:-postgres}
+      - STAGING_DB_PASSWORD=${STAGING_DB_PASSWORD:-password}
+      - PRODUCTION_DB_HOST=db-production
+      - PRODUCTION_DB_PORT=5432
+      - PRODUCTION_DB_NAME=${PRODUCTION_DB_NAME:-production}
+      - PRODUCTION_DB_USER=${PRODUCTION_DB_USER:-postgres}
+      - PRODUCTION_DB_PASSWORD=${PRODUCTION_DB_PASSWORD:-password}
     depends_on:
-      - db
+      - db-staging
+      - db-production
     volumes:
       - ./Data:/app
     networks:
       - data-co-network
 
-  # 5. Data UI Service (Flask)
+  # 6. Data UI Service (Flask) - Bulk Ingestion UI
   data-ui:
     build: ./Data
     container_name: data-co-ui-flask
-    command: python ui/app.py
+    command: python bulk_ingestion/web/app.py
     ports:
-      - "5000:5000"
+      - "${DATA_UI_PORT:-5001}:5000"
     environment:
-      - STAGING_DB_HOST=db
+      - STAGING_DB_HOST=db-staging
       - STAGING_DB_PORT=5432
-      - STAGING_DB_NAME=staging
-      - STAGING_DB_USER=postgres
-      - STAGING_DB_PASSWORD=password
-      - PRODUCTION_DB_NAME=production
-      - PRODUCTION_DB_USER=postgres
-      - FLASK_APP=ui/app.py
+      - STAGING_DB_NAME=${STAGING_DB_NAME:-staging}
+      - STAGING_DB_USER=${STAGING_DB_USER:-postgres}
+      - STAGING_DB_PASSWORD=${STAGING_DB_PASSWORD:-password}
+      - PRODUCTION_DB_HOST=db-production
+      - PRODUCTION_DB_PORT=5432
+      - PRODUCTION_DB_NAME=${PRODUCTION_DB_NAME:-production}
+      - PRODUCTION_DB_USER=${PRODUCTION_DB_USER:-postgres}
+      - PRODUCTION_DB_PASSWORD=${PRODUCTION_DB_PASSWORD:-password}
+      - FLASK_APP=bulk_ingestion/web/app.py
       - FLASK_DEBUG=1
     depends_on:
-      - db
+      - db-staging
+      - db-production
     volumes:
       - ./Data:/app
     networks:
@@ -95,4 +127,5 @@ networks:
     driver: bridge
 
 volumes:
-  postgres-data:
+  postgres-staging-data:
+  postgres-production-data:

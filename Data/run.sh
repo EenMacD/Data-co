@@ -1,60 +1,48 @@
 #!/bin/bash
 
-# Data Component Runner
-# This script sets up the environment and runs the Data Ingestion UI.
+# Master Run Script for Data Component
+# Sets up the environment and launches the Data UI
 
-set -e  # Exit on error
+set -e
 
 # Get the directory where this script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-UI_DIR="$SCRIPT_DIR/ui"
+cd "$SCRIPT_DIR"
 
-echo "============================================"
-echo "Data Component Startup"
-echo "============================================"
-echo ""
+echo "Using Data directory: $SCRIPT_DIR"
 
-# 1. Virtual Environment Setup
-if [ -d "$SCRIPT_DIR/bin" ] && [ -f "$SCRIPT_DIR/bin/activate" ]; then
-    # Existing venv structure in Data/bin (common in this project)
-    VENV_PATH="$SCRIPT_DIR"
-    echo "📦 Activating existing virtual environment in $VENV_PATH"
-    source "$VENV_PATH/bin/activate"
-elif [ -d "$SCRIPT_DIR/venv" ]; then
-    VENV_PATH="$SCRIPT_DIR/venv"
-    echo "📦 Activating virtual environment: $VENV_PATH"
-    source "$VENV_PATH/bin/activate"
-else
-    echo "⚠️  No virtual environment found."
-    echo "📦 Creating new virtual environment in venv..."
-    python3 -m venv venv
+# 1. Check Python
+if ! command -v python3 &> /dev/null; then
+    echo "❌ Python3 is not installed."
+    exit 1
+fi
+
+# 2. Setup Virtual Environment if missing
+if [ ! -f "bin/activate" ] && [ ! -d "venv" ]; then
+    echo "📦 Creating virtual environment..."
+    python3 -m venv .
+fi
+
+# Support both 'bin/activate' (Linux/Mac) and standard 'venv/bin/activate' patterns just in case
+if [ -f "bin/activate" ]; then
+    source bin/activate
+elif [ -f "venv/bin/activate" ]; then
     source venv/bin/activate
-fi
-
-# 2. Install Dependencies
-echo "📥 Checking/Installing dependencies..."
-pip install -r "$SCRIPT_DIR/requirements.txt"
-pip install -r "$UI_DIR/requirements.txt"
-
-# 3. Environment Variables
-if [ -f "$SCRIPT_DIR/.env" ]; then
-    echo "✅ Loading environment variables from .env"
-    export $(grep -v '^#' "$SCRIPT_DIR/.env" | xargs)
 else
-    echo "⚠️  WARNING: .env file not found at $SCRIPT_DIR/.env"
-    echo "   Please create it with your database credentials."
+    echo "❌ Could not find virtual environment activation script."
+    exit 1
 fi
 
-# 4. Run the UI
-echo ""
-echo "============================================"
-echo "🚀 Starting Data UI Server..."
-echo "============================================"
-echo ""
-echo "   URL: http://localhost:5000"
-echo "   Press Ctrl+C to stop"
-echo ""
+# 3. Install/Upgrade Pip
+echo "📥 Checking dependencies..."
+pip install --upgrade pip -q
 
-# Run app.py from the UI directory to ensure relative paths work
-cd "$UI_DIR"
-python3 app.py
+# 4. Run the Bulk Ingestion UI
+# We delegate to the specific component script which handles its own specific requirements
+if [ -f "bulk_ingestion/run.sh" ]; then
+    chmod +x bulk_ingestion/run.sh
+    exec ./bulk_ingestion/run.sh
+else
+    echo "❌ bulk_ingestion/run.sh not found!"
+    exit 1
+fi

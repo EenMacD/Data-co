@@ -34,7 +34,6 @@ type CompanySearchFilters struct {
 	Employees      string `json:"employees"`
 	Profitability  string `json:"profitability"`
 	CompanySize    string `json:"companySize"`
-	CompanyAge     string `json:"companyAge"`
 	CompanyStatus  string `json:"companyStatus"`
 	NetAssets      string `json:"netAssets"`
 	DebtLevel      string `json:"debtLevel"`

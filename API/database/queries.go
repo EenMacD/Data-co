@@ -31,26 +31,40 @@ func (qb *QueryBuilder) addCondition(condition string, value interface{}) {
 	qb.args = append(qb.args, value)
 }
 
-// AddIndustryFilter filters by industry category
+// AddIndustryFilter filters by industry using SIC codes
 func (qb *QueryBuilder) AddIndustryFilter(industry string) {
 	if industry == "" {
 		return
 	}
 
-	industryMap := map[string]string{
-		"tech":          "Technology",
-		"finance":       "Finance",
-		"retail":        "Retail",
-		"manufacturing": "Manufacturing",
-		"professional":  "Professional Services",
+	// Map industry names to SIC code prefixes
+	// See: https://resources.companieshouse.gov.uk/sic/
+	industryToSicPrefixes := map[string][]string{
+		"tech":          {"62", "63"},       // Computer programming, IT services, data processing
+		"finance":       {"64", "65", "66"}, // Financial services, insurance
+		"retail":        {"47"},             // Retail trade
+		"manufacturing": {"10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33"},
+		"professional":  {"69", "70", "71", "72", "73", "74"}, // Professional, scientific and technical
 	}
 
-	dbIndustry := industryMap[industry]
-	if dbIndustry == "" {
-		dbIndustry = industry
+	prefixes, ok := industryToSicPrefixes[industry]
+	if !ok {
+		// If no mapping found, try to match directly against sic_codes array
+		qb.addCondition("$%d = ANY(c.sic_codes)", industry)
+		return
 	}
 
-	qb.addCondition("c.industry_category = $%d", dbIndustry)
+	// Build condition to check if any SIC code starts with one of the prefixes
+	// Using EXISTS with unnest to check array elements
+	conditions := make([]string, len(prefixes))
+	for i, prefix := range prefixes {
+		qb.argCount++
+		qb.args = append(qb.args, prefix+"%")
+		conditions[i] = fmt.Sprintf("sic ILIKE $%d", qb.argCount)
+	}
+
+	condition := fmt.Sprintf("EXISTS (SELECT 1 FROM unnest(c.sic_codes) AS sic WHERE %s)", strings.Join(conditions, " OR "))
+	qb.conditions = append(qb.conditions, condition)
 }
 
 // AddLocationFilter filters by location (locality or region)
@@ -335,9 +349,23 @@ func (qb *QueryBuilder) BuildQuery(filters models.CompanySearchFilters) string {
 		baseQuery += "\nWHERE " + strings.Join(qb.conditions, " AND ")
 	}
 
+	// Safe sort column mapping
+	sortMap := map[string]string{
+		"company_name":         "c.company_name",
+		"company_number":       "c.company_number",
+		"incorporation_date":   "c.incorporation_date",
+		"latest_accounts_date": "latest_fin.period_end",
+		"turnover":             "latest_fin.turnover",
+		"net_worth":            "latest_fin.net_worth",
+		"employees":            "active_officers_count",
+		"relevance":            "c.company_name", // Default to name if no similarity score
+	}
+
 	orderBy := "c.company_name"
 	if filters.OrderBy != "" {
-		orderBy = filters.OrderBy
+		if val, ok := sortMap[filters.OrderBy]; ok {
+			orderBy = val
+		}
 	}
 	baseQuery += fmt.Sprintf("\nORDER BY %s", orderBy)
 
@@ -411,7 +439,6 @@ func BuildCompanyQuery(filters models.CompanySearchFilters) (string, []interface
 	qb.AddEmployeesFilter(filters.Employees)
 	qb.AddProfitabilityFilter(filters.Profitability)
 	qb.AddCompanySizeFilter(filters.CompanySize)
-	qb.AddCompanyAgeFilter(filters.CompanyAge)
 	qb.AddCompanyStatusFilter(filters.CompanyStatus)
 	qb.AddNetAssetsFilter(filters.NetAssets)
 	qb.AddDebtLevelFilter(filters.DebtLevel)
@@ -431,7 +458,6 @@ func BuildCompanyCountQuery(filters models.CompanySearchFilters) (string, []inte
 	qb.AddEmployeesFilter(filters.Employees)
 	qb.AddProfitabilityFilter(filters.Profitability)
 	qb.AddCompanySizeFilter(filters.CompanySize)
-	qb.AddCompanyAgeFilter(filters.CompanyAge)
 	qb.AddCompanyStatusFilter(filters.CompanyStatus)
 	qb.AddNetAssetsFilter(filters.NetAssets)
 	qb.AddDebtLevelFilter(filters.DebtLevel)
