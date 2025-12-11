@@ -39,6 +39,9 @@ func main() {
 	// Setup router
 	router := mux.NewRouter()
 
+	// Root route
+	router.HandleFunc("/", rootHandler).Methods("GET")
+
 	// API routes
 	api := router.PathPrefix("/api").Subrouter()
 	api.HandleFunc("/companies/search", companyHandler.SearchCompanies).Methods("POST", "OPTIONS")
@@ -75,6 +78,17 @@ func main() {
 	if err := http.ListenAndServe(":"+port, corsHandler.Handler(router)); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+// this function ensures the API is running and healthy to client
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{
+		"service": "Data-Co API",
+		"status": "running",
+		"message": "Welcome to the Data-Co API"
+	}`))
 }
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {

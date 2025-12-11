@@ -62,12 +62,12 @@ services:
     build:
       context: ./UI
       args:
-        - NEXT_PUBLIC_API_URL=http://${HOST_IP}:${API_PORT}/api
+        - NEXT_PUBLIC_API_URL=${API_URL:-http://${HOST_IP}:${API_PORT}/api}
     container_name: data-co-ui
     ports:
       - "${UI_PORT}:${UI_PORT}"
     environment:
-      - NEXT_PUBLIC_API_URL=http://${HOST_IP}:${API_PORT}/api
+      - NEXT_PUBLIC_API_URL=${API_URL:-http://${HOST_IP}:${API_PORT}/api}
     depends_on:
       - api
     networks:
@@ -122,6 +122,16 @@ services:
       - db-production
     volumes:
       - ./Data:/app
+    networks:
+      - data-co-network
+
+  # 7. Cloudflare Tunnel
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: data-co-tunnel
+    profiles: ["hosting"]
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN}
+    restart: unless-stopped
     networks:
       - data-co-network
 
