@@ -13,11 +13,11 @@ echo ""
 
 # Load environment variables (skip if already set by docker-compose)
 if [ -z "$STAGING_DB_HOST" ]; then
-    if [ -f .env ]; then
-        echo "✓ Found .env file"
-        export $(cat .env | grep -v '^#' | xargs)
+    if [ -f ../.env ]; then
+        echo "✓ Found .env file in project root"
+        export $(cat ../.env | grep -v '^#' | xargs)
     else
-        echo "✗ .env file not found"
+        echo "✗ .env file not found in project root"
         echo "  Please copy .env.example to .env and configure it first"
         echo ""
         echo "  cp .env.example .env"
@@ -164,14 +164,19 @@ echo "  PRODUCTION: $PRODUCTION_DB_NAME"
 echo ""
 echo "Next steps:"
 echo ""
-echo "  1. Run data ingestion to staging:"
-echo "     python Data-injestion-workflows/Api-request-workflow/api-main-db.py"
+echo "  1. Apply database migrations:"
+echo "     docker exec -it data-co-worker python database/apply_migrations.py"
 echo ""
-echo "  2. List batches available for merging:"
-echo "     python database/merge_to_production.py --list"
+echo "  2. Access the Bulk Ingestion UI:"
+echo "     http://localhost:\${DATA_UI_PORT}"
 echo ""
-echo "  3. Merge a batch to production:"
-echo "     python database/merge_to_production.py --batch-id <batch_id>"
+echo "  3. Use the UI to:"
+echo "     - Select date range → Discover Files"
+echo "     - Select files from panels → Add to Ingestion List"
+echo "     - Start Ingestion → Monitor progress"
 echo ""
-echo "For detailed documentation, see database/README.md"
+echo "  4. Merge data to production:"
+echo "     docker exec -it data-co-worker python database/merge_to_production.py --list"
+echo ""
+echo "For detailed documentation, see bulk_ingestion/README.md"
 echo ""

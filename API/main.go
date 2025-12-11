@@ -16,10 +16,10 @@ import (
 )
 
 func main() {
-	// Load environment variables
-	if err := godotenv.Load("../.env"); err != nil {
-		log.Printf("Warning: .env file not found: %v", err)
-	}
+	// Load environment variables from .env file if it exists
+	// In Docker, environment variables are provided via docker-compose.yml
+	_ = godotenv.Load("../.env") // Ignore error, env vars may come from docker-compose
+
 
 	// Initialize configuration
 	cfg := config.LoadConfig()
@@ -48,9 +48,6 @@ func main() {
 
 	// CORS middleware - read allowed origins from environment
 	corsOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
-	if corsOrigins == "" {
-		corsOrigins = "http://localhost:3000,http://localhost:3001"
-	}
 	allowedOrigins := strings.Split(corsOrigins, ",")
 	// Trim whitespace from each origin
 	for i, origin := range allowedOrigins {
@@ -67,9 +64,6 @@ func main() {
 
 	// Start server
 	port := os.Getenv("API_PORT")
-	if port == "" {
-		port = "8080"
-	}
 
 	log.Printf("Starting API server on port %s...", port)
 	log.Printf("API endpoints:")

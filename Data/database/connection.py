@@ -32,13 +32,13 @@ class DatabaseConfig:
         Args:
             env_prefix: Prefix for env vars (e.g., 'STAGING' or 'PRODUCTION')
         """
-        self.host = os.getenv(f"{env_prefix}_DB_HOST", "localhost")
-        self.port = int(os.getenv(f"{env_prefix}_DB_PORT", "5432"))
+        self.host = os.getenv(f"{env_prefix}_DB_HOST")
+        self.port = int(os.getenv(f"{env_prefix}_DB_PORT"))
         self.database = os.getenv(f"{env_prefix}_DB_NAME")
         self.user = os.getenv(f"{env_prefix}_DB_USER")
         self.password = os.getenv(f"{env_prefix}_DB_PASSWORD")
 
-        if not all([self.database, self.user, self.password]):
+        if not all([self.host, self.database, self.user, self.password]):
             raise ValueError(
                 f"Missing required database config for {env_prefix}. "
                 f"Please set {env_prefix}_DB_NAME, {env_prefix}_DB_USER, "

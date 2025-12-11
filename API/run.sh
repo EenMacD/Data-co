@@ -42,7 +42,7 @@ echo "============================================"
 echo "🚀 Starting API Server..."
 echo "============================================"
 echo ""
-echo "   URL: http://localhost:8080"
+echo "   URL: http://localhost:${API_PORT}"
 echo "   Press Ctrl+C to stop"
 echo ""
 

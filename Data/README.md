@@ -50,7 +50,7 @@ Data/
 
 3. **Access UI:**
    ```
-   http://localhost:5001
+   http://localhost:{DATA_UI_PORT}
    ```
 
 4. **Follow workflow:**
@@ -131,28 +131,28 @@ Configure via `.env` file (copy from `.env.example`):
 ```bash
 # Database Configuration
 STAGING_DB_HOST=localhost
-STAGING_DB_PORT=5432
+STAGING_DB_PORT={STAGING_DB_PORT}
 STAGING_DB_NAME=staging
 STAGING_DB_USER=postgres
 STAGING_DB_PASSWORD=your_password
 
 PRODUCTION_DB_HOST=localhost
-PRODUCTION_DB_PORT=5433
+PRODUCTION_DB_PORT={PRODUCTION_DB_PORT}
 PRODUCTION_DB_NAME=production
 PRODUCTION_DB_USER=postgres
 PRODUCTION_DB_PASSWORD=your_password
 
 # Flask UI
-DATA_UI_PORT=5001
+DATA_UI_PORT={DATA_UI_PORT}
 ```
 
 ## Docker Services
 
 Defined in `docker-compose.yml`:
 
-- **db-staging** - PostgreSQL staging database (port 5432)
-- **db-production** - PostgreSQL production database (port 5433)
-- **data-ui** - Flask bulk ingestion UI (port 5001)
+- **db-staging** - PostgreSQL staging database (port `{STAGING_DB_PORT}`)
+- **db-production** - PostgreSQL production database (port `{PRODUCTION_DB_PORT}`)
+- **data-ui** - Flask bulk ingestion UI (port `{DATA_UI_PORT}`)
 - **data-worker** - Background data processing worker
 
 Start services:
@@ -233,7 +233,7 @@ docker-compose up db-staging data-ui -d
 - Check relative imports are correct after reorganization
 
 ### Port Conflicts
-- Check ports 5432, 5433, 5001 are not in use
+- Check that ports {STAGING_DB_PORT}, {PRODUCTION_DB_PORT}, {DATA_UI_PORT} are not in use
 - Modify ports in `.env` if needed
 
 ## Migration from Legacy

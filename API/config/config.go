@@ -29,15 +29,15 @@ type ServerConfig struct {
 func LoadConfig() *Config {
 	return &Config{
 		Database: DatabaseConfig{
-			Host:     getEnv("STAGING_DB_HOST", "localhost"),
-			Port:     getEnv("STAGING_DB_PORT", "5432"),
-			Name:     getEnv("STAGING_DB_NAME", "staging"),
-			User:     getEnv("STAGING_DB_USER", "postgres"),
-			Password: getEnv("STAGING_DB_PASSWORD", ""),
+			Host:     os.Getenv("STAGING_DB_HOST"),
+			Port:     os.Getenv("STAGING_DB_PORT"),
+			Name:     os.Getenv("STAGING_DB_NAME"),
+			User:     os.Getenv("STAGING_DB_USER"),
+			Password: os.Getenv("STAGING_DB_PASSWORD"),
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		Server: ServerConfig{
-			Port: getEnv("API_PORT", "8080"),
+			Port: os.Getenv("API_PORT"),
 		},
 	}
 }

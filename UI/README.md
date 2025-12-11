@@ -13,7 +13,7 @@ The frontend application for the Data Co platform, built with Next.js. This appl
 
 *   **Node.js**: v18+
 *   **npm**: v9+
-*   **API**: The Data Co API must be running (usually on port 8080).
+*   **API**: The Data Co API must be running (usually on port `{API_PORT}`).
 
 ## Setup
 
@@ -25,7 +25,7 @@ The frontend application for the Data Co platform, built with Next.js. This appl
 2.  **Configure Environment:**
     Create a `.env.local` file if you need to override default settings (e.g., API URL).
     ```env
-    NEXT_PUBLIC_API_URL=http://localhost:8080/api
+    NEXT_PUBLIC_API_URL=http://localhost:{API_PORT}/api
     ```
 
 ## Development
@@ -36,7 +36,7 @@ Run the development server:
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:{UI_PORT}](http://localhost:{UI_PORT}) with your browser to see the result.
 
 ## Build for Production
 

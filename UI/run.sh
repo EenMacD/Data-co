@@ -30,8 +30,8 @@ echo "============================================"
 echo "🚀 Starting Next.js Dev Server..."
 echo "============================================"
 echo ""
-echo "   URL: http://localhost:3000"
+echo "   URL: http://localhost:${UI_PORT}"
 echo "   Press Ctrl+C to stop"
 echo ""
 
-npm run dev
+npm run dev -- -p ${UI_PORT}

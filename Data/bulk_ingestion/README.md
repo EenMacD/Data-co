@@ -110,7 +110,7 @@ python database/apply_migrations.py
 
 ### Access UI
 ```
-http://localhost:5001
+http://localhost:{DATA_UI_PORT}
 ```
 
 ### Workflow
@@ -134,7 +134,7 @@ PostgreSQL COPY is ~100x faster than row-by-row inserts.
 
 All configuration via environment variables (`.env` file):
 - `STAGING_DB_HOST` - PostgreSQL host
-- `STAGING_DB_PORT` - PostgreSQL port (default: 5432)
+- `STAGING_DB_PORT` - PostgreSQL port (configured in root `.env`)
 - `STAGING_DB_NAME` - Database name
 - `STAGING_DB_USER` - Database user
 - `STAGING_DB_PASSWORD` - Database password

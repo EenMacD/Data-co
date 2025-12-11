@@ -52,14 +52,14 @@ Required environment variables:
 ```
 # Staging database
 STAGING_DB_HOST=localhost
-STAGING_DB_PORT=5432
+STAGING_DB_PORT={STAGING_DB_PORT}
 STAGING_DB_NAME=companies_house_staging
 STAGING_DB_USER=your_username
 STAGING_DB_PASSWORD=your_password
 
 # Production database
 PRODUCTION_DB_HOST=localhost
-PRODUCTION_DB_PORT=5432
+PRODUCTION_DB_PORT={PRODUCTION_DB_PORT}
 PRODUCTION_DB_NAME=companies_house_production
 PRODUCTION_DB_USER=your_username
 PRODUCTION_DB_PASSWORD=your_password

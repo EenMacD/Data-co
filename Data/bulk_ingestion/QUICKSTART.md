@@ -12,11 +12,11 @@ That's it! The script automatically:
 - ✅ Installs dependencies
 - ✅ Starts database
 - ✅ Applies migrations
-- ✅ Launches UI at http://localhost:5000
+- ✅ Launches UI at http://localhost:{DATA_UI_PORT}
 
 ## Download Files
 
-1. Open http://localhost:5000
+1. Open http://localhost:{DATA_UI_PORT}
 2. Select date range → Click "Discover Files"
 3. Check files you want → Click "Add to List"
 4. Click "Start Ingestion"

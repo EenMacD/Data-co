@@ -39,9 +39,9 @@ This will open **3 separate terminal windows**, one for each component:
 
 | Component | URL | Description |
 |-----------|-----|-------------|
-| **UI** | [http://localhost:3000](http://localhost:3000) | The main frontend website (Next.js) |
-| **API** | [http://localhost:8080](http://localhost:8080) | The backend API (Go) |
-| **Data UI** | [http://localhost:5000](http://localhost:5000) | Internal tool for data ingestion (Flask) |
+| **UI** | [http://localhost:{UI_PORT}](http://localhost:{UI_PORT}) | The main frontend website (Next.js) |
+| **API** | [http://localhost:{API_PORT}](http://localhost:{API_PORT}) | The backend API (Go) |
+| **Data UI** | [http://localhost:{DATA_UI_PORT}](http://localhost:{DATA_UI_PORT}) | Internal tool for data ingestion (Flask) |
 
 ---
 
@@ -73,16 +73,16 @@ This project can be easily run using Docker Desktop. This will start the API, UI
    ```
 
 4. **Access the application:**
-   - **UI:** [http://localhost:3000](http://localhost:3000)
-   - **API:** [http://localhost:8080/api/health](http://localhost:8080/api/health)
-   - **Data UI:** [http://localhost:5000](http://localhost:5000)
+   - **UI:** [http://localhost:{UI_PORT}](http://localhost:{UI_PORT})
+   - **API:** [http://localhost:{API_PORT}/api/health](http://localhost:{API_PORT}/api/health)
+   - **Data UI:** [http://localhost:{DATA_UI_PORT}](http://localhost:{DATA_UI_PORT})
 
 ### Component Details
-- **API**: Go application running on port 8080.
-- **UI**: Next.js application running on port 3000.
-- **Database**: Postgres 15 running on port 5432.
+- **API**: Go application running on port `{API_PORT}`.
+- **UI**: Next.js application running on port `{UI_PORT}`.
+- **Database**: Postgres 15 running on port `{STAGING_DB_PORT}` (Staging) and `{PRODUCTION_DB_PORT}` (Production).
 - **Data Worker**: Python environment for running data ingestion scripts.
-- **Data UI**: Flask application for managing data ingestion (port 5000).
+- **Data UI**: Flask application for managing data ingestion (port `{DATA_UI_PORT}`).
 
 ### Running Data Ingestion
 To run data ingestion scripts, execute them inside the `data-worker` container:

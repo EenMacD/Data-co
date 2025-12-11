@@ -31,12 +31,12 @@ set +a
 
 # Show configuration
 echo ""
-echo "📋 Configuration:"
-echo "   Host IP:    ${HOST_IP:-localhost}"
-echo "   UI:         http://${HOST_IP:-localhost}:${UI_PORT:-3000}"
-echo "   API:        http://${HOST_IP:-localhost}:${API_PORT:-8080}/api"
-echo "   Data UI:    http://${HOST_IP:-localhost}:${DATA_UI_PORT:-5001}"
-echo "   Database:   localhost:${DB_EXTERNAL_PORT:-5433} (${POSTGRES_DB:-staging})"
+echo "clipboard: Configuration:"
+echo "   Host IP:    ${HOST_IP}"
+echo "   UI:         http://${HOST_IP}:${UI_PORT}"
+echo "   API:        http://${HOST_IP}:${API_PORT}/api"
+echo "   Data UI:    http://${HOST_IP}:${DATA_UI_PORT}"
+echo "   Database:   localhost:${PRODUCTION_DB_PORT} (${PRODUCTION_DB_NAME})"
 echo ""
 
 # Handle command line arguments
