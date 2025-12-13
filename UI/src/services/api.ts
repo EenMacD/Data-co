@@ -8,7 +8,6 @@ export interface CompanySearchFilters {
     employees?: string;
     profitability?: string;
     companySize?: string;
-    companyAge?: string;
     companyStatus?: string;
     netAssets?: string;
     debtLevel?: string;

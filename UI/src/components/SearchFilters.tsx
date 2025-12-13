@@ -60,18 +60,6 @@ const SearchFilters = () => {
                                 </div>
 
                                 <div className={styles.filterGroup}>
-                                    <label className={styles.label}>Company Age</label>
-                                    <select className={styles.select} defaultValue="">
-                                        <option value="">Select...</option>
-                                        <option value="0-2">0-2 years</option>
-                                        <option value="3-5">3-5 years</option>
-                                        <option value="6-10">6-10 years</option>
-                                        <option value="11-20">11-20 years</option>
-                                        <option value="21+">21+ years</option>
-                                    </select>
-                                </div>
-
-                                <div className={styles.filterGroup}>
                                     <label className={styles.label}>Company Status</label>
                                     <select className={styles.select} defaultValue="active">
                                         <option value="active">Active only</option>

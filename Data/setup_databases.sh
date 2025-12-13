@@ -48,25 +48,29 @@ echo ""
 create_database() {
     local db_name=$1
     local db_user=$2
+    local db_host=$3
+    local db_port=$4
+    local db_password=$5
+    local db_admin_user=$6
 
-    echo "→ Checking if database '$db_name' exists..."
+    echo "→ Checking if database '$db_name' exists on $db_host:$db_port..."
 
-    if PGPASSWORD=$STAGING_DB_PASSWORD psql -h "$STAGING_DB_HOST" -U "$STAGING_DB_USER" -lqt | cut -d \| -f 1 | grep -qw "$db_name"; then
+    if PGPASSWORD=$db_password psql -h "$db_host" -p "$db_port" -U "$db_admin_user" -lqt | cut -d \| -f 1 | grep -qw "$db_name"; then
         echo "  ℹ Database '$db_name' already exists"
         read -p "  Do you want to drop and recreate it? (y/N): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             echo "  Dropping database '$db_name'..."
-            PGPASSWORD=$STAGING_DB_PASSWORD dropdb -h "$STAGING_DB_HOST" -U "$STAGING_DB_USER" "$db_name" || echo "  (ignoring error)"
+            PGPASSWORD=$db_password dropdb -h "$db_host" -p "$db_port" -U "$db_admin_user" "$db_name" || echo "  (ignoring error)"
             echo "  Creating database '$db_name'..."
-            PGPASSWORD=$STAGING_DB_PASSWORD createdb -h "$STAGING_DB_HOST" -U "$STAGING_DB_USER" "$db_name" -O "$db_user"
+            PGPASSWORD=$db_password createdb -h "$db_host" -p "$db_port" -U "$db_admin_user" "$db_name" -O "$db_user"
         else
             echo "  Keeping existing database"
             return
         fi
     else
         echo "  Creating database '$db_name'..."
-        PGPASSWORD=$STAGING_DB_PASSWORD createdb -h "$STAGING_DB_HOST" -U "$STAGING_DB_USER" "$db_name" -O "$db_user"
+        PGPASSWORD=$db_password createdb -h "$db_host" -p "$db_port" -U "$db_admin_user" "$db_name" -O "$db_user"
     fi
 
     echo "  ✓ Database '$db_name' ready"
@@ -76,15 +80,19 @@ create_database() {
 apply_schema() {
     local db_name=$1
     local schema_file=$2
+    local db_host=$3
+    local db_port=$4
+    local db_user=$5
+    local db_password=$6
 
-    echo "→ Applying schema to '$db_name'..."
+    echo "→ Applying schema to '$db_name' on $db_host:$db_port..."
 
     if [ ! -f "$schema_file" ]; then
         echo "  ✗ Schema file not found: $schema_file"
         exit 1
     fi
 
-    PGPASSWORD=$STAGING_DB_PASSWORD psql -h "$STAGING_DB_HOST" -U "$STAGING_DB_USER" -d "$db_name" -f "$schema_file" -q
+    PGPASSWORD=$db_password psql -h "$db_host" -p "$db_port" -U "$db_user" -d "$db_name" -f "$schema_file" -q
 
     if [ $? -eq 0 ]; then
         echo "  ✓ Schema applied successfully"
@@ -107,8 +115,8 @@ if [ -z "$STAGING_DB_NAME" ] || [ -z "$STAGING_DB_USER" ]; then
     exit 1
 fi
 
-create_database "$STAGING_DB_NAME" "$STAGING_DB_USER"
-apply_schema "$STAGING_DB_NAME" "database/schema_staging.sql"
+create_database "$STAGING_DB_NAME" "$STAGING_DB_USER" "$STAGING_DB_HOST" "$STAGING_DB_PORT" "$STAGING_DB_PASSWORD" "$STAGING_DB_USER"
+apply_schema "$STAGING_DB_NAME" "database/schema_staging.sql" "$STAGING_DB_HOST" "$STAGING_DB_PORT" "$STAGING_DB_USER" "$STAGING_DB_PASSWORD"
 
 echo ""
 
@@ -125,8 +133,8 @@ if [ -z "$PRODUCTION_DB_NAME" ] || [ -z "$PRODUCTION_DB_USER" ]; then
     exit 1
 fi
 
-create_database "$PRODUCTION_DB_NAME" "$PRODUCTION_DB_USER"
-apply_schema "$PRODUCTION_DB_NAME" "database/schema_production.sql"
+create_database "$PRODUCTION_DB_NAME" "$PRODUCTION_DB_USER" "$PRODUCTION_DB_HOST" "$PRODUCTION_DB_PORT" "$PRODUCTION_DB_PASSWORD" "$PRODUCTION_DB_USER"
+apply_schema "$PRODUCTION_DB_NAME" "database/schema_production.sql" "$PRODUCTION_DB_HOST" "$PRODUCTION_DB_PORT" "$PRODUCTION_DB_USER" "$PRODUCTION_DB_PASSWORD"
 
 echo ""
 

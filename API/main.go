@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -45,9 +46,20 @@ func main() {
 	api.HandleFunc("/companies/{id}", companyHandler.GetCompany).Methods("GET", "OPTIONS")
 	api.HandleFunc("/health", healthCheck).Methods("GET")
 
-	// CORS middleware
+	// CORS middleware - read allowed origins from environment
+	corsOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
+	if corsOrigins == "" {
+		corsOrigins = "http://localhost:3000,http://localhost:3001"
+	}
+	allowedOrigins := strings.Split(corsOrigins, ",")
+	// Trim whitespace from each origin
+	for i, origin := range allowedOrigins {
+		allowedOrigins[i] = strings.TrimSpace(origin)
+	}
+	log.Printf("CORS allowed origins: %v", allowedOrigins)
+
 	corsHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:3001", "http://192.168.1.112:3000"},
+		AllowedOrigins:   allowedOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
