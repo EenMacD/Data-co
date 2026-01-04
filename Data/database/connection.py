@@ -6,6 +6,7 @@ from __future__ import annotations
 import os
 from contextlib import contextmanager
 from typing import Generator
+from pathlib import Path
 
 import json
 import psycopg2
@@ -18,8 +19,11 @@ from dotenv import load_dotenv
 # Note: Lists are NOT auto-converted to JSON to allow PostgreSQL array types
 register_adapter(dict, Json)
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from project root
+# This file is in Data/database/, so go up 2 levels to find .env
+ROOT_DIR = Path(__file__).resolve().parents[2]
+ENV_PATH = ROOT_DIR / ".env"
+load_dotenv(dotenv_path=ENV_PATH)
 
 
 class DatabaseConfig:

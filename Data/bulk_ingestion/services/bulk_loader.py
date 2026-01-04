@@ -252,7 +252,7 @@ class BulkLoader:
                     appointed_on DATE,
                     resigned_on DATE,
                     nationality VARCHAR(100),
-                    occupation VARCHAR(200),
+                    nature_of_control TEXT,
                     address_line_1 VARCHAR(500),
                     address_line_2 VARCHAR(500),
                     locality VARCHAR(200),
@@ -268,7 +268,7 @@ class BulkLoader:
 
             columns = [
                 'company_number', 'officer_name', 'officer_role',
-                'appointed_on', 'resigned_on', 'nationality', 'occupation',
+                'appointed_on', 'resigned_on', 'nationality', 'nature_of_control',
                 'address_line_1', 'address_line_2', 'locality', 'postal_code',
                 'country', 'date_of_birth', 'data_hash', 'batch_id', 'last_updated'
             ]
@@ -301,13 +301,13 @@ class BulkLoader:
             cur.execute(f"""
                 INSERT INTO staging_officers (
                     company_number, officer_name, officer_role,
-                    appointed_on, resigned_on, nationality, occupation,
+                    appointed_on, resigned_on, nationality, nature_of_control,
                     address_line_1, address_line_2, locality, postal_code, country,
                     date_of_birth, raw_data, data_hash, change_detected, last_updated
                 )
                 SELECT DISTINCT ON (t.company_number, t.officer_name, t.appointed_on::date, t.officer_role, t.date_of_birth::date)
                     t.company_number, t.officer_name, t.officer_role,
-                    t.appointed_on::date, t.resigned_on::date, t.nationality, t.occupation,
+                    t.appointed_on::date, t.resigned_on::date, t.nationality, t.nature_of_control,
                     t.address_line_1, t.address_line_2, t.locality, t.postal_code, t.country,
                     t.date_of_birth::date, t.raw_data::jsonb, t.data_hash, FALSE, t.last_updated
                 FROM {temp_table} t
@@ -317,7 +317,7 @@ class BulkLoader:
                 ON CONFLICT (company_number, officer_name, appointed_on, officer_role, date_of_birth) DO UPDATE SET
                     resigned_on = EXCLUDED.resigned_on,
                     nationality = EXCLUDED.nationality,
-                    occupation = EXCLUDED.occupation,
+                    nature_of_control = EXCLUDED.nature_of_control,
                     address_line_1 = EXCLUDED.address_line_1,
                     address_line_2 = EXCLUDED.address_line_2,
                     locality = EXCLUDED.locality,

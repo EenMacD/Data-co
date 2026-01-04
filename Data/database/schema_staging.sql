@@ -103,7 +103,7 @@ CREATE TABLE staging_officers (
     -- Personal details
     date_of_birth DATE,
     nationality VARCHAR(100),
-    occupation VARCHAR(200),
+    nature_of_control TEXT,
 
     -- Address
     address_line_1 VARCHAR(500),
@@ -214,6 +214,7 @@ CREATE INDEX idx_staging_officers_name ON staging_officers(officer_name);
 CREATE INDEX idx_staging_officers_needs_review ON staging_officers(needs_review);
 -- Change detection index
 CREATE INDEX idx_staging_officers_hash ON staging_officers(company_number, officer_name, data_hash);
+CREATE INDEX idx_staging_officers_nature_of_control ON staging_officers USING gin(nature_of_control gin_trgm_ops);
 
 CREATE INDEX idx_staging_financials_company ON staging_financials(company_number);
 CREATE INDEX idx_staging_financials_period ON staging_financials(period_end);

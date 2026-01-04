@@ -204,7 +204,7 @@ class StagingInserter:
                 officer.get("appointed_on"),
                 officer.get("resigned_on"),
                 officer.get("nationality"),
-                officer.get("occupation"),
+                officer.get("nature_of_control"),
                 address.get("address_line_1"),
                 address.get("address_line_2"),
                 address.get("locality"),
@@ -221,7 +221,7 @@ class StagingInserter:
                 appointed_on,
                 resigned_on,
                 nationality,
-                occupation,
+                nature_of_control,
                 address_line_1,
                 address_line_2,
                 locality,
@@ -237,7 +237,7 @@ class StagingInserter:
 
         self.officers_inserted += inserted_count
         return inserted_count
-
+    
     def complete_batch(self, status: str = "completed", error_message: str | None = None) -> None:
         """
         Mark batch as complete in ingestion log.
@@ -304,7 +304,7 @@ def parse_companies_house_officer(api_response: dict, company_number: str) -> li
             "appointed_on": item.get("appointed_on"),
             "resigned_on": item.get("resigned_on"),
             "nationality": item.get("nationality"),
-            "occupation": item.get("occupation"),
+            "nature_of_control": None,
             "address": item.get("address", {}),
         }
         officers.append(officer)
@@ -328,6 +328,9 @@ def parse_companies_house_psc(api_response: dict, company_number: str) -> list[d
 
     pscs = []
     for item in api_response.get("items", []):
+        natures = item.get("natures_of_control", [])
+        nature_of_control = '|'.join(natures) if natures else None
+        
         psc = {
             "company_number": company_number,
             "name": item.get("name"),
@@ -336,7 +339,7 @@ def parse_companies_house_psc(api_response: dict, company_number: str) -> list[d
             "resigned_on": item.get("ceased_on"),
             "nationality": item.get("nationality"),
             "address": item.get("address", {}),
-            "natures_of_control": item.get("natures_of_control", []),
+            "nature_of_control": nature_of_control,
         }
         pscs.append(psc)
 

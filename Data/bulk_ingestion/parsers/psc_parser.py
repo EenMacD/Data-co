@@ -36,7 +36,7 @@ class PSCDataParser:
         'officer_role',
         'date_of_birth',
         'nationality',
-        'occupation',
+        'nature_of_control',
         'resigned_on',
         'locality',
         'postal_code',
@@ -158,6 +158,10 @@ class PSCDataParser:
         # Determine PSC type/role
         kind = data.get('kind', 'person-with-significant-control')
 
+        # Extract nature of control
+        natures = data.get('natures_of_control', [])
+        nature_of_control = '|'.join(natures) if natures else None
+
         return {
             'company_number': company_number,
             'officer_name': name,
@@ -166,7 +170,7 @@ class PSCDataParser:
             'appointed_on': data.get('notified_on'),
             'resigned_on': data.get('ceased_on'),
             'nationality': data.get('nationality'),
-            'occupation': None,  # PSC data doesn't include occupation
+            'nature_of_control': nature_of_control,
             'address_line_1': address.get('address_line_1'),
             'address_line_2': address.get('address_line_2'),
             'locality': address.get('locality'),

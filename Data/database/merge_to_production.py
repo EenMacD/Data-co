@@ -276,22 +276,17 @@ class ProductionMerger:
             return
 
         for officer in officers:
-            # Normalize name for matching
-            normalized_name = DataTransformer.normalize_officer_name(
-                officer["officer_name"]
-            )
 
             # Upsert officer
             upsert_query = """
                 INSERT INTO production_officers (
                     company_number,
                     officer_name,
-                    officer_name_normalized,
                     officer_role,
                     appointed_on,
                     resigned_on,
                     nationality,
-                    occupation,
+                    nature_of_control,
                     date_of_birth,
                     address_line_1,
                     address_line_2,
@@ -305,12 +300,11 @@ class ProductionMerger:
                 ) VALUES (
                     %(company_number)s,
                     %(officer_name)s,
-                    %(normalized_name)s,
                     %(officer_role)s,
                     %(appointed_on)s,
                     %(resigned_on)s,
                     %(nationality)s,
-                    %(occupation)s,
+                    %(nature_of_control)s,
                     %(date_of_birth)s,
                     %(address_line_1)s,
                     %(address_line_2)s,
@@ -322,10 +316,10 @@ class ProductionMerger:
                     NOW(),
                     NOW()
                 )
-                ON CONFLICT (company_number, officer_name, appointed_on, officer_role) DO UPDATE SET
+                ON CONFLICT (company_number, officer_name, appointed_on, officer_role, date_of_birth) DO UPDATE SET
                     resigned_on = EXCLUDED.resigned_on,
                     nationality = EXCLUDED.nationality,
-                    occupation = EXCLUDED.occupation,
+                    nature_of_control = EXCLUDED.nature_of_control,
                     date_of_birth = EXCLUDED.date_of_birth,
                     raw_data = EXCLUDED.raw_data,
                     source_batch_id = EXCLUDED.source_batch_id,
@@ -337,12 +331,11 @@ class ProductionMerger:
                 {
                     "company_number": officer["company_number"],
                     "officer_name": officer["officer_name"],
-                    "normalized_name": normalized_name,
                     "officer_role": officer["officer_role"] or "unknown",
                     "appointed_on": officer["appointed_on"],
                     "resigned_on": officer["resigned_on"],
                     "nationality": officer["nationality"],
-                    "occupation": officer["occupation"],
+                    "nature_of_control": officer.get("nature_of_control"),
                     "date_of_birth": officer.get("date_of_birth"),
                     "address_line_1": officer["address_line_1"],
                     "address_line_2": officer["address_line_2"],

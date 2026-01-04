@@ -159,7 +159,7 @@ class DataValidator:
 
         if result["missing_name"] > 0:
             issues.append({
-                "severity": "error",
+                "severity": "warning",
                 "type": "missing_officer_name",
                 "count": result["missing_name"],
                 "message": f"{result['missing_name']} officers missing name",

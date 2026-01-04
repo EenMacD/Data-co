@@ -95,21 +95,23 @@ CREATE TABLE production_officers (
     company_number VARCHAR(8) NOT NULL REFERENCES production_companies(company_number) ON DELETE CASCADE,
 
     -- Officer identity (normalized)
-    officer_name VARCHAR(500) NOT NULL,
-    officer_name_normalized VARCHAR(500), -- For matching: lowercase, no punctuation
-    officer_role VARCHAR(200) NOT NULL,
+    officer_name VARCHAR(500), -- Nullable as requested
+    -- officer_name_normalized removed
+    officer_role VARCHAR(200), -- Nullable as requested
 
     -- Dates
     appointed_on DATE,
     resigned_on DATE,
-    is_active BOOLEAN GENERATED ALWAYS AS (resigned_on IS NULL) STORED,
+    -- is_active removed
 
     -- Personal details
     nationality VARCHAR(100),
-    occupation VARCHAR(200),
+    -- occupation removed
     date_of_birth DATE,
-    date_of_birth_month INTEGER,
-    date_of_birth_year INTEGER,
+    -- date_of_birth_month removed
+    -- date_of_birth_year removed
+
+    nature_of_control TEXT, -- List separated by |
 
     -- Address (normalized)
     address_line_1 VARCHAR(500),
@@ -254,10 +256,9 @@ CREATE INDEX idx_companies_prev_names_trgm ON production_companies USING gin(pre
 -- Officers
 CREATE INDEX idx_officers_company_number ON production_officers(company_number);
 CREATE INDEX idx_officers_name ON production_officers(officer_name);
-CREATE INDEX idx_officers_normalized_name ON production_officers(officer_name_normalized);
 CREATE INDEX idx_officers_role ON production_officers(officer_role);
-CREATE INDEX idx_officers_active ON production_officers(is_active);
 CREATE INDEX idx_officers_appointed ON production_officers(appointed_on);
+CREATE INDEX idx_officers_nature_of_control ON production_officers USING gin(nature_of_control gin_trgm_ops);
 
 -- Financials
 CREATE INDEX idx_financials_company_number ON production_financials(company_number);
