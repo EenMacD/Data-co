@@ -15,7 +15,13 @@ echo ""
 if [ -z "$STAGING_DB_HOST" ]; then
     if [ -f ../.env ]; then
         echo "✓ Found .env file in project root"
-        export $(cat ../.env | grep -v '^#' | xargs)
+        # Robustly load .env across OSes (handles \r, comments, and empty lines)
+        while IFS= read -r line || [ -n "$line" ]; do
+            # Strip carriage returns (Windows) and inline comments
+            clean_line=$(echo "$line" | tr -d '\r' | sed 's/#.*//' | xargs)
+            [ -z "$clean_line" ] && continue
+            export "$clean_line"
+        done < ../.env
     else
         echo "✗ .env file not found in project root"
         echo "  Please copy .env.example to .env and configure it first"

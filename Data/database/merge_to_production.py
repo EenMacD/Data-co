@@ -119,9 +119,10 @@ class ProductionMerger:
 
             # Upsert into production (insert or update)
             upsert_query = """
-                INSERT INTO companies (
+                INSERT INTO production_companies (
                     company_number,
                     company_name,
+                    company_type,
                     company_status,
                     locality,
                     postal_code,
@@ -131,6 +132,19 @@ class ProductionMerger:
                     country,
                     sic_codes,
                     primary_sic_code,
+                    incorporation_date,
+                    accounts_last_made_up_date,
+                    accounts_ref_date,
+                    accounts_next_due_date,
+                    account_category,
+                    returns_next_due_date,
+                    returns_last_made_up_date,
+                    num_mort_charges,
+                    num_mort_outstanding,
+                    num_mort_part_satisfied,
+                    previous_names,
+                    conf_stm_next_due_date,
+                    conf_stm_last_made_up_date,
                     raw_data,
                     data_quality_score,
                     source_batch_id,
@@ -139,6 +153,7 @@ class ProductionMerger:
                 ) VALUES (
                     %(company_number)s,
                     %(company_name)s,
+                    %(company_type)s,
                     %(company_status)s,
                     %(locality)s,
                     %(postal_code)s,
@@ -148,6 +163,19 @@ class ProductionMerger:
                     %(country)s,
                     %(sic_codes)s,
                     %(primary_sic_code)s,
+                    %(incorporation_date)s,
+                    %(accounts_last_made_up_date)s,
+                    %(accounts_ref_date)s,
+                    %(accounts_next_due_date)s,
+                    %(account_category)s,
+                    %(returns_next_due_date)s,
+                    %(returns_last_made_up_date)s,
+                    %(num_mort_charges)s,
+                    %(num_mort_outstanding)s,
+                    %(num_mort_part_satisfied)s,
+                    %(previous_names)s,
+                    %(conf_stm_next_due_date)s,
+                    %(conf_stm_last_made_up_date)s,
                     %(raw_data)s,
                     %(quality_score)s,
                     %(batch_id)s,
@@ -156,6 +184,7 @@ class ProductionMerger:
                 )
                 ON CONFLICT (company_number) DO UPDATE SET
                     company_name = EXCLUDED.company_name,
+                    company_type = EXCLUDED.company_type,
                     company_status = EXCLUDED.company_status,
                     locality = EXCLUDED.locality,
                     postal_code = EXCLUDED.postal_code,
@@ -163,8 +192,22 @@ class ProductionMerger:
                     country = EXCLUDED.country,
                     sic_codes = EXCLUDED.sic_codes,
                     primary_sic_code = EXCLUDED.primary_sic_code,
+                    incorporation_date = EXCLUDED.incorporation_date,
+                    accounts_last_made_up_date = EXCLUDED.accounts_last_made_up_date,
+                    accounts_ref_date = EXCLUDED.accounts_ref_date,
+                    accounts_next_due_date = EXCLUDED.accounts_next_due_date,
+                    account_category = EXCLUDED.account_category,
+                    returns_next_due_date = EXCLUDED.returns_next_due_date,
+                    returns_last_made_up_date = EXCLUDED.returns_last_made_up_date,
+                    num_mort_charges = EXCLUDED.num_mort_charges,
+                    num_mort_outstanding = EXCLUDED.num_mort_outstanding,
+                    num_mort_part_satisfied = EXCLUDED.num_mort_part_satisfied,
+                    previous_names = EXCLUDED.previous_names,
+                    conf_stm_next_due_date = EXCLUDED.conf_stm_next_due_date,
+                    conf_stm_last_made_up_date = EXCLUDED.conf_stm_last_made_up_date,
                     raw_data = EXCLUDED.raw_data,
                     data_quality_score = EXCLUDED.data_quality_score,
+                    source_batch_id = EXCLUDED.source_batch_id,
                     last_updated = NOW()
                 RETURNING (xmax = 0) AS inserted
             """
@@ -174,6 +217,7 @@ class ProductionMerger:
                 {
                     "company_number": company["company_number"],
                     "company_name": company["company_name"],
+                    "company_type": company["company_type"],
                     "company_status": company["company_status"],
                     "locality": company["locality"],
                     "postal_code": company["postal_code"],
@@ -183,6 +227,19 @@ class ProductionMerger:
                     "country": company["country"],
                     "sic_codes": company["sic_codes"],
                     "primary_sic_code": primary_sic,
+                    "incorporation_date": company["incorporation_date"],
+                    "accounts_last_made_up_date": company["accounts_last_made_up_date"],
+                    "accounts_ref_date": company["accounts_ref_date"],
+                    "accounts_next_due_date": company["accounts_next_due_date"],
+                    "account_category": company["account_category"],
+                    "returns_next_due_date": company["returns_next_due_date"],
+                    "returns_last_made_up_date": company["returns_last_made_up_date"],
+                    "num_mort_charges": company["num_mort_charges"],
+                    "num_mort_outstanding": company["num_mort_outstanding"],
+                    "num_mort_part_satisfied": company["num_mort_part_satisfied"],
+                    "previous_names": company["previous_names"],
+                    "conf_stm_next_due_date": company["conf_stm_next_due_date"],
+                    "conf_stm_last_made_up_date": company["conf_stm_last_made_up_date"],
                     "raw_data": company["raw_data"],
                     "quality_score": quality_score,
                     "batch_id": self.batch_id,
@@ -203,10 +260,9 @@ class ProductionMerger:
         # Get officers for companies in this batch
         query = """
             SELECT
-                so.*,
-                sc.company_number
+                so.*
             FROM staging_officers so
-            JOIN staging_companies sc ON so.staging_company_id = sc.id
+            JOIN staging_companies sc ON so.company_number = sc.company_number
             WHERE sc.batch_id = %(batch_id)s
             AND sc.needs_review = false
             AND so.officer_name IS NOT NULL
@@ -220,22 +276,6 @@ class ProductionMerger:
             return
 
         for officer in officers:
-            # Get production company_id
-            company_query = """
-                SELECT id FROM companies WHERE company_number = %(company_number)s
-            """
-            company_result = self.production_db.execute(
-                company_query, {"company_number": officer["company_number"]}, fetch=True
-            )
-
-            if not company_result:
-                print(
-                    f"  ! Skipping officer: company {officer['company_number']} not in production"
-                )
-                continue
-
-            company_id = company_result[0]["id"]
-
             # Normalize name for matching
             normalized_name = DataTransformer.normalize_officer_name(
                 officer["officer_name"]
@@ -243,8 +283,7 @@ class ProductionMerger:
 
             # Upsert officer
             upsert_query = """
-                INSERT INTO officers (
-                    company_id,
+                INSERT INTO production_officers (
                     company_number,
                     officer_name,
                     officer_name_normalized,
@@ -253,6 +292,7 @@ class ProductionMerger:
                     resigned_on,
                     nationality,
                     occupation,
+                    date_of_birth,
                     address_line_1,
                     address_line_2,
                     locality,
@@ -263,7 +303,6 @@ class ProductionMerger:
                     first_seen,
                     last_updated
                 ) VALUES (
-                    %(company_id)s,
                     %(company_number)s,
                     %(officer_name)s,
                     %(normalized_name)s,
@@ -272,6 +311,7 @@ class ProductionMerger:
                     %(resigned_on)s,
                     %(nationality)s,
                     %(occupation)s,
+                    %(date_of_birth)s,
                     %(address_line_1)s,
                     %(address_line_2)s,
                     %(locality)s,
@@ -286,14 +326,15 @@ class ProductionMerger:
                     resigned_on = EXCLUDED.resigned_on,
                     nationality = EXCLUDED.nationality,
                     occupation = EXCLUDED.occupation,
+                    date_of_birth = EXCLUDED.date_of_birth,
                     raw_data = EXCLUDED.raw_data,
+                    source_batch_id = EXCLUDED.source_batch_id,
                     last_updated = NOW()
             """
 
             self.production_db.execute(
                 upsert_query,
                 {
-                    "company_id": company_id,
                     "company_number": officer["company_number"],
                     "officer_name": officer["officer_name"],
                     "normalized_name": normalized_name,
@@ -302,6 +343,7 @@ class ProductionMerger:
                     "resigned_on": officer["resigned_on"],
                     "nationality": officer["nationality"],
                     "occupation": officer["occupation"],
+                    "date_of_birth": officer.get("date_of_birth"),
                     "address_line_1": officer["address_line_1"],
                     "address_line_2": officer["address_line_2"],
                     "locality": officer["locality"],
@@ -321,10 +363,9 @@ class ProductionMerger:
         # Get financials for companies in this batch
         query = """
             SELECT
-                sf.*,
-                sc.company_number
+                sf.*
             FROM staging_financials sf
-            JOIN staging_companies sc ON sf.staging_company_id = sc.id
+            JOIN staging_companies sc ON sf.company_number = sc.company_number
             WHERE sc.batch_id = %(batch_id)s
             AND sc.needs_review = false
         """
@@ -340,23 +381,9 @@ class ProductionMerger:
             return
 
         for financial in financials:
-            # Get production company_id
-            company_query = """
-                SELECT id FROM companies WHERE company_number = %(company_number)s
-            """
-            company_result = self.production_db.execute(
-                company_query, {"company_number": financial["company_number"]}, fetch=True
-            )
-
-            if not company_result:
-                continue
-
-            company_id = company_result[0]["id"]
-
             # Upsert financial record
             upsert_query = """
-                INSERT INTO financials (
-                    company_id,
+                INSERT INTO production_financials (
                     company_number,
                     period_start,
                     period_end,
@@ -369,7 +396,6 @@ class ProductionMerger:
                     raw_data,
                     source_batch_id
                 ) VALUES (
-                    %(company_id)s,
                     %(company_number)s,
                     %(period_start)s,
                     %(period_end)s,
@@ -390,13 +416,13 @@ class ProductionMerger:
                     net_worth = EXCLUDED.net_worth,
                     source = EXCLUDED.source,
                     raw_data = EXCLUDED.raw_data,
+                    source_batch_id = EXCLUDED.source_batch_id,
                     last_updated = NOW()
             """
 
             self.production_db.execute(
                 upsert_query,
                 {
-                    "company_id": company_id,
                     "company_number": financial["company_number"],
                     "period_start": financial["period_start"],
                     "period_end": financial["period_end"],
@@ -455,7 +481,17 @@ class ProductionMerger:
 
 def list_batches() -> None:
     """List all batches available for merging."""
-    db = get_staging_db()
+    staging_db = get_staging_db()
+    
+    # Need to check production for merge status
+    merged_batches = set()
+    try:
+        production_db = get_production_db()
+        rows = production_db.execute("SELECT batch_id FROM merge_log", fetch=True)
+        merged_batches = {row["batch_id"] for row in rows}
+    except Exception:
+        # Fails if tables don't exist yet etc.
+        pass
 
     query = """
         SELECT
@@ -464,36 +500,29 @@ def list_batches() -> None:
             il.started_at,
             il.completed_at,
             il.companies_count,
-            il.status,
-            dq.needs_review,
-            dq.missing_names,
-            CASE
-                WHEN EXISTS (
-                    SELECT 1 FROM merge_log ml WHERE ml.batch_id = il.batch_id
-                ) THEN 'merged'
-                ELSE 'not_merged'
-            END as merge_status
+            il.status
         FROM staging_ingestion_log il
-        LEFT JOIN staging_data_quality dq ON il.batch_id = dq.batch_id
         WHERE il.status = 'completed'
         ORDER BY il.completed_at DESC
         LIMIT 20
     """
 
-    batches = db.execute(query, fetch=True)
+    batches = staging_db.execute(query, fetch=True)
 
     print("\nAvailable batches for merging:")
     print("-" * 120)
     print(
-        f"{'Batch ID':<50} {'Search Name':<20} {'Companies':<12} {'Needs Review':<15} {'Status'}"
+        f"{'Batch ID':<50} {'Search Name':<20} {'Companies':<12} {'Status'}"
     )
     print("-" * 120)
 
     for batch in batches:
+        is_merged = batch["batch_id"] in merged_batches
+        status = "merged" if is_merged else "not_merged"
         print(
             f"{batch['batch_id']:<50} {batch['search_name']:<20} "
-            f"{batch['companies_count']:<12} {batch.get('needs_review', 0):<15} "
-            f"{batch.get('merge_status', 'unknown')}"
+            f"{batch['companies_count']:<12} "
+            f"{status}"
         )
 
 

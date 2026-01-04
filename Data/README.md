@@ -122,7 +122,11 @@ Kept for reference purposes only.
 - `staging_ingestion_log` - Ingestion audit trail
 
 ### Production Tables
-Same schema as staging, populated via `database/merge_to_production.py`
+- `production_companies` - Company master data (one record per company)
+- `production_officers` - Officers and PSC data
+- `production_financials` - Financial accounts data
+- `production_merge_log` - Merge audit trail
+Same schema structure as staging, populated via `database/merge_to_production.py`
 
 ## Environment Variables
 

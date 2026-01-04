@@ -9,7 +9,7 @@ services:
       POSTGRES_DB: ${STAGING_DB_NAME}
     command: -p ${STAGING_DB_PORT}
     volumes:
-      - postgres-staging-data:/var/lib/postgresql/data
+      - ${STAGING_DB_VOLUME}:/var/lib/postgresql/data
     ports:
       - "${STAGING_DB_PORT}:${STAGING_DB_PORT}"
     networks:
@@ -25,7 +25,7 @@ services:
       POSTGRES_DB: ${PRODUCTION_DB_NAME}
     command: -p ${PRODUCTION_DB_PORT}
     volumes:
-      - postgres-production-data:/var/lib/postgresql/data
+      - ${PRODUCTION_DB_VOLUME}:/var/lib/postgresql/data
     ports:
       - "${PRODUCTION_DB_PORT}:${PRODUCTION_DB_PORT}"
     networks:
@@ -142,3 +142,5 @@ networks:
 volumes:
   postgres-staging-data:
   postgres-production-data:
+
+

@@ -86,6 +86,7 @@ class BulkLoader:
                     company_number VARCHAR(8) NOT NULL,
                     company_name VARCHAR(500),
                     company_status VARCHAR(50),
+                    company_type VARCHAR(100),
                     locality VARCHAR(200),
                     postal_code VARCHAR(20),
                     address_line_1 VARCHAR(500),
@@ -93,6 +94,19 @@ class BulkLoader:
                     region VARCHAR(100),
                     country VARCHAR(100),
                     sic_codes TEXT[],
+                    incorporation_date DATE,
+                    accounts_last_made_up_date DATE,
+                    accounts_ref_date CHAR(5),
+                    accounts_next_due_date DATE,
+                    account_category VARCHAR(30),
+                    returns_next_due_date DATE,
+                    returns_last_made_up_date DATE,
+                    num_mort_charges INTEGER,
+                    num_mort_outstanding INTEGER,
+                    num_mort_part_satisfied INTEGER,
+                    previous_names TEXT,
+                    conf_stm_next_due_date DATE,
+                    conf_stm_last_made_up_date DATE,
                     data_hash VARCHAR(32),
                     batch_id VARCHAR(50),
                     last_updated TIMESTAMP
@@ -101,9 +115,15 @@ class BulkLoader:
 
             # Prepare data for COPY
             columns = [
-                'company_number', 'company_name', 'company_status',
+                'company_number', 'company_name', 'company_status', 'company_type',
                 'locality', 'postal_code', 'address_line_1', 'address_line_2',
-                'region', 'country', 'sic_codes', 'data_hash', 'batch_id', 'last_updated'
+                'region', 'country', 'sic_codes',
+                'incorporation_date', 'accounts_last_made_up_date', 'accounts_ref_date',
+                'accounts_next_due_date', 'account_category',
+                'returns_next_due_date', 'returns_last_made_up_date',
+                'num_mort_charges', 'num_mort_outstanding', 'num_mort_part_satisfied',
+                'previous_names', 'conf_stm_next_due_date', 'conf_stm_last_made_up_date',
+                'data_hash', 'batch_id', 'last_updated'
             ]
 
             # Ensure all columns exist, fill missing with None
@@ -130,27 +150,34 @@ class BulkLoader:
             )
 
             # UPSERT with change detection
-            # This query:
-            # - Inserts new companies
-            # - Updates existing companies only if data_hash differs
-            # - Sets change_detected = TRUE for updated records
             cur.execute(f"""
                 INSERT INTO staging_companies (
-                    company_number, company_name, company_status,
+                    company_number, company_name, company_status, company_type,
                     locality, postal_code, address_line_1, address_line_2,
-                    region, country, sic_codes, data_hash,
-                    last_updated, change_detected, raw_data
+                    region, country, sic_codes,
+                    incorporation_date, accounts_last_made_up_date, accounts_ref_date,
+                    accounts_next_due_date, account_category,
+                    returns_next_due_date, returns_last_made_up_date,
+                    num_mort_charges, num_mort_outstanding, num_mort_part_satisfied,
+                    previous_names, conf_stm_next_due_date, conf_stm_last_made_up_date,
+                    data_hash, last_updated, change_detected, raw_data, batch_id
                 )
                 SELECT DISTINCT ON (t.company_number)
-                    t.company_number, t.company_name, t.company_status,
+                    t.company_number, t.company_name, t.company_status, t.company_type,
                     t.locality, t.postal_code, t.address_line_1, t.address_line_2,
-                    t.region, t.country, t.sic_codes, t.data_hash,
-                    t.last_updated, FALSE, '{{}}'::jsonb
+                    t.region, t.country, t.sic_codes,
+                    t.incorporation_date, t.accounts_last_made_up_date, t.accounts_ref_date,
+                    t.accounts_next_due_date, t.account_category,
+                    t.returns_next_due_date, t.returns_last_made_up_date,
+                    t.num_mort_charges, t.num_mort_outstanding, t.num_mort_part_satisfied,
+                    t.previous_names, t.conf_stm_next_due_date, t.conf_stm_last_made_up_date,
+                    t.data_hash, t.last_updated, FALSE, '{{}}'::jsonb, t.batch_id
                 FROM {temp_table} t
                 ORDER BY t.company_number
                 ON CONFLICT (company_number) DO UPDATE SET
                     company_name = EXCLUDED.company_name,
                     company_status = EXCLUDED.company_status,
+                    company_type = EXCLUDED.company_type,
                     locality = EXCLUDED.locality,
                     postal_code = EXCLUDED.postal_code,
                     address_line_1 = EXCLUDED.address_line_1,
@@ -158,21 +185,31 @@ class BulkLoader:
                     region = EXCLUDED.region,
                     country = EXCLUDED.country,
                     sic_codes = EXCLUDED.sic_codes,
+                    incorporation_date = EXCLUDED.incorporation_date,
+                    accounts_last_made_up_date = EXCLUDED.accounts_last_made_up_date,
+                    accounts_ref_date = EXCLUDED.accounts_ref_date,
+                    accounts_next_due_date = EXCLUDED.accounts_next_due_date,
+                    account_category = EXCLUDED.account_category,
+                    returns_next_due_date = EXCLUDED.returns_next_due_date,
+                    returns_last_made_up_date = EXCLUDED.returns_last_made_up_date,
+                    num_mort_charges = EXCLUDED.num_mort_charges,
+                    num_mort_outstanding = EXCLUDED.num_mort_outstanding,
+                    num_mort_part_satisfied = EXCLUDED.num_mort_part_satisfied,
+                    previous_names = EXCLUDED.previous_names,
+                    conf_stm_next_due_date = EXCLUDED.conf_stm_next_due_date,
+                    conf_stm_last_made_up_date = EXCLUDED.conf_stm_last_made_up_date,
                     data_hash = EXCLUDED.data_hash,
                     last_updated = EXCLUDED.last_updated,
+                    batch_id = EXCLUDED.batch_id,
                     change_detected = (staging_companies.data_hash IS DISTINCT FROM EXCLUDED.data_hash)
                 WHERE staging_companies.data_hash IS DISTINCT FROM EXCLUDED.data_hash
             """)
 
-            # Get counts
-            # Note: This is approximate - for exact counts we'd need more complex queries
             affected_rows = cur.rowcount
-
-            # Drop temp table
             cur.execute(f"DROP TABLE IF EXISTS {temp_table}")
 
         stats = {
-            'inserted': affected_rows,  # Approximate
+            'inserted': affected_rows,
             'updated': 0,
             'skipped': len(df) - affected_rows,
         }
@@ -260,21 +297,22 @@ class BulkLoader:
             )
 
             # Insert officers with UPSERT
-            # Unique Key: (company_number, officer_name, appointed_on, officer_role, date_of_birth)
+            # Changed insert target to use `company_number` foreign key directly
             cur.execute(f"""
                 INSERT INTO staging_officers (
-                    staging_company_id, company_number, officer_name, officer_role,
+                    company_number, officer_name, officer_role,
                     appointed_on, resigned_on, nationality, occupation,
                     address_line_1, address_line_2, locality, postal_code, country,
                     date_of_birth, raw_data, data_hash, change_detected, last_updated
                 )
                 SELECT DISTINCT ON (t.company_number, t.officer_name, t.appointed_on::date, t.officer_role, t.date_of_birth::date)
-                    sc.id, t.company_number, t.officer_name, t.officer_role,
+                    t.company_number, t.officer_name, t.officer_role,
                     t.appointed_on::date, t.resigned_on::date, t.nationality, t.occupation,
                     t.address_line_1, t.address_line_2, t.locality, t.postal_code, t.country,
                     t.date_of_birth::date, t.raw_data::jsonb, t.data_hash, FALSE, t.last_updated
                 FROM {temp_table} t
-                LEFT JOIN staging_companies sc ON sc.company_number = t.company_number
+                -- Ensure company exists first (FK constraint)
+                JOIN staging_companies sc ON sc.company_number = t.company_number
                 ORDER BY t.company_number, t.officer_name, t.appointed_on::date, t.officer_role, t.date_of_birth::date
                 ON CONFLICT (company_number, officer_name, appointed_on, officer_role, date_of_birth) DO UPDATE SET
                     resigned_on = EXCLUDED.resigned_on,
@@ -363,10 +401,6 @@ class BulkLoader:
             else:
                  df['raw_data'] = '{}'
 
-            # We need to map dataframe columns to temp table columns for COPY
-            # Note: json dump is handled by to_csv/buffer usually, but strict JSON needed for COPY CSV?
-            # Actually, standard COPY CSV handles strings.
-            
             # Reorder df to match columns + raw_data
             export_cols = columns + ['raw_data']
             
@@ -381,19 +415,20 @@ class BulkLoader:
             )
 
             # UPSERT with change detection
-            # Unique Key: (company_number, period_end)
+            # Changed to use company_number FK directly
             cur.execute(f"""
                 INSERT INTO staging_financials (
-                    staging_company_id, company_number, period_start, period_end,
+                    company_number, period_start, period_end,
                     turnover, profit_loss, total_assets, total_liabilities, net_worth,
                     source, raw_data, data_hash, change_detected, last_updated
                 )
                 SELECT DISTINCT ON (t.company_number, t.period_end::date)
-                    sc.id, t.company_number, t.period_start::date, t.period_end::date,
+                    t.company_number, t.period_start::date, t.period_end::date,
                     t.turnover, t.profit_loss, t.total_assets, t.total_liabilities, t.net_worth,
                     t.source, t.raw_data::jsonb, t.data_hash, FALSE, t.last_updated
                 FROM {temp_table} t
-                LEFT JOIN staging_companies sc ON sc.company_number = t.company_number
+                -- Ensure company exists first (FK constraint)
+                JOIN staging_companies sc ON sc.company_number = t.company_number
                 ORDER BY t.company_number, t.period_end::date
                 ON CONFLICT (company_number, period_end) DO UPDATE SET
                     period_start = EXCLUDED.period_start,

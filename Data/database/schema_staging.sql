@@ -4,6 +4,9 @@
 -- Model: One record per company, updated in place with change detection
 -- =====================================================
 
+-- Enable pg_trgm extension for fuzzy search
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 -- Drop existing tables if recreating
 DROP TABLE IF EXISTS staging_contact_enrichments CASCADE;
 DROP TABLE IF EXISTS staging_financials CASCADE;
@@ -36,10 +39,10 @@ CREATE TABLE staging_ingestion_log (
 -- One record per company, updated in place
 -- =====================================================
 CREATE TABLE staging_companies (
-    id SERIAL PRIMARY KEY,
-    company_number VARCHAR(8) NOT NULL,
+    company_number VARCHAR(8) PRIMARY KEY, -- Changed from id to company_number as PK
     company_name VARCHAR(500),
     company_status VARCHAR(50),
+    company_type VARCHAR(100), -- New
 
     -- Address fields from CSV
     locality VARCHAR(200),
@@ -52,6 +55,21 @@ CREATE TABLE staging_companies (
     -- SIC codes (stored as array)
     sic_codes TEXT[],
 
+    -- New columns matching production
+    incorporation_date DATE,
+    accounts_last_made_up_date DATE,
+    accounts_ref_date CHAR(5),
+    accounts_next_due_date DATE,
+    account_category VARCHAR(30),
+    returns_next_due_date DATE,
+    returns_last_made_up_date DATE,
+    num_mort_charges INTEGER,
+    num_mort_outstanding INTEGER,
+    num_mort_part_satisfied INTEGER,
+    previous_names TEXT,
+    conf_stm_next_due_date DATE,
+    conf_stm_last_made_up_date DATE,
+
     -- Raw API response (everything else goes here)
     raw_data JSONB NOT NULL DEFAULT '{}'::jsonb,
 
@@ -62,14 +80,12 @@ CREATE TABLE staging_companies (
 
     -- Merge tracking
     merged_at TIMESTAMP,
+    batch_id VARCHAR(50), -- Tracks which batch last updated this record
 
     -- Metadata
     ingested_at TIMESTAMP DEFAULT NOW(),
     needs_review BOOLEAN DEFAULT false,
-    review_notes TEXT,
-
-    -- One record per company
-    UNIQUE(company_number)
+    review_notes TEXT
 );
 
 -- =====================================================
@@ -77,14 +93,15 @@ CREATE TABLE staging_companies (
 -- =====================================================
 CREATE TABLE staging_officers (
     id SERIAL PRIMARY KEY,
-    staging_company_id INTEGER REFERENCES staging_companies(id) ON DELETE CASCADE,
-    company_number VARCHAR(8) NOT NULL,
+    company_number VARCHAR(8) NOT NULL REFERENCES staging_companies(company_number) ON DELETE CASCADE,
 
     -- Basic officer info
     officer_name VARCHAR(500),
     officer_role VARCHAR(200),
     appointed_on DATE,
     resigned_on DATE,
+    -- Personal details
+    date_of_birth DATE,
     nationality VARCHAR(100),
     occupation VARCHAR(200),
 
@@ -106,7 +123,9 @@ CREATE TABLE staging_officers (
     -- Metadata
     ingested_at TIMESTAMP DEFAULT NOW(),
     needs_review BOOLEAN DEFAULT false,
-    review_notes TEXT
+    review_notes TEXT,
+
+    UNIQUE(company_number, officer_name, appointed_on, officer_role, date_of_birth)
 );
 
 -- =====================================================
@@ -114,8 +133,7 @@ CREATE TABLE staging_officers (
 -- =====================================================
 CREATE TABLE staging_financials (
     id SERIAL PRIMARY KEY,
-    staging_company_id INTEGER REFERENCES staging_companies(id) ON DELETE CASCADE,
-    company_number VARCHAR(8) NOT NULL,
+    company_number VARCHAR(8) NOT NULL REFERENCES staging_companies(company_number) ON DELETE CASCADE,
 
     -- Financial period
     period_start DATE,
@@ -179,7 +197,7 @@ CREATE TABLE staging_contact_enrichments (
 -- =====================================================
 -- Indexes for staging queries
 -- =====================================================
-CREATE INDEX idx_staging_companies_number ON staging_companies(company_number);
+-- PK index exists for company_number
 CREATE INDEX idx_staging_companies_status ON staging_companies(company_status);
 CREATE INDEX idx_staging_companies_locality ON staging_companies(locality);
 CREATE INDEX idx_staging_companies_needs_review ON staging_companies(needs_review);
@@ -212,7 +230,6 @@ CREATE INDEX idx_staging_financials_merged_at ON staging_financials(merged_at) W
 -- View: Companies needing review
 CREATE VIEW staging_review_queue AS
 SELECT
-    c.id,
     c.company_number,
     c.company_name,
     c.needs_review,
@@ -221,9 +238,9 @@ SELECT
     c.last_updated,
     COUNT(o.id) as officer_count
 FROM staging_companies c
-LEFT JOIN staging_officers o ON c.id = o.staging_company_id
+LEFT JOIN staging_officers o ON c.company_number = o.company_number
 WHERE c.needs_review = true
-GROUP BY c.id, c.company_number, c.company_name, c.needs_review, c.review_notes, c.ingested_at, c.last_updated
+GROUP BY c.company_number, c.company_name, c.needs_review, c.review_notes, c.ingested_at, c.last_updated
 ORDER BY c.last_updated DESC;
 
 -- View: Data quality summary

@@ -139,7 +139,8 @@ class DataValidator:
         """Validate officer records."""
         join_clause = ""
         if self.batch_id:
-            join_clause = f"JOIN staging_companies sc ON so.staging_company_id = sc.id WHERE sc.batch_id = '{self.batch_id}'"
+            # JOIN using company_number (FK) instead of id
+            join_clause = f"JOIN staging_companies sc ON so.company_number = sc.company_number WHERE sc.batch_id = '{self.batch_id}'"
 
         query = f"""
             SELECT
