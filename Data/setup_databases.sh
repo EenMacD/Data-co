@@ -122,7 +122,7 @@ if [ -z "$STAGING_DB_NAME" ] || [ -z "$STAGING_DB_USER" ]; then
 fi
 
 create_database "$STAGING_DB_NAME" "$STAGING_DB_USER" "$STAGING_DB_HOST" "$STAGING_DB_PORT" "$STAGING_DB_PASSWORD" "$STAGING_DB_USER"
-apply_schema "$STAGING_DB_NAME" "database/schema_staging.sql" "$STAGING_DB_HOST" "$STAGING_DB_PORT" "$STAGING_DB_USER" "$STAGING_DB_PASSWORD"
+bash database/apply_staging.sh
 
 echo ""
 
@@ -140,7 +140,7 @@ if [ -z "$PRODUCTION_DB_NAME" ] || [ -z "$PRODUCTION_DB_USER" ]; then
 fi
 
 create_database "$PRODUCTION_DB_NAME" "$PRODUCTION_DB_USER" "$PRODUCTION_DB_HOST" "$PRODUCTION_DB_PORT" "$PRODUCTION_DB_PASSWORD" "$PRODUCTION_DB_USER"
-apply_schema "$PRODUCTION_DB_NAME" "database/schema_production.sql" "$PRODUCTION_DB_HOST" "$PRODUCTION_DB_PORT" "$PRODUCTION_DB_USER" "$PRODUCTION_DB_PASSWORD"
+bash database/apply_production.sh
 
 echo ""
 

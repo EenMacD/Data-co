@@ -1,0 +1,159 @@
+{
+  "period_start": [
+    "startdateforperiodcoveredbyreport"
+  ],
+  "turnover": [
+    "turnoverrevenue",
+    "turnovergrossoperatingrevenue"
+  ],
+  "profit_loss": [
+    "profitloss"
+  ],
+  "cash_bank_on_hand": [
+    "cashbankonhand",
+    "cashbankinhand"
+  ],
+  "total_assets": [
+    "totalassets"
+  ],
+  "total_liabilities": [
+    "totalliabilities"
+  ],
+  "net_assets_liabilities": [
+    "netassetsliabilities",
+    "netassetsliabilitiesincludingpensionassetliability"
+  ],
+  "fixed_assets": [
+    "fixedassets"
+  ],
+  "current_assets": [
+    "currentassets"
+  ],
+  "distribution_costs": [
+    "distributioncosts"
+  ],
+  "administrative_expenses": [
+    "administrativeexpenses"
+  ],
+  "average_number_employees_during_period": [
+    "averagenumberemployeesduringperiod"
+  ],
+  "other_operating_income": [
+    "OtherOperatingIncome"
+  ],
+  "cost_sales": [
+    "costsales"
+  ],
+  "gross_profit_loss": [
+    "grossprofitloss"
+  ],
+  "description_body_authorising_financial_statements": [
+    "descriptionbodyauthorisingfinancialstatements"
+  ],
+  "creditors": [
+    "creditors"
+  ],
+  "net_current_assets_liabilities": [
+    "netcurrentassetsliabilities"
+  ],
+  "total_assets_less_current_liabilities": [
+    "totalassetslesscurrentliabilities"
+  ],
+  "staff_costs_employee_benefits_expense": [
+    "staffcostsemployeebenefitsexpense"
+  ],
+  "wages_salaries": [
+    "wagessalaries"
+  ],
+  "operating_profit_loss": [
+    "operatingprofitloss"
+  ],
+  "net_finance_income_costs": [
+    "netfinanceincomecosts"
+  ],
+  "profit_loss_on_ordinary_activities_before_tax": [
+    "profitlossonordinaryactivitiesbeforetax"
+  ],
+  "profit_loss_on_ordinary_activities_after_tax": [
+    "profitlossonordinaryactivitiesaftertax"
+  ],
+  "investments_fixed_assets": [
+    "investmentsfixedassets"
+  ],
+  "debtors": [
+    "debtors"
+  ],
+  "total_inventories": [
+    "totalinventories"
+  ],
+  "trade_creditors_trade_payables": [
+    "tradecreditorstradepayables"
+  ],
+  "bank_borrowings_overdrafts": [
+    "bankborrowingsoverdrafts"
+  ],
+  "current_liabilities": [
+    "currentliabilities",
+    "AccruedLiabilities"
+  ],
+  "income_expense_recognised_directly_in_equity": [
+    "incomeexpenserecogniseddirectlyinequity"
+  ],
+  "dividends_paid": [
+    "dividendspaid"
+  ],
+  "net_cash_flows_from_used_in_operating_activities": [
+    "netcashflowsfromusedinoperatingactivities"
+  ],
+  "net_cash_generated_from_operations": [
+    "netcashgeneratedfromoperations"
+  ],
+  "income_taxes_paid_refund_classified_as_operating_activities": [
+    "incometaxespaidrefundclassifiedasoperatingactivities"
+  ],
+  "net_cash_flows_from_used_in_investing_activities": [
+    "netcashflowsfromusedininvestingactivities"
+  ],
+  "net_cash_flows_from_used_in_financing_activities": [
+    "netcashflowsfromusedinfinancingactivities"
+  ],
+  "cash_cash_equivalents_cash_flow_value": [
+    "cashcashequivalentscashflowvalue"
+  ],
+  "social_security_costs": [
+    "socialsecuritycosts"
+  ],
+  "other_employee_expense": [
+    "otheremployeeexpense"
+  ],
+  "director_remuneration": [
+    "directorremuneration"
+  ],
+  "administration_support_average_number_employees": [
+    "administrationsupportaveragenumberemployees"
+  ],
+  "production_average_number_employees": [
+    "productionaveragenumberemployees"
+  ],
+  "sales_marketing_distribution_average_number_employees": [
+    "salesmarketingdistributionaveragenumberemployees"
+  ],
+  "other_departments_average_number_employees": [
+    "otherdepartmentsaveragenumberemployees"
+  ],
+  "production_software_name": [
+    "nameProductionSoftware"
+  ],
+  "production_software_version": [
+    "versionProductionSoftware"
+  ],
+  "report_title": [
+    "reportTitle"
+  ],
+  "entity_current_legal_or_registered_name": [
+    "entityCurrentLegalOrRegisteredName"
+  ],
+  "name_entity_officer": [
+    "nameEntityOfficer"
+  ]
+}
