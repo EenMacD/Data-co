@@ -32,11 +32,11 @@ Go REST API for querying UK Companies House data with advanced filtering.
    Ensure your `.env` file (in the root `data-co` directory) contains:
    ```
    PRODUCTION_DB_HOST=localhost
-   PRODUCTION_DB_PORT=5432
+   PRODUCTION_DB_PORT={PRODUCTION_DB_PORT}
    PRODUCTION_DB_NAME=production
    PRODUCTION_DB_USER=your_user
    PRODUCTION_DB_PASSWORD=your_password
-   API_PORT=8080
+   API_PORT={API_PORT}
    ```
 
 3. **Run the API server:**
@@ -44,7 +44,7 @@ Go REST API for querying UK Companies House data with advanced filtering.
    go run main.go
    ```
 
-   The server will start on `http://localhost:8080`
+   The server will start on `http://localhost:{API_PORT}`
 
 ### Building for Production
 
@@ -245,15 +245,15 @@ API/
 
 ```bash
 # Test health endpoint
-curl http://localhost:8080/api/health
+curl http://localhost:{API_PORT}/api/health
 
 # Test company search
-curl -X POST http://localhost:8080/api/companies/search \
+curl -X POST http://localhost:{API_PORT}/api/companies/search \
   -H "Content-Type: application/json" \
   -d '{"industry":"tech","location":"london","limit":10}'
 
 # Test company count
-curl -X POST http://localhost:8080/api/companies/count \
+curl -X POST http://localhost:{API_PORT}/api/companies/count \
   -H "Content-Type: application/json" \
   -d '{"industry":"tech","location":"london"}'
 ```
@@ -264,7 +264,7 @@ Update your Next.js frontend to call the Go API:
 
 ```typescript
 // In your Next.js app
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://localhost:{API_PORT}/api';
 
 async function searchCompanies(filters) {
   const response = await fetch(`${API_BASE_URL}/companies/search`, {

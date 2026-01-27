@@ -13,11 +13,17 @@ echo ""
 
 # Load environment variables (skip if already set by docker-compose)
 if [ -z "$STAGING_DB_HOST" ]; then
-    if [ -f .env ]; then
-        echo "✓ Found .env file"
-        export $(cat .env | grep -v '^#' | xargs)
+    if [ -f ../.env ]; then
+        echo "✓ Found .env file in project root"
+        # Robustly load .env across OSes (handles \r, comments, and empty lines)
+        while IFS= read -r line || [ -n "$line" ]; do
+            # Strip carriage returns (Windows) and inline comments
+            clean_line=$(echo "$line" | tr -d '\r' | sed 's/#.*//' | xargs)
+            [ -z "$clean_line" ] && continue
+            export "$clean_line"
+        done < ../.env
     else
-        echo "✗ .env file not found"
+        echo "✗ .env file not found in project root"
         echo "  Please copy .env.example to .env and configure it first"
         echo ""
         echo "  cp .env.example .env"
@@ -60,6 +66,9 @@ create_database() {
         read -p "  Do you want to drop and recreate it? (y/N): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo "  Disconnecting active sessions..."
+            PGPASSWORD=$db_password psql -h "$db_host" -p "$db_port" -U "$db_admin_user" -d "postgres" -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$db_name' AND pid <> pg_backend_pid();" > /dev/null
+
             echo "  Dropping database '$db_name'..."
             PGPASSWORD=$db_password dropdb -h "$db_host" -p "$db_port" -U "$db_admin_user" "$db_name" || echo "  (ignoring error)"
             echo "  Creating database '$db_name'..."
@@ -116,7 +125,7 @@ if [ -z "$STAGING_DB_NAME" ] || [ -z "$STAGING_DB_USER" ]; then
 fi
 
 create_database "$STAGING_DB_NAME" "$STAGING_DB_USER" "$STAGING_DB_HOST" "$STAGING_DB_PORT" "$STAGING_DB_PASSWORD" "$STAGING_DB_USER"
-apply_schema "$STAGING_DB_NAME" "database/schema_staging.sql" "$STAGING_DB_HOST" "$STAGING_DB_PORT" "$STAGING_DB_USER" "$STAGING_DB_PASSWORD"
+bash staging/common/schemas/apply_staging.sh
 
 echo ""
 
@@ -134,7 +143,7 @@ if [ -z "$PRODUCTION_DB_NAME" ] || [ -z "$PRODUCTION_DB_USER" ]; then
 fi
 
 create_database "$PRODUCTION_DB_NAME" "$PRODUCTION_DB_USER" "$PRODUCTION_DB_HOST" "$PRODUCTION_DB_PORT" "$PRODUCTION_DB_PASSWORD" "$PRODUCTION_DB_USER"
-apply_schema "$PRODUCTION_DB_NAME" "database/schema_production.sql" "$PRODUCTION_DB_HOST" "$PRODUCTION_DB_PORT" "$PRODUCTION_DB_USER" "$PRODUCTION_DB_PASSWORD"
+bash production/common/schemas/apply_production.sh
 
 echo ""
 
@@ -146,7 +155,7 @@ echo "TESTING CONNECTIONS"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 echo "→ Testing Python database connections..."
-python database/connection.py
+python staging/common/services/connection.py
 
 echo ""
 
@@ -163,15 +172,19 @@ echo "  STAGING:    $STAGING_DB_NAME"
 echo "  PRODUCTION: $PRODUCTION_DB_NAME"
 echo ""
 echo "Next steps:"
+echo "  1. Apply database migrations:"
+echo "     Running setup_databases.sh is sufficient for now."
 echo ""
-echo "  1. Run data ingestion to staging:"
-echo "     python Data-injestion-workflows/Api-request-workflow/api-main-db.py"
+echo "  2. Access the Data Ingestion UI:"
+echo "     http://localhost:\${DATA_UI_PORT}"
 echo ""
-echo "  2. List batches available for merging:"
-echo "     python database/merge_to_production.py --list"
+echo "  3. Use the UI to:"
+echo "     - Select date range → Discover Files"
+echo "     - Select files from panels → Add to Ingestion List"
+echo "     - Start Ingestion → Monitor progress"
 echo ""
-echo "  3. Merge a batch to production:"
-echo "     python database/merge_to_production.py --batch-id <batch_id>"
+echo "  4. Merge data to production:"
+echo "     docker exec -it data-co-worker python production/common/services/merge_to_production.py --list"
 echo ""
-echo "For detailed documentation, see database/README.md"
+echo "For detailed documentation, see data_ingestion/README.md"
 echo ""

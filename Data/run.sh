@@ -37,12 +37,12 @@ fi
 echo "📥 Checking dependencies..."
 pip install --upgrade pip -q
 
-# 4. Run the Bulk Ingestion UI
+# 4. Run the Data Ingestion UI
 # We delegate to the specific component script which handles its own specific requirements
-if [ -f "bulk_ingestion/run.sh" ]; then
-    chmod +x bulk_ingestion/run.sh
-    exec ./bulk_ingestion/run.sh
+if [ -f "staging/common/web/run.sh" ]; then
+    chmod +x staging/common/web/run.sh
+    exec ./staging/common/web/run.sh
 else
-    echo "❌ bulk_ingestion/run.sh not found!"
+    echo "❌ staging/common/web/run.sh not found!"
     exit 1
 fi

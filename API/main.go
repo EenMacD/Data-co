@@ -16,10 +16,10 @@ import (
 )
 
 func main() {
-	// Load environment variables
-	if err := godotenv.Load("../.env"); err != nil {
-		log.Printf("Warning: .env file not found: %v", err)
-	}
+	// Load environment variables from .env file if it exists
+	// In Docker, environment variables are provided via docker-compose.yml
+	_ = godotenv.Load("../.env") // Ignore error, env vars may come from docker-compose
+
 
 	// Initialize configuration
 	cfg := config.LoadConfig()
@@ -39,6 +39,9 @@ func main() {
 	// Setup router
 	router := mux.NewRouter()
 
+	// Root route
+	router.HandleFunc("/", rootHandler).Methods("GET")
+
 	// API routes
 	api := router.PathPrefix("/api").Subrouter()
 	api.HandleFunc("/companies/search", companyHandler.SearchCompanies).Methods("POST", "OPTIONS")
@@ -48,9 +51,6 @@ func main() {
 
 	// CORS middleware - read allowed origins from environment
 	corsOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
-	if corsOrigins == "" {
-		corsOrigins = "http://localhost:3000,http://localhost:3001"
-	}
 	allowedOrigins := strings.Split(corsOrigins, ",")
 	// Trim whitespace from each origin
 	for i, origin := range allowedOrigins {
@@ -67,9 +67,6 @@ func main() {
 
 	// Start server
 	port := os.Getenv("API_PORT")
-	if port == "" {
-		port = "8080"
-	}
 
 	log.Printf("Starting API server on port %s...", port)
 	log.Printf("API endpoints:")
@@ -81,6 +78,17 @@ func main() {
 	if err := http.ListenAndServe(":"+port, corsHandler.Handler(router)); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+// this function ensures the API is running and healthy to client
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{
+		"service": "Data-Co API",
+		"status": "running",
+		"message": "Welcome to the Data-Co API"
+	}`))
 }
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {
