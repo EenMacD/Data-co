@@ -100,7 +100,7 @@ services:
   data-ui:
     build: ./Data
     container_name: data-co-ui-flask
-    command: python bulk_ingestion/web/app.py
+    command: python staging/common/web/app.py
     ports:
       - "${DATA_UI_PORT}:${DATA_UI_PORT}"
     environment:
@@ -114,7 +114,7 @@ services:
       - PRODUCTION_DB_NAME=${PRODUCTION_DB_NAME}
       - PRODUCTION_DB_USER=${PRODUCTION_DB_USER}
       - PRODUCTION_DB_PASSWORD=${PRODUCTION_DB_PASSWORD}
-      - FLASK_APP=bulk_ingestion/web/app.py
+      - FLASK_APP=staging/common/web/app.py
       - FLASK_DEBUG=1
       - DATA_UI_PORT=${DATA_UI_PORT}
     depends_on:

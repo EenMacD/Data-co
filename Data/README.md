@@ -6,28 +6,20 @@ Data ingestion and processing service for Companies House data.
 
 ```
 Data/
-├── bulk_ingestion/     # NEW: Modern bulk data ingestion system
-│   ├── parsers/        # Data parsers (Company, PSC, Accounts)
-│   ├── services/       # Core services (discovery, download, loading)
-│   ├── web/            # Flask UI and API
-│   └── README.md       # Full documentation
+├── staging/            # Staging environment resources (Companies, PSC, Accounts)
+│   ├── common/         # Common utilities (connection, parsers, Web UI)
+│   │   ├── services/   # Shared services and base classes
+│   │   ├── web/        # Flask Ingestion UI
+│   │   └── schemas/    # Common SQL schemas
+│   ├── companies/      # Company-specific logic
+│   ├── psc/            # PSC-specific logic
+│   └── accounts/       # Accounts-specific logic
 │
-├── legacy/             # ARCHIVED: Old ingestion workflows (deprecated)
-│   ├── workflows/      # Old API and bulk workflows
-│   ├── collation/      # Old financials collation
-│   ├── config/         # Old YAML config system
-│   ├── scripts/        # Old run scripts
-│   └── README.md       # Legacy documentation
+├── production/         # Production environment resources
+│   ├── common/         # Merge logic and production schemas
+│   └── ...             # Mirrored structure for schemas
 │
-├── database/           # SHARED: Database schema and utilities
-│   ├── connection.py   # PostgreSQL connection pooling
-│   ├── inserters.py    # Database insert utilities
-│   ├── validators.py   # Data validation
-│   ├── migrations/     # Schema migrations
-│   └── apply_migrations.py  # Migration runner
-│
-├── config/             # SHARED: Configuration files
-├── docs/               # SHARED: Documentation
+├── .env.example        # Environment variables template
 ├── Dockerfile          # Docker build configuration
 ├── requirements.txt    # Python dependencies
 └── setup_databases.sh  # Database initialization script
@@ -35,17 +27,17 @@ Data/
 
 ## Quick Start
 
-### Using the Bulk Ingestion System (Recommended)
+### Using the Data Ingestion System (Recommended)
 
 1. **Start services:**
    ```bash
    docker-compose up db-staging data-ui -d
    ```
 
-2. **Apply database migration:**
+2. **Initialize Databases (if first time):**
    ```bash
    cd Data
-   python database/apply_migrations.py
+   bash setup_databases.sh
    ```
 
 3. **Access UI:**
@@ -58,34 +50,13 @@ Data/
    - Select files from panels → Add to Ingestion List
    - Start Ingestion → Monitor progress
 
-See [bulk_ingestion/README.md](bulk_ingestion/README.md) for full documentation.
-
-## What Changed?
-
-### ✅ New System (bulk_ingestion/)
-**Modern UI-driven bulk data ingestion with:**
-- Web UI for file selection
-- Monthly snapshot selection (first-of-month for PSC/Accounts)
-- PostgreSQL COPY bulk loading (100x faster)
-- Hash-based change detection and auto-update
-- Stop/resume capability
-- Real-time progress tracking via SSE
-- Auto-cleanup of downloaded files
-
-### ❌ Legacy System (legacy/)
-**Old workflow (ARCHIVED):**
-- Download entire bulk dataset
-- Enrich via API requests
-- Row-by-row database inserts (slow)
-- Complex YAML configuration
-- No UI, no progress tracking
-- No change detection
+See [staging/common/web/README.md](staging/common/web/README.md) for full documentation.
 
 ## Components
 
 ### Active Components
 
-#### bulk_ingestion/ (Primary System)
+#### staging/common/web/ (Primary System)
 Modern bulk data ingestion system. **Use this for all new work.**
 
 Features:
@@ -94,24 +65,15 @@ Features:
 - Real-time progress and logs
 - Efficient bulk loading with change detection
 
-[Full Documentation →](bulk_ingestion/README.md)
+[Full Documentation →](staging/common/web/README.md)
 
-#### database/ (Shared)
-Database connection and schema management used by all systems.
+#### staging/ & production/ (Core Logic)
+Organized by business domain (Companies, PSC, Accounts) and environment.
 
-Key files:
-- `connection.py` - Connection pooling for staging/production DBs
-- `migrations/` - Schema version control
-- `apply_migrations.py` - Migration runner
-
-### Archived Components
-
-#### legacy/ (Deprecated)
-Old ingestion workflows. **Do not use for new development.**
-
-Kept for reference purposes only.
-
-[Legacy Documentation →](legacy/README.md)
+- **Loaders**: `staging/*/services/loader.py` - Handles ETL for specific data types.
+- **Parsers**: `staging/*/parsers/*_parser.py` - specialized data parsing.
+- **Connection**: `staging/common/services/connection.py` - Database connection management.
+- **Merging**: `production/common/services/merge_to_production.py` - Promotes data from Staging to Production.
 
 ## Database Schema
 
@@ -126,7 +88,7 @@ Kept for reference purposes only.
 - `production_officers` - Officers and PSC data
 - `production_financials` - Financial accounts data
 - `production_merge_log` - Merge audit trail
-Same schema structure as staging, populated via `database/merge_to_production.py`
+Same schema structure as staging, populated via `production/common/services/merge_to_production.py`
 
 ## Environment Variables
 
@@ -169,7 +131,7 @@ docker-compose up db-staging data-ui -d
 ### Install Dependencies
 
 ```bash
-cd Data/bulk_ingestion/web
+cd Data
 pip install -r requirements.txt
 ```
 
@@ -177,13 +139,10 @@ pip install -r requirements.txt
 
 ```bash
 # Test database connection
-python database/connection.py
+python staging/common/services/connection.py
 
-# Test file discovery
-python -m bulk_ingestion.services.file_discovery
-
-# Apply migrations
-python database/apply_migrations.py
+# Test merge script (dry run)
+python production/common/services/merge_to_production.py --list
 ```
 
 ### Local Development (Without Docker)
@@ -193,7 +152,7 @@ python database/apply_migrations.py
 3. Run Flask app:
    ```bash
    cd Data
-   python bulk_ingestion/web/app.py
+   python staging/common/web/app.py
    ```
 
 ## Monitoring
@@ -213,60 +172,4 @@ docker logs -f data-co-db-staging
 ```bash
 # Connect to staging DB
 docker exec -it data-co-db-staging psql -U postgres -d staging
-
-# Check record counts
-SELECT COUNT(*) FROM staging_companies;
-SELECT COUNT(*) FROM staging_officers;
-SELECT COUNT(*) FROM staging_financials;
 ```
-
-## Troubleshooting
-
-### Services Won't Start
-```bash
-docker-compose down
-docker-compose up db-staging data-ui -d
-```
-
-### Database Connection Error
-- Check `.env` file exists with correct credentials
-- Verify database container is running: `docker ps`
-
-### Import Errors
-- Verify `sys.path` setup in Python files
-- Check relative imports are correct after reorganization
-
-### Port Conflicts
-- Check that ports {STAGING_DB_PORT}, {PRODUCTION_DB_PORT}, {DATA_UI_PORT} are not in use
-- Modify ports in `.env` if needed
-
-## Migration from Legacy
-
-If you have existing code using the legacy system:
-
-1. **Review** [legacy/README.md](legacy/README.md) for migration notes
-2. **Update** to use new bulk_ingestion system
-3. **Apply** database migration: `python database/apply_migrations.py`
-4. **Test** with small dataset first
-
-The new system is backwards-compatible with existing staging data.
-
-## Contributing
-
-When adding new features:
-
-1. Add to `bulk_ingestion/` (not legacy/)
-2. Update relevant README files
-3. Add database migrations to `database/migrations/`
-4. Update `bulk_ingestion/web/requirements.txt` if new dependencies
-5. Test with Docker Compose setup
-
-## Support
-
-- **Bulk Ingestion Issues** - See [bulk_ingestion/README.md](bulk_ingestion/README.md)
-- **Database Issues** - Check [database/README.md](database/README.md)
-- **Legacy Code Questions** - See [legacy/README.md](legacy/README.md)
-
-## License
-
-Internal project - not for public distribution.

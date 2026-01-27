@@ -1,0 +1,21 @@
+root = true
+
+# All files
+[*]
+indent_style = space
+indent_size = 4
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# Shell scripts - Force LF
+[*.{sh,bash}]
+end_of_line = lf
+
+# Docker files - Force LF
+[Dockerfile]
+end_of_line = lf
+
+# Windows scripts - Force CRLF
+[*.{bat,cmd,ps1}]
+end_of_line = crlf

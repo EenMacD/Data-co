@@ -66,6 +66,9 @@ create_database() {
         read -p "  Do you want to drop and recreate it? (y/N): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo "  Disconnecting active sessions..."
+            PGPASSWORD=$db_password psql -h "$db_host" -p "$db_port" -U "$db_admin_user" -d "postgres" -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$db_name' AND pid <> pg_backend_pid();" > /dev/null
+
             echo "  Dropping database '$db_name'..."
             PGPASSWORD=$db_password dropdb -h "$db_host" -p "$db_port" -U "$db_admin_user" "$db_name" || echo "  (ignoring error)"
             echo "  Creating database '$db_name'..."
@@ -122,7 +125,7 @@ if [ -z "$STAGING_DB_NAME" ] || [ -z "$STAGING_DB_USER" ]; then
 fi
 
 create_database "$STAGING_DB_NAME" "$STAGING_DB_USER" "$STAGING_DB_HOST" "$STAGING_DB_PORT" "$STAGING_DB_PASSWORD" "$STAGING_DB_USER"
-bash database/apply_staging.sh
+bash staging/common/schemas/apply_staging.sh
 
 echo ""
 
@@ -140,7 +143,7 @@ if [ -z "$PRODUCTION_DB_NAME" ] || [ -z "$PRODUCTION_DB_USER" ]; then
 fi
 
 create_database "$PRODUCTION_DB_NAME" "$PRODUCTION_DB_USER" "$PRODUCTION_DB_HOST" "$PRODUCTION_DB_PORT" "$PRODUCTION_DB_PASSWORD" "$PRODUCTION_DB_USER"
-bash database/apply_production.sh
+bash production/common/schemas/apply_production.sh
 
 echo ""
 
@@ -152,7 +155,7 @@ echo "TESTING CONNECTIONS"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 echo "→ Testing Python database connections..."
-python database/connection.py
+python staging/common/services/connection.py
 
 echo ""
 
@@ -169,11 +172,10 @@ echo "  STAGING:    $STAGING_DB_NAME"
 echo "  PRODUCTION: $PRODUCTION_DB_NAME"
 echo ""
 echo "Next steps:"
-echo ""
 echo "  1. Apply database migrations:"
-echo "     docker exec -it data-co-worker python database/apply_migrations.py"
+echo "     Running setup_databases.sh is sufficient for now."
 echo ""
-echo "  2. Access the Bulk Ingestion UI:"
+echo "  2. Access the Data Ingestion UI:"
 echo "     http://localhost:\${DATA_UI_PORT}"
 echo ""
 echo "  3. Use the UI to:"
@@ -182,7 +184,7 @@ echo "     - Select files from panels → Add to Ingestion List"
 echo "     - Start Ingestion → Monitor progress"
 echo ""
 echo "  4. Merge data to production:"
-echo "     docker exec -it data-co-worker python database/merge_to_production.py --list"
+echo "     docker exec -it data-co-worker python production/common/services/merge_to_production.py --list"
 echo ""
-echo "For detailed documentation, see bulk_ingestion/README.md"
+echo "For detailed documentation, see data_ingestion/README.md"
 echo ""
