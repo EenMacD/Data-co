@@ -4,13 +4,14 @@ services:
     image: postgres:15
     container_name: data-co-db-staging
     environment:
-      POSTGRES_USER: ${STAGING_DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${STAGING_DB_PASSWORD:-password}
-      POSTGRES_DB: ${STAGING_DB_NAME:-staging}
+      POSTGRES_USER: ${STAGING_DB_USER}
+      POSTGRES_PASSWORD: ${STAGING_DB_PASSWORD}
+      POSTGRES_DB: ${STAGING_DB_NAME}
+    command: -p ${STAGING_DB_PORT}
     volumes:
-      - postgres-staging-data:/var/lib/postgresql/data
+      - ${STAGING_DB_VOLUME}:/var/lib/postgresql/data
     ports:
-      - "${STAGING_DB_PORT:-5432}:5432"
+      - "${STAGING_DB_PORT}:${STAGING_DB_PORT}"
     networks:
       - data-co-network
 
@@ -19,13 +20,14 @@ services:
     image: postgres:15
     container_name: data-co-db-production
     environment:
-      POSTGRES_USER: ${PRODUCTION_DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${PRODUCTION_DB_PASSWORD:-password}
-      POSTGRES_DB: ${PRODUCTION_DB_NAME:-production}
+      POSTGRES_USER: ${PRODUCTION_DB_USER}
+      POSTGRES_PASSWORD: ${PRODUCTION_DB_PASSWORD}
+      POSTGRES_DB: ${PRODUCTION_DB_NAME}
+    command: -p ${PRODUCTION_DB_PORT}
     volumes:
-      - postgres-production-data:/var/lib/postgresql/data
+      - ${PRODUCTION_DB_VOLUME}:/var/lib/postgresql/data
     ports:
-      - "${PRODUCTION_DB_PORT:-5433}:5432"
+      - "${PRODUCTION_DB_PORT}:${PRODUCTION_DB_PORT}"
     networks:
       - data-co-network
 
@@ -34,21 +36,21 @@ services:
     build: ./API
     container_name: data-co-api
     ports:
-      - "${API_PORT:-8080}:8080"
+      - "${API_PORT}:${API_PORT}"
     environment:
       - STAGING_DB_HOST=db-staging
-      - STAGING_DB_PORT=5432
-      - STAGING_DB_NAME=${STAGING_DB_NAME:-staging}
-      - STAGING_DB_USER=${STAGING_DB_USER:-postgres}
-      - STAGING_DB_PASSWORD=${STAGING_DB_PASSWORD:-password}
+      - STAGING_DB_PORT=${STAGING_DB_PORT}
+      - STAGING_DB_NAME=${STAGING_DB_NAME}
+      - STAGING_DB_USER=${STAGING_DB_USER}
+      - STAGING_DB_PASSWORD=${STAGING_DB_PASSWORD}
       - STAGING_DB_SSLMODE=disable
       - PRODUCTION_DB_HOST=db-production
-      - PRODUCTION_DB_PORT=5432
-      - PRODUCTION_DB_NAME=${PRODUCTION_DB_NAME:-production}
-      - PRODUCTION_DB_USER=${PRODUCTION_DB_USER:-postgres}
-      - PRODUCTION_DB_PASSWORD=${PRODUCTION_DB_PASSWORD:-password}
-      - API_PORT=8080
-      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001}
+      - PRODUCTION_DB_PORT=${PRODUCTION_DB_PORT}
+      - PRODUCTION_DB_NAME=${PRODUCTION_DB_NAME}
+      - PRODUCTION_DB_USER=${PRODUCTION_DB_USER}
+      - PRODUCTION_DB_PASSWORD=${PRODUCTION_DB_PASSWORD}
+      - API_PORT=${API_PORT}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
     depends_on:
       - db-staging
       - db-production
@@ -60,12 +62,12 @@ services:
     build:
       context: ./UI
       args:
-        - NEXT_PUBLIC_API_URL=http://${HOST_IP:-localhost}:${API_PORT:-8080}/api
+        - NEXT_PUBLIC_API_URL=${API_URL:-http://${HOST_IP}:${API_PORT}/api}
     container_name: data-co-ui
     ports:
-      - "${UI_PORT:-3000}:3000"
+      - "${UI_PORT}:${UI_PORT}"
     environment:
-      - NEXT_PUBLIC_API_URL=http://${HOST_IP:-localhost}:${API_PORT:-8080}/api
+      - NEXT_PUBLIC_API_URL=${API_URL:-http://${HOST_IP}:${API_PORT}/api}
     depends_on:
       - api
     networks:
@@ -77,15 +79,15 @@ services:
     container_name: data-co-worker
     environment:
       - STAGING_DB_HOST=db-staging
-      - STAGING_DB_PORT=5432
-      - STAGING_DB_NAME=${STAGING_DB_NAME:-staging}
-      - STAGING_DB_USER=${STAGING_DB_USER:-postgres}
-      - STAGING_DB_PASSWORD=${STAGING_DB_PASSWORD:-password}
+      - STAGING_DB_PORT=${STAGING_DB_PORT}
+      - STAGING_DB_NAME=${STAGING_DB_NAME}
+      - STAGING_DB_USER=${STAGING_DB_USER}
+      - STAGING_DB_PASSWORD=${STAGING_DB_PASSWORD}
       - PRODUCTION_DB_HOST=db-production
-      - PRODUCTION_DB_PORT=5432
-      - PRODUCTION_DB_NAME=${PRODUCTION_DB_NAME:-production}
-      - PRODUCTION_DB_USER=${PRODUCTION_DB_USER:-postgres}
-      - PRODUCTION_DB_PASSWORD=${PRODUCTION_DB_PASSWORD:-password}
+      - PRODUCTION_DB_PORT=${PRODUCTION_DB_PORT}
+      - PRODUCTION_DB_NAME=${PRODUCTION_DB_NAME}
+      - PRODUCTION_DB_USER=${PRODUCTION_DB_USER}
+      - PRODUCTION_DB_PASSWORD=${PRODUCTION_DB_PASSWORD}
     depends_on:
       - db-staging
       - db-production
@@ -98,27 +100,38 @@ services:
   data-ui:
     build: ./Data
     container_name: data-co-ui-flask
-    command: python bulk_ingestion/web/app.py
+    command: python staging/common/web/app.py
     ports:
-      - "${DATA_UI_PORT:-5001}:5000"
+      - "${DATA_UI_PORT}:${DATA_UI_PORT}"
     environment:
       - STAGING_DB_HOST=db-staging
-      - STAGING_DB_PORT=5432
-      - STAGING_DB_NAME=${STAGING_DB_NAME:-staging}
-      - STAGING_DB_USER=${STAGING_DB_USER:-postgres}
-      - STAGING_DB_PASSWORD=${STAGING_DB_PASSWORD:-password}
+      - STAGING_DB_PORT=${STAGING_DB_PORT}
+      - STAGING_DB_NAME=${STAGING_DB_NAME}
+      - STAGING_DB_USER=${STAGING_DB_USER}
+      - STAGING_DB_PASSWORD=${STAGING_DB_PASSWORD}
       - PRODUCTION_DB_HOST=db-production
-      - PRODUCTION_DB_PORT=5432
-      - PRODUCTION_DB_NAME=${PRODUCTION_DB_NAME:-production}
-      - PRODUCTION_DB_USER=${PRODUCTION_DB_USER:-postgres}
-      - PRODUCTION_DB_PASSWORD=${PRODUCTION_DB_PASSWORD:-password}
-      - FLASK_APP=bulk_ingestion/web/app.py
+      - PRODUCTION_DB_PORT=${PRODUCTION_DB_PORT}
+      - PRODUCTION_DB_NAME=${PRODUCTION_DB_NAME}
+      - PRODUCTION_DB_USER=${PRODUCTION_DB_USER}
+      - PRODUCTION_DB_PASSWORD=${PRODUCTION_DB_PASSWORD}
+      - FLASK_APP=staging/common/web/app.py
       - FLASK_DEBUG=1
+      - DATA_UI_PORT=${DATA_UI_PORT}
     depends_on:
       - db-staging
       - db-production
     volumes:
       - ./Data:/app
+    networks:
+      - data-co-network
+
+  # 7. Cloudflare Tunnel
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: data-co-tunnel
+    profiles: ["hosting"]
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN}
+    restart: unless-stopped
     networks:
       - data-co-network
 
@@ -129,3 +142,5 @@ networks:
 volumes:
   postgres-staging-data:
   postgres-production-data:
+
+

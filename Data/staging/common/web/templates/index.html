@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Companies House Bulk Data Ingestion</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Companies House Bulk Data Ingestion</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 1. Date Range Selection -->
+        <div class="card">
+            <h2>1. Select Date Range</h2>
+            <div class="date-range">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate">
+                </div>
+                <button id="discoverBtn" class="btn-success">Discover Files</button>
+            </div>
+            <div class="help-text">Select date range to discover available monthly snapshot files from Companies House</div>
+        </div>
+
+        <!-- 2. File Selection Panels -->
+        <div class="card" id="fileSelectionCard" style="display: none;">
+            <h2>2. Select Files to Ingest</h2>
+            <div class="file-panels">
+                <!-- Company Data Panel -->
+                <div class="file-panel">
+                    <h3>Company Data</h3>
+                    <div class="checkbox-select-all">
+                        <input type="checkbox" id="selectAllCompany">
+                        <label for="selectAllCompany">Select All</label>
+                    </div>
+                    <div class="file-list" id="companyFileList">
+                        <div class="empty-state">Click "Discover Files" to load available files</div>
+                    </div>
+                </div>
+
+                <!-- PSC Data Panel -->
+                <div class="file-panel">
+                    <h3>PSC Data</h3>
+                    <div class="checkbox-select-all">
+                        <input type="checkbox" id="selectAllPSC">
+                        <label for="selectAllPSC">Select All</label>
+                    </div>
+                    <div class="file-list" id="pscFileList">
+                        <div class="empty-state">Click "Discover Files" to load available files</div>
+                    </div>
+                </div>
+
+                <!-- Accounts Data Panel -->
+                <div class="file-panel">
+                    <h3>Accounts Data</h3>
+                    <div class="checkbox-select-all">
+                        <input type="checkbox" id="selectAllAccounts">
+                        <label for="selectAllAccounts">Select All</label>
+                    </div>
+                    <div class="file-list" id="accountsFileList">
+                        <div class="empty-state">Click "Discover Files" to load available files</div>
+                    </div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button id="addToListBtn" class="btn-success">Add Selected to Ingestion List</button>
+            </div>
+        </div>
+
+        <!-- 3. Selected Files List -->
+        <div class="card" id="selectedFilesCard" style="display: none;">
+            <h2>3. Ingestion List</h2>
+            <div id="selectedFilesContainer">
+                <table class="selected-files-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Filename</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="selectedFilesBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="button-group">
+                <button id="clearListBtn" class="btn-danger">Clear List</button>
+                <button id="startIngestionBtn" class="btn-success" style="margin-left: auto;">Start Ingestion</button>
+            </div>
+        </div>
+
+        <!-- 4. Status & Progress -->
+        <div class="card">
+            <h2>Status & Progress</h2>
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <span id="statusBadge" class="status-badge status-idle">Idle</span>
+                <span id="statusText">Ready to start</span>
+            </div>
+
+            <div class="button-group">
+                <button id="stopIngestionBtn" class="btn-danger" style="display: none;">Stop After Current File</button>
+                <button id="resumeIngestionBtn" class="btn-warning" style="display: none;">Resume Ingestion</button>
+                <button id="refreshStatusBtn" style="margin-left: auto;">Refresh Status</button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar" id="progressBar">0%</div>
+                </div>
+                <div class="progress-info">
+                    <span id="progressText">Waiting to start...</span>
+                    <span id="currentFile"></span>
+                </div>
+            </div>
+
+            <!-- Database Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalCompanies">0</div>
+                    <div class="stat-label">Total Companies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalOfficers">0</div>
+                    <div class="stat-label">Total Officers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalFinancials">0</div>
+                    <div class="stat-label">Total Financials</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Live Logs -->
+        <div class="card">
+            <h2>Live Logs</h2>
+            <div id="logs"></div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal for Start Ingestion -->
+    <div id="startIngestionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Start Ingestion</h3>
+                <button class="modal-close" onclick="closeStartModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to start the ingestion process?</p>
+                <p><strong id="modalFileCount"></strong></p>
+                <p style="color: #7f8c8d; font-size: 14px; margin-top: 10px;">This will begin processing the selected files and may take some time to complete.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeStartModal()">Cancel</button>
+                <button class="btn-success" onclick="confirmStartIngestion()">Start Ingestion</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal for Stop Ingestion -->
+    <div id="stopIngestionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Stop Ingestion</h3>
+                <button class="modal-close" onclick="closeStopModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to stop the ingestion process?</p>
+                <p style="color: #7f8c8d; font-size: 14px; margin-top: 10px;">The current file will finish processing before stopping. You can resume later from where it stopped.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeStopModal()">Cancel</button>
+                <button class="btn-danger" onclick="confirmStopIngestion()">Stop After Current File</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
