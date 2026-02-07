@@ -1,6 +1,6 @@
-import SearchBar from "@/app/common/components/SearchBar/SearchBar";
+import SearchBar from "@/app/common/components/SearchBar";
 import styles from "./DataUtilSection.module.css";
-import CustomButton from "@/app/common/components/Buttons/CustomButton/CustomButton";
+import CustomButton from "@/app/common/components/Buttons/CustomButton";
 import { DownloadIcon, Menu } from "lucide-react";
 
 export default function DataUtilSection() {

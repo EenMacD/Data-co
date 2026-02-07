@@ -1,4 +1,4 @@
-import DataUtilSection from "./DataUtilSection/DataUtilSection";
+import DataUtilSection from "./DataUtilSection";
 import styles from "./DataSection.module.css";
 
 export default function DataSection() {

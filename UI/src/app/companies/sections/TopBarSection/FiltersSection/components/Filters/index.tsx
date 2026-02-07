@@ -1,5 +1,5 @@
-import CustomButton from "@/app/common/components/Buttons/CustomButton/CustomButton";
-import FilterItem from "./FilterItem/FilterItem";
+import CustomButton from "@/app/common/components/Buttons/CustomButton";
+import FilterItem from "./FilterItem";
 import styles from "./Filters.module.css";
 import { ListFilterPlus } from "lucide-react";
 

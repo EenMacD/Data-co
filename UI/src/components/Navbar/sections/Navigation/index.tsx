@@ -1,6 +1,6 @@
 import styles from "./Navigation.module.css";
-import NavigationItem from "./NavigationItem/NavigationItem";
-import NavSectionHeading from "../../components/NavSectionHeading/NavSectionHeading";
+import NavigationItem from "./NavigationItem";
+import NavSectionHeading from "../../components/NavSectionHeading";
 import { House, Building2, Users } from "lucide-react";
 
 export default function Navigation() {

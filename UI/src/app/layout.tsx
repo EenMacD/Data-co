@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { fontsClassNames } from "@/fonts/fonts";
 import "@/fonts/fonts.css";
 import "./globals.css";
-import Navbar from "@/components/Navbar/Navbar";
+import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
     title: "Create Next App",

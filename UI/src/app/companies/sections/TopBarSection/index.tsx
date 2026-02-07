@@ -1,5 +1,5 @@
-import HeadingSection from "./HeadingSection/HeadingSection";
-import FilterSection from "./FiltersSection/FilterSection";
+import HeadingSection from "./HeadingSection";
+import FilterSection from "./FiltersSection";
 import styles from "./TopBarSection.module.css";
 
 export default function TopBarSection() {

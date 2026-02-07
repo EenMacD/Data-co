@@ -1,6 +1,6 @@
-import FilterLabel from "../../common/FilterLabel/FilterLabel";
+import FilterLabel from "../../common/FilterLabel";
 import styles from "./FilterItem.module.css";
-import CustomButton from "@/app/common/components/Buttons/CustomButton/CustomButton";
+import CustomButton from "@/app/common/components/Buttons/CustomButton";
 
 export default function FilterItem({
     label,

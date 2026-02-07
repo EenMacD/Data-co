@@ -1,4 +1,4 @@
-import NavSectionHeading from "../../components/NavSectionHeading/NavSectionHeading";
+import NavSectionHeading from "../../components/NavSectionHeading";
 
 export default function Utilities() {
     return (

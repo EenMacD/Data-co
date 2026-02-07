@@ -1,6 +1,6 @@
 import styles from "./PageUtil.module.css";
-import PageUtilSettingsButton from "./components/PageUtilSettingsButton/PageUtilSettingsButton";
-import PageUtilProfileButton from "./components/PageUtilProfileButton/PageUtilProfileButton";
+import PageUtilSettingsButton from "./components/PageUtilSettingsButton";
+import PageUtilProfileButton from "./components/PageUtilProfileButton";
 
 export default function PageUtil() {
     return (

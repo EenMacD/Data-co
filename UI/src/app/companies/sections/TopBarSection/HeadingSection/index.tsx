@@ -1,6 +1,6 @@
-import PageTitle from "./components/PageTitle/PageTitle";
-import SearchBar from "../../../../common/components/SearchBar/SearchBar";
-import PageUtil from "./components/PageUtil/PageUtil";
+import PageTitle from "./components/PageTitle";
+import SearchBar from "../../../../common/components/SearchBar";
+import PageUtil from "./components/PageUtil";
 import styles from "./HeadingSection.module.css";
 
 export default function HeadingSection() {
