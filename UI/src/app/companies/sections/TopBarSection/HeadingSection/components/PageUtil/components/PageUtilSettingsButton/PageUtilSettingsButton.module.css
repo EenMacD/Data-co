@@ -1,0 +1,16 @@
+.container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 4.6rem;
+    height: 4.6rem;
+    border-radius: 50%;
+    background-color: var(--card);
+    box-shadow: 0 0 0 1px var(--input);
+    cursor: pointer;
+}
+
+.icon {
+    color: var(--primary);
+}

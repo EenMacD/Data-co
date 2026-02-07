@@ -1,0 +1,9 @@
+.topBarSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--margin-md);
+    padding: var(--margin-md) var(--margin-md);
+
+    box-shadow: 0 0.4rem 2rem 3px
+        color-mix(in srgb, var(--primary), transparent 95%);
+}

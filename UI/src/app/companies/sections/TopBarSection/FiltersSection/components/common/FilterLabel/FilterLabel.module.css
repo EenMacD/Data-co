@@ -1,0 +1,7 @@
+.label {
+    font-size: var(--medium-font);
+    font-weight: 700;
+    color: var(--primary-light);
+    text-transform: capitalize;
+    margin-bottom: var(--margin-xs);
+}

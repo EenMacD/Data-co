@@ -1,0 +1,25 @@
+.DataUtilSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.searchWrapper {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: var(--margin-sm);
+}
+
+.utilWrapper {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    gap: var(--margin-sm);
+}
+
+.resutlsText {
+    font-size: var(--medium-font);
+    font-weight: 500;
+    color: var(--primary-light);
+}

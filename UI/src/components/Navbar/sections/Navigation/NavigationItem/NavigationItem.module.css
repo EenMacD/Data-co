@@ -1,0 +1,33 @@
+.navItem {
+    font-size: var(--mediumlarge-font-size);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: var(--card);
+    width: 20rem;
+    padding: 1rem 2rem;
+    border-radius: var(--rounded-sm);
+}
+
+.icon svg {
+    width: 2rem;
+    height: 2rem;
+    color: var(--primary);
+}
+
+.title {
+    margin-left: 1rem;
+    font-size: 1.6rem;
+    font-weight: 500;
+}
+
+.navItem:hover,
+.navItem.active {
+    color: var(--accent);
+    background-color: var(--secondary);
+}
+
+.navItem:is(:hover, .active) :is(.title, .icon svg) {
+    color: var(--surface);
+}
