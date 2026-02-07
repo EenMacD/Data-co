@@ -1,4 +1,4 @@
-import styles from "./PageUtil.module.css";
+import styles from "./styles.module.css";
 import PageUtilSettingsButton from "./components/PageUtilSettingsButton";
 import PageUtilProfileButton from "./components/PageUtilProfileButton";
 

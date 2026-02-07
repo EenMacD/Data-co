@@ -1,6 +1,6 @@
 import CustomButton from "@/app/common/components/Buttons/CustomButton";
 import FilterItem from "./FilterItem";
-import styles from "./Filters.module.css";
+import styles from "./styles.module.css";
 import { ListFilterPlus } from "lucide-react";
 
 export default function Filters() {

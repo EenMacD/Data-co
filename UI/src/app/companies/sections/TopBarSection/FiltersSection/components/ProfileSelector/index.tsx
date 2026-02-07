@@ -1,5 +1,5 @@
 import FilterLabel from "../common/FilterLabel";
-import styles from "./ProfileSelector.module.css";
+import styles from "./styles.module.css";
 import { ChevronDown } from "lucide-react";
 import CustomButton from "@/app/common/components/Buttons/CustomButton";
 

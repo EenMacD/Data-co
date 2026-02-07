@@ -1,5 +1,5 @@
 import SearchBar from "@/app/common/components/SearchBar";
-import styles from "./DataUtilSection.module.css";
+import styles from "./styles.module.css";
 import CustomButton from "@/app/common/components/Buttons/CustomButton";
 import { DownloadIcon, Menu } from "lucide-react";
 

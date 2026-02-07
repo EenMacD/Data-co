@@ -1,4 +1,4 @@
-import styles from "./CustomButton.module.css";
+import styles from "./styles.module.css"; // "./CustomButton.module.css";
 
 export default function CustomButton({
     text,

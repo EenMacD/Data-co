@@ -1,5 +1,5 @@
 import { Settings } from "lucide-react";
-import styles from "./PageUtilSettingsButton.module.css";
+import styles from "./styles.module.css";
 
 export default function PageUtilSettingsButton() {
     return (

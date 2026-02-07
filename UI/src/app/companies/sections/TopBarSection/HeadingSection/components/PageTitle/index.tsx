@@ -1,4 +1,4 @@
-import styles from "./PageTitle.module.css";
+import styles from "./styles.module.css";
 import { Building2 } from "lucide-react";
 
 export default function PageTitle() {

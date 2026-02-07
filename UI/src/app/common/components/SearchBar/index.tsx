@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import styles from "./SearchBar.module.css";
+import styles from "./styles.module.css";
 
 export default function SearchBar({
     placeholder,

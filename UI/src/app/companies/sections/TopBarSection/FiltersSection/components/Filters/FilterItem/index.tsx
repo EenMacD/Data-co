@@ -1,5 +1,5 @@
 import FilterLabel from "../../common/FilterLabel";
-import styles from "./FilterItem.module.css";
+import styles from "./styles.module.css";
 import CustomButton from "@/app/common/components/Buttons/CustomButton";
 
 export default function FilterItem({

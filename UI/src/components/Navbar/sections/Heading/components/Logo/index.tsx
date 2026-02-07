@@ -1,4 +1,4 @@
-import styles from './Logo.module.css'
+import styles from "./styles.module.css"; // './Logo.module.css'
 
 export default function Logo() {
     return (
@@ -6,5 +6,5 @@ export default function Logo() {
             <span className={styles.logo}>Q</span>
             <h1 className={styles.title}>Quantra</h1>
         </div>
-    )
+    );
 }

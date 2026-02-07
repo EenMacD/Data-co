@@ -1,4 +1,4 @@
-import styles from "./NavSectionHeading.module.css";
+import styles from "./styles.module.css";
 
 export default function NavSectionHeading({ title }: { title: string }) {
     return (

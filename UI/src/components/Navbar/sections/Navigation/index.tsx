@@ -1,4 +1,4 @@
-import styles from "./Navigation.module.css";
+import styles from "./styles.module.css";
 import NavigationItem from "./NavigationItem";
 import NavSectionHeading from "../../components/NavSectionHeading";
 import { House, Building2, Users } from "lucide-react";

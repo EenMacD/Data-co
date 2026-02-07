@@ -1,5 +1,5 @@
 import Image from "next/image";
-import styles from "./PageUtilProfileButton.module.css";
+import styles from "./styles.module.css";
 
 export default function PageUtilProfileButton() {
     return (
