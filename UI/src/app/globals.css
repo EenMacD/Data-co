@@ -6,6 +6,7 @@
     --danger: #ff0000;
     /* === light */
     --primary-light: rgba(19, 65, 91, 0.75);
+    --primary-dark: #0a2a3b; /* Dark Slate Blue */
 
     /* ====== Background Colors */
     --surface: #ffffff; /* Main application background */
@@ -28,8 +29,9 @@
     --margin-xl: 6.4rem;
 
     /* ====== padding */
+    --padding-xs: 1.4rem;
     --padding-sm: 1.6rem;
-    --padding-md: 2.4rem;
+    --padding-md: 2rem;
     --padding-lg: 3.2rem;
 }
 
@@ -52,7 +54,7 @@ body {
 
 main {
     flex: 1;
-    width: 100%;
+    min-width: 0; /* Allow main to shrink below content width */
     height: 100%;
 }
 

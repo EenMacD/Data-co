@@ -1,5 +1,5 @@
 .label {
-    font-size: var(--medium-font);
+    font-size: var(--font-sm);
     font-weight: 700;
     color: var(--primary-light);
     text-transform: capitalize;

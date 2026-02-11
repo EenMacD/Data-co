@@ -1,0 +1,29 @@
+.container {
+    display: flex;
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    flex-direction: column; /* Changed to column to stack footer at bottom */
+}
+
+.resultsWrapper {
+    flex: 1;
+    overflow: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    margin-bottom: var(--margin-md);
+}
+
+.resultsWrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.table {
+    width: 100%;
+    white-space: nowrap;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Removed sidePanel style as it is no longer used */

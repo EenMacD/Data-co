@@ -6,7 +6,7 @@
 
     width: min-content;
     height: 5rem;
-    padding: var(--padding-sm) var(--padding-md);
+    padding: var(--padding-xs);
     border-radius: var(--rounded-sm);
     background-color: var(--bg-color);
     display: flex;
@@ -24,7 +24,7 @@
 }
 
 .text {
-    font-size: var(--small-font);
+    font-size: var(--font-xs);
     color: var(--text-color);
     text-transform: uppercase;
     white-space: nowrap;
@@ -39,6 +39,10 @@
     align-items: center;
     justify-content: center;
     color: var(--icon-color);
+}
+
+.iconOnly {
+    transform: scale(1.2);
 }
 
 .round {
