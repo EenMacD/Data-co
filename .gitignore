@@ -28,3 +28,5 @@ build/
 # company data files
 Data/project_data/glasgow_all_companies/raw/
 
+# legacy
+legacy-API/
