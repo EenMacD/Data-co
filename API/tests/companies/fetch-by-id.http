@@ -1,1 +1,1 @@
-GET http://localhost:8080/companies/
+GET http://localhost:8080/api/companies/SC036386
