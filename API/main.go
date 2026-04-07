@@ -24,12 +24,13 @@ func main() {
 
 	// Initialize database connection
 	db, err := database.NewConnection(cfg.Database)
-	helpers.HandleError("Failed to connect to database", err)
+	helpers.HError("Failed to connect to database", err)
 	defer db.Close()
 
 	// Initialize handlers
 	companyHandler := handlers.NewCompanyHandler(db)
 
+	// to group route under companies
 	companies := router.Group("/api/companies")
 
 	companies.GET("/:id", companyHandler.FetchCompany)
