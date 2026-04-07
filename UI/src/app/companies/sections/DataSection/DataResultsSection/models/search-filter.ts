@@ -11,4 +11,6 @@ export default interface CompanySearchFilters {
     debtLevel?: string;
     limit?: number;
     offset?: number;
+    orderBy?: string;
+    includeTotal?: boolean;
 }

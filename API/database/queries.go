@@ -107,12 +107,12 @@ func (qb *QueryBuilder) AddRevenueFilter(revenueRange string) {
 	}
 
 	ranges := map[string]struct{ min, max float64 }{
-		"0-1m":      {0, 1_000_000},
-		"1m-10m":    {1_000_000, 10_000_000},
-		"10m-50m":   {10_000_000, 50_000_000},
-		"50m-100m":  {50_000_000, 100_000_000},
-		"100m+":     {100_000_000, 0},
-		"50m+":      {50_000_000, 0},
+		"0-1m":     {0, 1_000_000},
+		"1m-10m":   {1_000_000, 10_000_000},
+		"10m-50m":  {10_000_000, 50_000_000},
+		"50m-100m": {50_000_000, 100_000_000},
+		"100m+":    {100_000_000, 0},
+		"50m+":     {50_000_000, 0},
 	}
 
 	if r, ok := ranges[revenueRange]; ok {
@@ -226,11 +226,12 @@ func (qb *QueryBuilder) AddCompanyAgeFilter(ageRange string) {
 
 // AddCompanyStatusFilter filters by company status
 func (qb *QueryBuilder) AddCompanyStatusFilter(status string) {
-	if status == "" || status == "all" {
+	normalizedStatus := strings.ToLower(strings.TrimSpace(status))
+	if normalizedStatus == "" || normalizedStatus == "all" {
 		return
 	}
 
-	qb.addCondition("LOWER(c.company_status) = LOWER($%d)", status)
+	qb.addCondition("c.company_status = $%d", normalizedStatus)
 }
 
 // AddNetAssetsFilter filters by net assets/net worth
@@ -245,10 +246,10 @@ func (qb *QueryBuilder) AddNetAssetsFilter(netAssetsRange string) {
 	}
 
 	ranges := map[string]struct{ min, max float64 }{
-		"0-100k":   {0, 100_000},
-		"100k-1m":  {100_000, 1_000_000},
-		"1m-10m":   {1_000_000, 10_000_000},
-		"10m+":     {10_000_000, 0},
+		"0-100k":  {0, 100_000},
+		"100k-1m": {100_000, 1_000_000},
+		"1m-10m":  {1_000_000, 10_000_000},
+		"10m+":    {10_000_000, 0},
 	}
 
 	if r, ok := ranges[netAssetsRange]; ok {
@@ -289,7 +290,7 @@ func (qb *QueryBuilder) AddDebtLevelFilter(debtLevel string) {
 }
 
 // AddSearchTerm adds full-text search on company name
-func (qb *QueryBuilder) AddSearchTerm(searchTerm string)  {
+func (qb *QueryBuilder) AddSearchTerm(searchTerm string) {
 	if searchTerm == "" {
 		return
 	}

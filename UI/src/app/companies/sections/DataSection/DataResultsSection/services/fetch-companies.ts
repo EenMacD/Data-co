@@ -14,6 +14,8 @@ export async function searchCompanies(
         body: JSON.stringify(filters),
     });
 
+    console.log(JSON.stringify(filters));
+
     if (!response.ok) {
         throw new Error(`API error: ${response.statusText}`);
     }

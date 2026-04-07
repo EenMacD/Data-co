@@ -40,11 +40,16 @@ func (h *CompanyHandler) SearchCompanies(c *gin.Context) {
 	if filters.CompanyStatus == "" {
 		filters.CompanyStatus = "active"
 	}
+	includeTotal := filters.IncludeTotal == nil || *filters.IncludeTotal
+	queryFilters := filters
+	if !includeTotal {
+		queryFilters.Limit = filters.Limit + 1
+	}
 
 	// Build query
-	query, args := database.BuildCompanyQuery(filters)
+	query, args := database.BuildCompanyQuery(queryFilters)
 
-	log.Printf("Executing search query with filters: %+v", filters)
+	log.Printf("Executing search query with filters: %+v (includeTotal=%t)", queryFilters, includeTotal)
 
 	// Execute query
 	rows, err := h.db.Query(query, args...)
@@ -59,7 +64,7 @@ func (h *CompanyHandler) SearchCompanies(c *gin.Context) {
 	defer rows.Close()
 
 	// Parse results
-	companies := make([]models.Company, 0)
+	companies := make([]models.Company, 0, queryFilters.Limit)
 	for rows.Next() {
 		var c models.Company
 		err := rows.Scan(
@@ -96,13 +101,23 @@ func (h *CompanyHandler) SearchCompanies(c *gin.Context) {
 		return
 	}
 
-	// Get total count
-	countQuery, countArgs := database.BuildCompanyCountQuery(filters)
 	var total int
-	err = h.db.QueryRow(countQuery, countArgs...).Scan(&total)
-	if err != nil {
-		log.Printf("Count query error: %v", err)
-		total = len(companies) // Fallback to returned count
+	hasMore := false
+	if !includeTotal && len(companies) > filters.Limit {
+		hasMore = true
+		companies = companies[:filters.Limit]
+	}
+
+	if includeTotal {
+		countQuery, countArgs := database.BuildCompanyCountQuery(filters)
+		err = h.db.QueryRow(countQuery, countArgs...).Scan(&total)
+		if err != nil {
+			log.Printf("Count query error: %v", err)
+			total = len(companies) // Fallback to returned count
+		}
+		hasMore = filters.Offset+len(companies) < total
+	} else if !hasMore {
+		total = filters.Offset + len(companies)
 	}
 
 	// Build response
@@ -111,7 +126,7 @@ func (h *CompanyHandler) SearchCompanies(c *gin.Context) {
 		Total:     total,
 		Limit:     filters.Limit,
 		Offset:    filters.Offset,
-		HasMore:   filters.Offset+len(companies) < total,
+		HasMore:   hasMore,
 	}
 
 	log.Printf("Returning %d companies (total: %d)", len(companies), total)

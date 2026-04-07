@@ -57,6 +57,7 @@ CREATE TABLE staging_companies (
 -- Indexes for staging queries
 -- PK index exists for company_number
 CREATE INDEX idx_staging_companies_status ON staging_companies(company_status);
+CREATE INDEX idx_staging_companies_status_name ON staging_companies(company_status, company_name);
 CREATE INDEX idx_staging_companies_locality ON staging_companies(locality);
 CREATE INDEX idx_staging_companies_needs_review ON staging_companies(needs_review);
 CREATE INDEX idx_staging_companies_raw_data ON staging_companies USING GIN(raw_data);

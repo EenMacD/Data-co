@@ -5,7 +5,12 @@ import styles from "./styles.module.css";
 import { searchCompanies } from "./services/fetch-companies";
 
 export default async function DataResultsSection() {
-    const response = await searchCompanies({ limit: 10, offset: 0 });
+    const response = await searchCompanies({
+        limit: 20,
+        offset: 1,
+        orderBy: "company_number",
+        includeTotal: false,
+    });
     const companies = response.companies;
 
     const columns = [
