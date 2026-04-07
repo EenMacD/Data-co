@@ -302,12 +302,12 @@ func (qb *QueryBuilder) BuildQuery(filters models.CompanySearchFilters) string {
 	baseQuery := `
 	WITH latest_financials AS (
 		SELECT DISTINCT ON (company_number)
-			company_number as company_id,
+			company_number,
 			turnover,
 			profit_loss as profit_after_tax,
 			total_assets,
 			total_liabilities,
-			net_worth,
+			net_assets_liabilities as net_worth,
 			0 as profit_margin,
 			0 as current_ratio,
 			period_end
@@ -317,32 +317,23 @@ func (qb *QueryBuilder) BuildQuery(filters models.CompanySearchFilters) string {
 	),
 	officer_counts AS (
 		SELECT
-			company_number as company_id,
+			company_number,
 			COUNT(*) FILTER (WHERE resigned_on IS NULL) as active_officers
 		FROM staging_officers
 		GROUP BY company_number
 	)
 	SELECT
-		c.id,
 		c.company_number,
 		c.company_name,
 		c.company_status,
 		c.locality,
 		c.region,
 		c.postal_code,
-		'' as primary_sic_code,
-		'' as industry_category,
-		NULL::date as incorporation_date,
-		latest_fin.turnover,
-		latest_fin.profit_after_tax,
-		latest_fin.total_assets,
-		latest_fin.net_worth,
-		latest_fin.profit_margin,
-		latest_fin.period_end as latest_accounts_date,
-		COALESCE(officer_counts.active_officers, 0) as active_officers_count
+		array_to_string(c.sic_codes, ',') as sic_code,
+		c.incorporation_date
 	FROM staging_companies c
-	LEFT JOIN latest_financials latest_fin ON c.id = latest_fin.company_id
-	LEFT JOIN officer_counts ON c.id = officer_counts.company_id
+	LEFT JOIN latest_financials latest_fin ON c.company_number = latest_fin.company_number
+	LEFT JOIN officer_counts ON c.company_number = officer_counts.company_number
 	`
 
 	if len(qb.conditions) > 0 {
@@ -393,28 +384,28 @@ func (qb *QueryBuilder) BuildQuery(filters models.CompanySearchFilters) string {
 func (qb *QueryBuilder) BuildCountQuery() string {
 	baseQuery := `
 	WITH latest_financials AS (
-		SELECT DISTINCT ON (staging_company_id)
-			staging_company_id as company_id,
+		SELECT DISTINCT ON (company_number)
+			company_number,
 			turnover,
 			profit_loss as profit_after_tax,
 			total_assets,
 			total_liabilities,
-			net_worth
+			net_assets_liabilities as net_worth
 		FROM staging_financials
 		WHERE period_end IS NOT NULL
-		ORDER BY staging_company_id, period_end DESC
+		ORDER BY company_number, period_end DESC
 	),
 	officer_counts AS (
 		SELECT
-			staging_company_id as company_id,
+			company_number,
 			COUNT(*) FILTER (WHERE resigned_on IS NULL) as active_officers
 		FROM staging_officers
-		GROUP BY staging_company_id
+		GROUP BY company_number
 	)
 	SELECT COUNT(*) as total
 	FROM staging_companies c
-	LEFT JOIN latest_financials latest_fin ON c.id = latest_fin.company_id
-	LEFT JOIN officer_counts ON c.id = officer_counts.company_id
+	LEFT JOIN latest_financials latest_fin ON c.company_number = latest_fin.company_number
+	LEFT JOIN officer_counts ON c.company_number = officer_counts.company_number
 	`
 
 	if len(qb.conditions) > 0 {
@@ -429,10 +420,7 @@ func (qb *QueryBuilder) GetArgs() []interface{} {
 	return qb.args
 }
 
-// BuildCompanyQuery is a convenience function to build a query from filters
-func BuildCompanyQuery(filters models.CompanySearchFilters) (string, []interface{}) {
-	qb := NewQueryBuilder()
-
+func applyCompanyFilters(qb *QueryBuilder, filters models.CompanySearchFilters) {
 	qb.AddIndustryFilter(filters.Industry)
 	qb.AddLocationFilter(filters.Location)
 	qb.AddRevenueFilter(filters.Revenue)
@@ -443,6 +431,12 @@ func BuildCompanyQuery(filters models.CompanySearchFilters) (string, []interface
 	qb.AddNetAssetsFilter(filters.NetAssets)
 	qb.AddDebtLevelFilter(filters.DebtLevel)
 	qb.AddSearchTerm(filters.SearchTerm)
+}
+
+// BuildCompanyQuery is a convenience function to build a query from filters
+func BuildCompanyQuery(filters models.CompanySearchFilters) (string, []interface{}) {
+	qb := NewQueryBuilder()
+	applyCompanyFilters(qb, filters)
 
 	query := qb.BuildQuery(filters)
 	return query, qb.GetArgs()
@@ -451,17 +445,7 @@ func BuildCompanyQuery(filters models.CompanySearchFilters) (string, []interface
 // BuildCompanyCountQuery builds a count query from filters
 func BuildCompanyCountQuery(filters models.CompanySearchFilters) (string, []interface{}) {
 	qb := NewQueryBuilder()
-
-	qb.AddIndustryFilter(filters.Industry)
-	qb.AddLocationFilter(filters.Location)
-	qb.AddRevenueFilter(filters.Revenue)
-	qb.AddEmployeesFilter(filters.Employees)
-	qb.AddProfitabilityFilter(filters.Profitability)
-	qb.AddCompanySizeFilter(filters.CompanySize)
-	qb.AddCompanyStatusFilter(filters.CompanyStatus)
-	qb.AddNetAssetsFilter(filters.NetAssets)
-	qb.AddDebtLevelFilter(filters.DebtLevel)
-	qb.AddSearchTerm(filters.SearchTerm)
+	applyCompanyFilters(qb, filters)
 
 	query := qb.BuildCountQuery()
 	return query, qb.GetArgs()

@@ -19,10 +19,20 @@ from dotenv import load_dotenv
 # Note: Lists are NOT auto-converted to JSON to allow PostgreSQL array types
 register_adapter(dict, Json)
 
-# Load environment variables from project root
-# This file is in Data/staging/common/services/, so go up 3 levels to find .env
+# Load environment variables from the nearest parent directory containing .env.
+# This supports both Data/.env and repo-root/.env layouts.
 ROOT_DIR = Path(__file__).resolve().parents[3]
-ENV_PATH = ROOT_DIR / ".env"
+
+
+def _find_env_path() -> Path:
+    for directory in [ROOT_DIR, *ROOT_DIR.parents]:
+        candidate = directory / ".env"
+        if candidate.exists():
+            return candidate
+    return ROOT_DIR / ".env"
+
+
+ENV_PATH = _find_env_path()
 load_dotenv(dotenv_path=ENV_PATH)
 
 
@@ -37,17 +47,35 @@ class DatabaseConfig:
             env_prefix: Prefix for env vars (e.g., 'STAGING' or 'PRODUCTION')
         """
         self.host = os.getenv(f"{env_prefix}_DB_HOST")
-        self.port = int(os.getenv(f"{env_prefix}_DB_PORT"))
         self.database = os.getenv(f"{env_prefix}_DB_NAME")
         self.user = os.getenv(f"{env_prefix}_DB_USER")
         self.password = os.getenv(f"{env_prefix}_DB_PASSWORD")
+        port_value = os.getenv(f"{env_prefix}_DB_PORT", "5432")
 
-        if not all([self.host, self.database, self.user, self.password]):
+        missing_keys = [
+            key
+            for key, value in {
+                f"{env_prefix}_DB_HOST": self.host,
+                f"{env_prefix}_DB_NAME": self.database,
+                f"{env_prefix}_DB_USER": self.user,
+                f"{env_prefix}_DB_PASSWORD": self.password,
+            }.items()
+            if not value
+        ]
+
+        if missing_keys:
             raise ValueError(
-                f"Missing required database config for {env_prefix}. "
-                f"Please set {env_prefix}_DB_NAME, {env_prefix}_DB_USER, "
-                f"and {env_prefix}_DB_PASSWORD in .env"
+                f"Missing required database config for {env_prefix}: "
+                f"{', '.join(missing_keys)}. Set them in {ENV_PATH}."
             )
+
+        try:
+            self.port = int(port_value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f"Invalid port for {env_prefix}: "
+                f"{env_prefix}_DB_PORT={port_value!r}. Expected an integer."
+            ) from exc
 
     def get_connection_string(self) -> str:
         """Get psycopg2 connection string."""

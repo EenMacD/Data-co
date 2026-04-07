@@ -14,16 +14,16 @@ type Company struct {
 	Locality             sql.NullString  `json:"locality"`
 	Region               sql.NullString  `json:"region"`
 	PostalCode           sql.NullString  `json:"postal_code"`
-	PrimarySICCode       sql.NullString  `json:"primary_sic_code"`
-	IndustryCategory     sql.NullString  `json:"industry_category"`
+	SICCode       			 sql.NullString  `json:"sic_code"`
+	// IndustryCategory     sql.NullString  `json:"industry_category"`
 	IncorporationDate    *time.Time      `json:"incorporation_date"`
-	Turnover             sql.NullFloat64 `json:"turnover"`
-	ProfitAfterTax       sql.NullFloat64 `json:"profit_after_tax"`
-	TotalAssets          sql.NullFloat64 `json:"total_assets"`
-	NetWorth             sql.NullFloat64 `json:"net_worth"`
-	ProfitMargin         sql.NullFloat64 `json:"profit_margin"`
-	LatestAccountsDate   *time.Time      `json:"latest_accounts_date"`
-	ActiveOfficersCount  int             `json:"active_officers_count"`
+	// Turnover             sql.NullFloat64 `json:"turnover"`
+	// ProfitAfterTax       sql.NullFloat64 `json:"profit_after_tax"`
+	// TotalAssets          sql.NullFloat64 `json:"total_assets"`
+	// NetWorth             sql.NullFloat64 `json:"net_worth"`
+	// ProfitMargin         sql.NullFloat64 `json:"profit_margin"`
+	// LatestAccountsDate   *time.Time      `json:"latest_accounts_date"`
+	// ActiveOfficersCount  int             `json:"active_officers_count"`
 }
 
 // CompanySearchFilters represents the filter criteria from frontend

@@ -381,35 +381,32 @@ class ProductionMerger:
                     period_start,
                     period_end,
                     turnover,
-                    profit_after_tax,
+                    cost_sales,
                     total_assets,
                     total_liabilities,
-                    net_worth,
                     source,
                     raw_data,
-                    source_batch_id
+                    batch_id
                 ) VALUES (
                     %(company_number)s,
                     %(period_start)s,
                     %(period_end)s,
                     %(turnover)s,
-                    %(profit_after_tax)s,
+                    %(cost_sales)s,
                     %(total_assets)s,
                     %(total_liabilities)s,
-                    %(net_worth)s,
                     %(source)s,
                     %(raw_data)s,
                     %(batch_id)s
                 )
                 ON CONFLICT (company_number, period_end) DO UPDATE SET
                     turnover = EXCLUDED.turnover,
-                    profit_after_tax = EXCLUDED.profit_after_tax,
+                    cost_sales = EXCLUDED.cost_sales,
                     total_assets = EXCLUDED.total_assets,
                     total_liabilities = EXCLUDED.total_liabilities,
-                    net_worth = EXCLUDED.net_worth,
                     source = EXCLUDED.source,
                     raw_data = EXCLUDED.raw_data,
-                    source_batch_id = EXCLUDED.source_batch_id,
+                    batch_id = EXCLUDED.batch_id,
                     last_updated = NOW()
             """
 
@@ -420,10 +417,9 @@ class ProductionMerger:
                     "period_start": financial["period_start"],
                     "period_end": financial["period_end"],
                     "turnover": financial["turnover"],
-                    "profit_after_tax": financial["profit_loss"],
+                    "cost_sales": financial.get("cost_sales"),
                     "total_assets": financial["total_assets"],
                     "total_liabilities": financial["total_liabilities"],
-                    "net_worth": financial["net_worth"],
                     "source": financial["source"] or "api",
                     "raw_data": financial["raw_data"],
                     "batch_id": self.batch_id,

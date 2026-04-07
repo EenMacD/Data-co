@@ -1,18 +1,9 @@
+import { getString } from "@/app/common/helpers/get-string";
+import Company from "../models/company";
 import styles from "./styles.module.css";
+import { formatCurrency } from "@/app/common/helpers/format-currency";
 
-interface CompanyData {
-    companyName: string;
-    address: string;
-    phone: string;
-    email: string;
-    website: string;
-    revenue: string;
-    employees: string;
-    companyStatus: string;
-    sicCode: string;
-}
-
-export default function ResultsBody({ data }: { data: CompanyData[] }) {
+export default function ResultsBody({ data }: { data: Company[] }) {
     return (
         <tbody className={styles.tableBody}>
             {data.map((item, index) => (
@@ -20,15 +11,14 @@ export default function ResultsBody({ data }: { data: CompanyData[] }) {
                     key={index}
                     className={`${styles.tableRow} ${index % 2 === 0 ? styles.even : ""}`}
                 >
-                    <td>{item.companyName}</td>
-                    <td>{item.address}</td>
-                    <td>{item.phone}</td>
-                    <td>{item.email}</td>
-                    <td>{item.website}</td>
-                    <td>{item.revenue}</td>
-                    <td>{item.employees}</td>
-                    <td>{item.companyStatus}</td>
-                    <td>{item.sicCode}</td>
+                    <td>{item.company_name}</td>
+                    <td>{getString(item.locality)}</td>
+                    <td>{item.company_number}</td>
+                    <td>{item.company_status}</td>
+                    <td>{getString(item.primary_sic_code)}</td>
+                    <td>{formatCurrency(item.turnover)}</td>
+                    <td>{item.active_officers_count}</td>
+                    <td>{item.incorporation_date}</td>
                 </tr>
             ))}
         </tbody>

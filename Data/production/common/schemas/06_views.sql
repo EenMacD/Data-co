@@ -16,11 +16,7 @@ SELECT
     c.incorporation_date,
     f.period_end as latest_accounts_date,
     f.turnover,
-    f.profit_after_tax,
     f.total_assets,
-    f.net_worth,
-    f.profit_margin,
-    f.current_ratio,
     COUNT(o.id) FILTER (WHERE o.is_active) as active_officers_count
 FROM production_companies c
 LEFT JOIN LATERAL (
@@ -33,8 +29,7 @@ LEFT JOIN production_officers o ON c.company_number = o.company_number
 WHERE c.company_status = 'active'
 GROUP BY c.company_number, c.company_name, c.company_status, c.company_type, c.locality,
          c.region, c.primary_sic_code, c.industry_category, c.incorporation_date,
-         f.period_end, f.turnover, f.profit_after_tax, f.total_assets,
-         f.net_worth, f.profit_margin, f.current_ratio;
+         f.period_end, f.turnover, f.total_assets;
 
 -- Officers with contact information
 CREATE OR REPLACE VIEW officers_with_contacts AS
