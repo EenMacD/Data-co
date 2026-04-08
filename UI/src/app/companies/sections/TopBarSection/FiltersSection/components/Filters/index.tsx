@@ -1,10 +1,16 @@
+import type { ReactElement } from "react";
 import CustomButton from "@/app/common/components/Buttons/CustomButton";
 import FilterItem from "./FilterItem";
 import styles from "./styles.module.css";
 import { ListFilterPlus } from "lucide-react";
 
-export default function Filters() {
-    const pinnedFilters: { label: string; text: string }[] = [
+interface PinnedFilter {
+    label: string;
+    text: string;
+}
+
+export default function Filters(): ReactElement {
+    const pinnedFilters: PinnedFilter[] = [
         { label: "Location", text: "Select Option" },
         { label: "SIC Code", text: "Select Option" },
         { label: "Company Status", text: "Select Option" },
@@ -13,13 +19,15 @@ export default function Filters() {
 
     return (
         <div className={styles.container}>
-            {pinnedFilters.map((filter, index) => (
-                <FilterItem
-                    key={index}
-                    label={filter.label}
-                    text={filter.text}
-                />
-            ))}
+            {pinnedFilters.map(
+                (filter: PinnedFilter, index: number): ReactElement => (
+                    <FilterItem
+                        key={index}
+                        label={filter.label}
+                        text={filter.text}
+                    />
+                ),
+            )}
             <CustomButton
                 text="Filters"
                 leadingIcon={<ListFilterPlus />}

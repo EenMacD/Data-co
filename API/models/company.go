@@ -28,20 +28,20 @@ type Company struct {
 
 // CompanySearchFilters represents the filter criteria from frontend
 type CompanySearchFilters struct {
-	Industry      string `json:"industry"`
-	Location      string `json:"location"`
-	Revenue       string `json:"revenue"`
-	Employees     string `json:"employees"`
-	Profitability string `json:"profitability"`
-	CompanySize   string `json:"companySize"`
-	CompanyStatus string `json:"companyStatus"`
-	NetAssets     string `json:"netAssets"`
-	DebtLevel     string `json:"debtLevel"`
-	SearchTerm    string `json:"searchTerm"`
-	Limit         int    `json:"limit"`
-	Offset        int    `json:"offset"`
-	OrderBy       string `json:"orderBy"`
-	IncludeTotal  *bool  `json:"includeTotal"`
+	// Industry      string `json:"industry"`
+	Location string `json:"location"`
+	// Revenue       string `json:"revenue"`
+	// Employees     string `json:"employees"`
+	// Profitability string `json:"profitability"`
+	// CompanySize   string `json:"companySize"`
+	// CompanyStatus string `json:"companyStatus"`
+	// NetAssets     string `json:"netAssets"`
+	// DebtLevel     string `json:"debtLevel"`
+	// SearchTerm    string `json:"searchTerm"`
+	Limit        int    `json:"limit"`
+	Offset       int    `json:"offset"`
+	OrderBy      string `json:"orderBy"`
+	IncludeTotal *bool  `json:"includeTotal"`
 }
 
 // SearchResponse represents the API response for company search

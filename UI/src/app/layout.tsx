@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import type { Metadata } from "next";
 import { fontsClassNames } from "@/fonts/fonts";
 import "@/fonts/fonts.css";
@@ -13,7 +14,9 @@ type Props = {
     children: React.ReactNode;
 };
 
-export default function RootLayout({ children }: Readonly<Props>) {
+export default function RootLayout({
+    children,
+}: Readonly<Props>): ReactElement {
     return (
         <html lang="en">
             <body className={fontsClassNames}>

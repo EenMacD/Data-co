@@ -4,9 +4,9 @@ import { SearchResponse } from "../models/search-response";
 export async function searchCompanies(
     filters: CompanySearchFilters,
 ): Promise<SearchResponse> {
-    const apiRoute = process.env.API_URL;
+    const apiRoute: string | undefined = process.env.API_URL;
 
-    const response = await fetch(`${apiRoute}/companies/search`, {
+    const response: Response = await fetch(`${apiRoute}/companies/search`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

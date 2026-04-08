@@ -1,9 +1,10 @@
+import type { ReactElement } from "react";
 import PageTitle from "./components/PageTitle";
 import SearchBar from "../../../../common/components/SearchBar";
 import PageUtil from "./components/PageUtil";
 import styles from "./styles.module.css";
 
-export default function HeadingSection() {
+export default function HeadingSection(): ReactElement {
     return (
         <section className={styles.container}>
             <div className={styles.positionGroup}>

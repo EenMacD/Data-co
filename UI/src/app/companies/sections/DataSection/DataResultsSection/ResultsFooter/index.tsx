@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { RefObject } from "react";
 import styles from "./styles.module.css";
 import CustomScrollbar from "../../../../../common/components/CustomScrollbar";
@@ -18,7 +19,7 @@ interface ResultsFooterProps {
 
 export default function ResultsFooter({
     scrollContainerRef,
-}: ResultsFooterProps) {
+}: ResultsFooterProps): ReactElement {
     return (
         <div className={styles.footer}>
             <div className={styles.scrollbarContainer}>

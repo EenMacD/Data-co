@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, RefObject } from "react";
+import type { MouseEvent as ReactMouseEvent, ReactElement, RefObject } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import styles from "./styles.module.css";
 
 interface CustomScrollbarProps {
@@ -9,14 +10,16 @@ interface CustomScrollbarProps {
 
 export default function CustomScrollbar({
     scrollContainerRef,
-}: CustomScrollbarProps) {
-    const trackRef = useRef<HTMLDivElement>(null);
-    const thumbRef = useRef<HTMLDivElement>(null);
+}: CustomScrollbarProps): ReactElement {
+    const trackRef: RefObject<HTMLDivElement | null> =
+        useRef<HTMLDivElement>(null);
+    const thumbRef: RefObject<HTMLDivElement | null> =
+        useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeftStart, setScrollLeftStart] = useState(0);
 
-    const updateThumb = useCallback(() => {
+    const updateThumb: () => void = useCallback((): void => {
         if (
             !scrollContainerRef.current ||
             !trackRef.current ||
@@ -26,17 +29,17 @@ export default function CustomScrollbar({
 
         const { scrollLeft, scrollWidth, clientWidth } =
             scrollContainerRef.current;
-        const trackWidth = trackRef.current.clientWidth;
+        const trackWidth: number = trackRef.current.clientWidth;
 
         // Calculate thumb width based on visible ratio
-        const visibleRatio = clientWidth / scrollWidth;
-        const thumbWidth = Math.max(visibleRatio * trackWidth, 20); // Min width 20px
+        const visibleRatio: number = clientWidth / scrollWidth;
+        const thumbWidth: number = Math.max(visibleRatio * trackWidth, 20); // Min width 20px
 
         // Calculate thumb position
-        const maxScrollLeft = scrollWidth - clientWidth;
-        const scrollRatio = scrollLeft / maxScrollLeft;
-        const maxThumbLeft = trackWidth - thumbWidth;
-        const thumbLeft = scrollRatio * maxThumbLeft;
+        const maxScrollLeft: number = scrollWidth - clientWidth;
+        const scrollRatio: number = scrollLeft / maxScrollLeft;
+        const maxThumbLeft: number = trackWidth - thumbWidth;
+        const thumbLeft: number = scrollRatio * maxThumbLeft;
 
         thumbRef.current.style.width = `${thumbWidth}px`;
         thumbRef.current.style.transform = `translateX(${thumbLeft}px)`;
@@ -53,10 +56,10 @@ export default function CustomScrollbar({
 
     // Update on scroll
     useEffect(() => {
-        const container = scrollContainerRef.current;
+        const container: HTMLDivElement | null = scrollContainerRef.current;
         if (!container) return;
 
-        const handleScroll = () => {
+        const handleScroll: () => void = (): void => {
             if (!isDragging) {
                 requestAnimationFrame(updateThumb);
             }
@@ -66,7 +69,7 @@ export default function CustomScrollbar({
         updateThumb();
 
         // Also update on resize of container AND content
-        const resizeObserver = new ResizeObserver(() => {
+        const resizeObserver: ResizeObserver = new ResizeObserver((): void => {
             updateThumb();
         });
 
@@ -78,7 +81,7 @@ export default function CustomScrollbar({
         container.addEventListener("scroll", handleScroll);
         window.addEventListener("resize", updateThumb);
 
-        return () => {
+        return (): void => {
             container.removeEventListener("scroll", handleScroll);
             window.removeEventListener("resize", updateThumb);
             resizeObserver.disconnect();
@@ -86,7 +89,9 @@ export default function CustomScrollbar({
     }, [scrollContainerRef, isDragging, updateThumb]);
 
     // Handle drag logic
-    const handleMouseDown = (e: React.MouseEvent) => {
+    const handleMouseDown: (e: ReactMouseEvent) => void = (
+        e: ReactMouseEvent,
+    ): void => {
         if (!scrollContainerRef.current || !thumbRef.current) return;
         e.preventDefault();
         setIsDragging(true);
@@ -101,7 +106,9 @@ export default function CustomScrollbar({
     useEffect(() => {
         if (!isDragging) return;
 
-        const handleMouseMove = (e: MouseEvent) => {
+        const handleMouseMove: (e: MouseEvent) => void = (
+            e: MouseEvent,
+        ): void => {
             if (
                 !scrollContainerRef.current ||
                 !trackRef.current ||
@@ -109,21 +116,21 @@ export default function CustomScrollbar({
             )
                 return;
 
-            const deltaX = e.clientX - startX;
-            const trackWidth = trackRef.current.clientWidth;
+            const deltaX: number = e.clientX - startX;
+            const trackWidth: number = trackRef.current.clientWidth;
             const { scrollWidth, clientWidth } = scrollContainerRef.current;
 
-            const visibleRatio = clientWidth / scrollWidth;
-            const thumbWidth = Math.max(visibleRatio * trackWidth, 20);
-            const maxThumbLeft = trackWidth - thumbWidth;
-            const maxScrollLeft = scrollWidth - clientWidth;
+            const visibleRatio: number = clientWidth / scrollWidth;
+            const thumbWidth: number = Math.max(visibleRatio * trackWidth, 20);
+            const maxThumbLeft: number = trackWidth - thumbWidth;
+            const maxScrollLeft: number = scrollWidth - clientWidth;
 
             // Calculate new scroll position based on delta
             // thumbMove / maxThumbMove = scrollMove / maxScrollMove
             // scrollMove = (thumbMove * maxScrollMove) / maxThumbMove
 
             // However, dragging by pixels on track corresponds to pixels on scroll content
-            const scrollAmount = (deltaX / maxThumbLeft) * maxScrollLeft;
+            const scrollAmount: number = (deltaX / maxThumbLeft) * maxScrollLeft;
 
             scrollContainerRef.current.scrollLeft =
                 scrollLeftStart + scrollAmount;
@@ -139,7 +146,7 @@ export default function CustomScrollbar({
             updateThumb();
         };
 
-        const handleMouseUp = () => {
+        const handleMouseUp: () => void = (): void => {
             setIsDragging(false);
             document.body.style.userSelect = "";
         };
@@ -147,14 +154,16 @@ export default function CustomScrollbar({
         document.addEventListener("mousemove", handleMouseMove);
         document.addEventListener("mouseup", handleMouseUp);
 
-        return () => {
+        return (): void => {
             document.removeEventListener("mousemove", handleMouseMove);
             document.removeEventListener("mouseup", handleMouseUp);
         };
     }, [isDragging, startX, scrollLeftStart, scrollContainerRef, updateThumb]);
 
     // Handle click on track to jump
-    const handleTrackClick = (e: React.MouseEvent) => {
+    const handleTrackClick: (e: ReactMouseEvent) => void = (
+        e: ReactMouseEvent,
+    ): void => {
         if (e.target === thumbRef.current) return; // Ignore clicks on the thumb itself
         if (
             !scrollContainerRef.current ||
@@ -163,28 +172,28 @@ export default function CustomScrollbar({
         )
             return;
 
-        const trackRect = trackRef.current.getBoundingClientRect();
-        const clickX = e.clientX - trackRect.left;
+        const trackRect: DOMRect = trackRef.current.getBoundingClientRect();
+        const clickX: number = e.clientX - trackRect.left;
 
-        const trackWidth = trackRef.current.clientWidth;
+        const trackWidth: number = trackRef.current.clientWidth;
         const { scrollWidth, clientWidth } = scrollContainerRef.current;
-        const visibleRatio = clientWidth / scrollWidth;
-        const thumbWidth = Math.max(visibleRatio * trackWidth, 20);
+        const visibleRatio: number = clientWidth / scrollWidth;
+        const thumbWidth: number = Math.max(visibleRatio * trackWidth, 20);
 
         // Center the thumb on the click position
         // improved logic: calculate the desired center of thumb
-        const desiredThumbCenter = clickX;
-        const desiredThumbLeft = desiredThumbCenter - thumbWidth / 2;
+        const desiredThumbCenter: number = clickX;
+        const desiredThumbLeft: number = desiredThumbCenter - thumbWidth / 2;
 
-        const maxThumbLeft = trackWidth - thumbWidth;
+        const maxThumbLeft: number = trackWidth - thumbWidth;
         // Clamp
-        const clampedThumbLeft = Math.max(
+        const clampedThumbLeft: number = Math.max(
             0,
             Math.min(desiredThumbLeft, maxThumbLeft),
         );
 
-        const maxScrollLeft = scrollWidth - clientWidth;
-        const scrollRatio = clampedThumbLeft / maxThumbLeft;
+        const maxScrollLeft: number = scrollWidth - clientWidth;
+        const scrollRatio: number = clampedThumbLeft / maxThumbLeft;
 
         scrollContainerRef.current.scrollTo({
             left: scrollRatio * maxScrollLeft,

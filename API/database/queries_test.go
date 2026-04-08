@@ -74,10 +74,9 @@ func TestBuildCompanyQueryUsesSharedFragmentsAndProjection(t *testing.T) {
 	}
 }
 
-func TestBuildCompanyCountQueryUsesSharedFragmentsAndConditions(t *testing.T) {
+func TestBuildCompanyCountQueryUsesSharedFragmentsAndLocationCondition(t *testing.T) {
 	query, args := BuildCompanyCountQuery(models.CompanySearchFilters{
-		CompanyStatus: "active",
-		SearchTerm:    "Acme",
+		Location: "london",
 	})
 
 	for _, fragment := range []string{
@@ -85,14 +84,14 @@ func TestBuildCompanyCountQueryUsesSharedFragmentsAndConditions(t *testing.T) {
 		"SELECT\n\tCOUNT(*) AS total",
 		"LEFT JOIN latest_financials latest_fin ON c.company_number = latest_fin.company_number",
 		"LEFT JOIN officer_counts ON c.company_number = officer_counts.company_number",
-		"WHERE c.company_status = $1 AND c.company_name ILIKE $2",
+		"WHERE (c.locality ILIKE $1 OR c.region ILIKE $2)",
 	} {
 		if !strings.Contains(query, fragment) {
 			t.Fatalf("query missing fragment %q:\n%s", fragment, query)
 		}
 	}
 
-	expectedArgs := []interface{}{"active", "%Acme%"}
+	expectedArgs := []interface{}{"%London%", "%London%"}
 	if !reflect.DeepEqual(args, expectedArgs) {
 		t.Fatalf("unexpected args: expected %#v, got %#v", expectedArgs, args)
 	}

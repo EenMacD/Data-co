@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import styles from "./styles.module.css"; // "./CustomButton.module.css";
 
 interface TextStyle {
@@ -38,7 +39,7 @@ export default function CustomButton({
     trailingIconStyle,
     leadingIconStyle,
     buttonStyle,
-}: CustomButtonProps) {
+}: CustomButtonProps): ReactElement {
     return (
         <div
             className={`${styles.container} ${isRound ? styles.round : ""} ${

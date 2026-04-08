@@ -1,10 +1,17 @@
+import type { ReactElement } from "react";
 import styles from "./styles.module.css";
 
-export default function ResultsHeader({ columns }: { columns: string[] }) {
+interface ResultsHeaderProps {
+    columns: string[];
+}
+
+export default function ResultsHeader({
+    columns,
+}: ResultsHeaderProps): ReactElement {
     return (
         <thead className={styles.tableHeader}>
             <tr>
-                {columns.map((column, index) => (
+                {columns.map((column: string, index: number): ReactElement => (
                     <th key={index}>{column}</th>
                 ))}
             </tr>

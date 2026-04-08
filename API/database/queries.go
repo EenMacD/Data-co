@@ -3,7 +3,6 @@ package database
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"data-co/api/models"
 )
@@ -69,6 +68,7 @@ func (qb *QueryBuilder) addCondition(condition string, value interface{}) {
 	qb.args = append(qb.args, value)
 }
 
+/*
 // AddIndustryFilter filters by industry using SIC codes
 func (qb *QueryBuilder) AddIndustryFilter(industry string) {
 	if industry == "" {
@@ -104,6 +104,7 @@ func (qb *QueryBuilder) AddIndustryFilter(industry string) {
 	condition := fmt.Sprintf("EXISTS (SELECT 1 FROM unnest(c.sic_codes) AS sic WHERE %s)", strings.Join(conditions, " OR "))
 	qb.conditions = append(qb.conditions, condition)
 }
+*/
 
 // AddLocationFilter filters by location (locality or region)
 func (qb *QueryBuilder) AddLocationFilter(location string) {
@@ -138,6 +139,7 @@ func (qb *QueryBuilder) AddLocationFilter(location string) {
 	qb.conditions = append(qb.conditions, fmt.Sprintf("(c.locality ILIKE $%d OR c.region ILIKE $%d)", firstArg, secondArg))
 }
 
+/*
 // AddRevenueFilter filters by revenue range
 func (qb *QueryBuilder) AddRevenueFilter(revenueRange string) {
 	if revenueRange == "" {
@@ -164,7 +166,9 @@ func (qb *QueryBuilder) AddRevenueFilter(revenueRange string) {
 		}
 	}
 }
+*/
 
+/*
 // AddEmployeesFilter filters by employee count (using officer count as proxy)
 func (qb *QueryBuilder) AddEmployeesFilter(employeesRange string) {
 	if employeesRange == "" {
@@ -189,7 +193,9 @@ func (qb *QueryBuilder) AddEmployeesFilter(employeesRange string) {
 		}
 	}
 }
+*/
 
+/*
 // AddProfitabilityFilter filters by profitability status
 func (qb *QueryBuilder) AddProfitabilityFilter(profitability string) {
 	if profitability == "" {
@@ -208,7 +214,9 @@ func (qb *QueryBuilder) AddProfitabilityFilter(profitability string) {
 		qb.argCount++
 	}
 }
+*/
 
+/*
 // AddCompanySizeFilter filters by company size
 func (qb *QueryBuilder) AddCompanySizeFilter(size string) {
 	if size == "" {
@@ -233,7 +241,9 @@ func (qb *QueryBuilder) AddCompanySizeFilter(size string) {
 		}
 	}
 }
+*/
 
+/*
 // AddCompanyAgeFilter filters by company age
 func (qb *QueryBuilder) AddCompanyAgeFilter(ageRange string) {
 	if ageRange == "" {
@@ -261,7 +271,9 @@ func (qb *QueryBuilder) AddCompanyAgeFilter(ageRange string) {
 		}
 	}
 }
+*/
 
+/*
 // AddCompanyStatusFilter filters by company status
 func (qb *QueryBuilder) AddCompanyStatusFilter(status string) {
 	normalizedStatus := strings.ToLower(strings.TrimSpace(status))
@@ -271,7 +283,9 @@ func (qb *QueryBuilder) AddCompanyStatusFilter(status string) {
 
 	qb.addCondition("c.company_status = $%d", normalizedStatus)
 }
+*/
 
+/*
 // AddNetAssetsFilter filters by net assets/net worth
 func (qb *QueryBuilder) AddNetAssetsFilter(netAssetsRange string) {
 	if netAssetsRange == "" {
@@ -301,7 +315,9 @@ func (qb *QueryBuilder) AddNetAssetsFilter(netAssetsRange string) {
 		}
 	}
 }
+*/
 
+/*
 // AddDebtLevelFilter filters by debt level as percentage of assets
 func (qb *QueryBuilder) AddDebtLevelFilter(debtLevel string) {
 	if debtLevel == "" {
@@ -326,7 +342,9 @@ func (qb *QueryBuilder) AddDebtLevelFilter(debtLevel string) {
 		}
 	}
 }
+*/
 
+/*
 // AddSearchTerm adds full-text search on company name
 func (qb *QueryBuilder) AddSearchTerm(searchTerm string) {
 	if searchTerm == "" {
@@ -335,6 +353,7 @@ func (qb *QueryBuilder) AddSearchTerm(searchTerm string) {
 
 	qb.addCondition("c.company_name ILIKE $%d", "%"+searchTerm+"%")
 }
+*/
 
 func buildCompanySearchQuery(projection string) string {
 	return companySearchCTEs + "\nSELECT\n\t" + projection + "\n" + companySearchFromClause
@@ -393,16 +412,16 @@ func (qb *QueryBuilder) GetArgs() []interface{} {
 }
 
 func applyCompanyFilters(qb *QueryBuilder, filters models.CompanySearchFilters) {
-	qb.AddIndustryFilter(filters.Industry)
+	// qb.AddIndustryFilter(filters.Industry)
 	qb.AddLocationFilter(filters.Location)
-	qb.AddRevenueFilter(filters.Revenue)
-	qb.AddEmployeesFilter(filters.Employees)
-	qb.AddProfitabilityFilter(filters.Profitability)
-	qb.AddCompanySizeFilter(filters.CompanySize)
-	qb.AddCompanyStatusFilter(filters.CompanyStatus)
-	qb.AddNetAssetsFilter(filters.NetAssets)
-	qb.AddDebtLevelFilter(filters.DebtLevel)
-	qb.AddSearchTerm(filters.SearchTerm)
+	// qb.AddRevenueFilter(filters.Revenue)
+	// qb.AddEmployeesFilter(filters.Employees)
+	// qb.AddProfitabilityFilter(filters.Profitability)
+	// qb.AddCompanySizeFilter(filters.CompanySize)
+	// qb.AddCompanyStatusFilter(filters.CompanyStatus)
+	// qb.AddNetAssetsFilter(filters.NetAssets)
+	// qb.AddDebtLevelFilter(filters.DebtLevel)
+	// qb.AddSearchTerm(filters.SearchTerm)
 }
 
 // BuildCompanyQuery is a convenience function to build a query from filters

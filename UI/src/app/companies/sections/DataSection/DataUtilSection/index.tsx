@@ -1,9 +1,10 @@
+import type { ReactElement } from "react";
 import SearchBar from "@/app/common/components/SearchBar";
 import styles from "./styles.module.css";
 import CustomButton from "@/app/common/components/Buttons/CustomButton";
 import { DownloadIcon, Menu } from "lucide-react";
 
-export default function DataUtilSection() {
+export default function DataUtilSection(): ReactElement {
     return (
         <div className={styles.DataUtilSection}>
             <div className={styles.searchWrapper}>

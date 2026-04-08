@@ -1,7 +1,8 @@
+import type { ReactElement } from "react";
 import Image from "next/image";
 import styles from "./styles.module.css";
 
-export default function PageUtilProfileButton() {
+export default function PageUtilProfileButton(): ReactElement {
     return (
         <div>
             <Image

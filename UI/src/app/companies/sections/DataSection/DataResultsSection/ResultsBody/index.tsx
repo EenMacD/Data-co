@@ -1,26 +1,34 @@
+import type { ReactElement } from "react";
 import { getString } from "@/app/common/helpers/get-string";
 import Company from "../models/company";
 import styles from "./styles.module.css";
-import { formatCurrency } from "@/app/common/helpers/format-currency";
+import TdContent from "./components/TdContent";
+// import { formatCurrency } from "@/app/common/helpers/format-currency";
 
-export default function ResultsBody({ data }: { data: Company[] }) {
+interface ResultsBodyProps {
+    data: Company[];
+}
+
+export default function ResultsBody({ data }: ResultsBodyProps): ReactElement {
     return (
         <tbody className={styles.tableBody}>
-            {data.map((item, index) => (
-                <tr
-                    key={index}
-                    className={`${styles.tableRow} ${index % 2 === 0 ? styles.even : ""}`}
-                >
-                    <td>{item.company_name}</td>
-                    <td>{getString(item.locality)}</td>
-                    <td>{item.company_number}</td>
-                    <td>{item.company_status}</td>
-                    <td>{getString(item.primary_sic_code)}</td>
+            {data.map(
+                (item: Company, index: number): ReactElement => (
+                    <tr
+                        key={index}
+                        className={`${styles.tableRow} ${index % 2 === 0 ? styles.even : ""}`}
+                    >
+                        <TdContent>{item.company_name}</TdContent>
+                        <TdContent>{item.company_number}</TdContent>
+                        <TdContent>{getString(item.locality)}</TdContent>
+                        <TdContent>{item.company_status}</TdContent>
+                        {/* <td>{getString(item.sic_code)}</td>
                     <td>{formatCurrency(item.turnover)}</td>
                     <td>{item.active_officers_count}</td>
-                    <td>{item.incorporation_date}</td>
-                </tr>
-            ))}
+                    <td>{item.incorporation_date}</td> */}
+                    </tr>
+                ),
+            )}
         </tbody>
     );
 }

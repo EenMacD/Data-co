@@ -5,34 +5,8 @@
     text-align: left;
 }
 
-.tableBody td {
-    padding: var(--margin-sm);
-}
-
 .tableRow {
     height: 5.6rem;
-}
-
-.tableRow td:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 5;
-    background-color: var(--surface);
-    font-weight: 700;
-    font-size: var(--font-md);
-    /* box-shadow moved to ::after to ensure visibility */
-}
-
-.tableRow td:first-child::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 10px; /* Width of the shadow area */
-    transform: translateX(100%);
-    background: linear-gradient(to right, rgba(19, 65, 91, 0.1), transparent);
-    pointer-events: none;
 }
 
 .tableRow td:nth-child(2) {

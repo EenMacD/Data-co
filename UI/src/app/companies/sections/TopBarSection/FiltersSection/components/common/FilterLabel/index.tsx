@@ -1,5 +1,12 @@
+import type { ReactElement } from "react";
 import styles from "./styles.module.css";
 
-export default function FilterLabel({ label }: { label: string }) {
+interface FilterLabelProps {
+    label: string;
+}
+
+export default function FilterLabel({
+    label,
+}: FilterLabelProps): ReactElement {
     return <h4 className={styles.label}>{label}</h4>;
 }

@@ -1,16 +1,25 @@
 "use client";
 
+import type { ReactElement, ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./styles.module.css";
 
+interface NavLink {
+    title: string;
+    href: string;
+    icon: ReactNode;
+}
+
+interface NavigationItemProps {
+    navLink: NavLink;
+}
+
 export default function NavigationItem({
     navLink,
-}: {
-    navLink: { title: string; href: string; icon: React.ReactNode };
-}) {
-    const pathname = usePathname();
-    const isActive = pathname === navLink.href;
+}: NavigationItemProps): ReactElement {
+    const pathname: string = usePathname();
+    const isActive: boolean = pathname === navLink.href;
 
     return (
         <Link

@@ -37,9 +37,6 @@ func (h *CompanyHandler) SearchCompanies(c *gin.Context) {
 	if filters.Limit == 0 {
 		filters.Limit = 10
 	}
-	if filters.CompanyStatus == "" {
-		filters.CompanyStatus = "active"
-	}
 	includeTotal := filters.IncludeTotal == nil || *filters.IncludeTotal
 	queryFilters := filters
 	if !includeTotal {
@@ -105,11 +102,6 @@ func (h *CompanyHandler) CountCompanies(c *gin.Context) {
 			Message: err.Error(),
 		})
 		return
-	}
-
-	// Set defaults
-	if filters.CompanyStatus == "" {
-		filters.CompanyStatus = "active"
 	}
 
 	// Build count query
