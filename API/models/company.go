@@ -7,16 +7,16 @@ import (
 
 // Company represents a company record from the database
 type Company struct {
-	ID            int            `json:"id"`
-	CompanyNumber string         `json:"company_number"`
-	CompanyName   string         `json:"company_name"`
-	CompanyStatus string         `json:"company_status"`
-	Locality      sql.NullString `json:"locality"`
-	Region        sql.NullString `json:"region"`
-	PostalCode    sql.NullString `json:"postal_code"`
-	SICCode       sql.NullString `json:"sic_code"`
+	ID            int            `db:"-" json:"id"`
+	CompanyNumber string         `db:"company_number" json:"company_number"`
+	CompanyName   string         `db:"company_name" json:"company_name"`
+	CompanyStatus string         `db:"company_status" json:"company_status"`
+	Locality      sql.NullString `db:"locality" json:"locality"`
+	Region        sql.NullString `db:"region" json:"region"`
+	PostalCode    sql.NullString `db:"postal_code" json:"postal_code"`
+	SICCode       sql.NullString `db:"sic_code" json:"sic_code"`
 	// IndustryCategory     sql.NullString  `json:"industry_category"`
-	IncorporationDate *time.Time `json:"incorporation_date"`
+	IncorporationDate *time.Time `db:"incorporation_date" json:"incorporation_date"`
 	// Turnover             sql.NullFloat64 `json:"turnover"`
 	// ProfitAfterTax       sql.NullFloat64 `json:"profit_after_tax"`
 	// TotalAssets          sql.NullFloat64 `json:"total_assets"`

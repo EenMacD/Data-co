@@ -29,11 +29,11 @@ type ServerConfig struct {
 func LoadConfig() *Config {
 	return &Config{
 		Database: DatabaseConfig{
-			Host:     os.Getenv("STAGING_DB_HOST"),
-			Port:     os.Getenv("STAGING_DB_PORT"),
-			Name:     os.Getenv("STAGING_DB_NAME"),
-			User:     os.Getenv("STAGING_DB_USER"),
-			Password: os.Getenv("STAGING_DB_PASSWORD"),
+			Host:     os.Getenv("PRODUCTION_DB_HOST"),
+			Port:     os.Getenv("PRODUCTION_DB_PORT"),
+			Name:     os.Getenv("PRODUCTION_DB_NAME"),
+			User:     os.Getenv("PRODUCTION_DB_USER"),
+			Password: os.Getenv("PRODUCTION_DB_PASSWORD"),
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		Server: ServerConfig{

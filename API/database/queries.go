@@ -8,6 +8,44 @@ import (
 	"data-co/api/models"
 )
 
+const companySearchCTEs = `WITH latest_financials AS (
+	SELECT DISTINCT ON (company_number)
+		company_number,
+		turnover,
+		profit_after_tax,
+		total_assets,
+		total_liabilities,
+		net_worth,
+		profit_margin,
+		current_ratio,
+		period_end
+	FROM production_financials
+	WHERE period_end IS NOT NULL
+	ORDER BY company_number, period_end DESC
+),
+officer_counts AS (
+	SELECT
+		company_number,
+		COUNT(*) FILTER (WHERE resigned_on IS NULL) AS active_officers
+	FROM production_officers
+	GROUP BY company_number
+)`
+
+const companySearchFromClause = `FROM production_companies c
+LEFT JOIN latest_financials latest_fin ON c.company_number = latest_fin.company_number
+LEFT JOIN officer_counts ON c.company_number = officer_counts.company_number`
+
+var companySortMap = map[string]string{
+	"company_name":         "c.company_name",
+	"company_number":       "c.company_number",
+	"incorporation_date":   "c.incorporation_date",
+	"latest_accounts_date": "latest_fin.period_end",
+	"turnover":             "latest_fin.turnover",
+	"net_worth":            "latest_fin.net_worth",
+	"employees":            "officer_counts.active_officers",
+	"relevance":            "c.company_name", // Default to name if no similarity score
+}
+
 // QueryBuilder builds SQL queries based on filter criteria
 type QueryBuilder struct {
 	conditions []string
@@ -298,64 +336,26 @@ func (qb *QueryBuilder) AddSearchTerm(searchTerm string) {
 	qb.addCondition("c.company_name ILIKE $%d", "%"+searchTerm+"%")
 }
 
+func buildCompanySearchQuery(projection string) string {
+	return companySearchCTEs + "\nSELECT\n\t" + projection + "\n" + companySearchFromClause
+}
+
+func (qb *QueryBuilder) appendWhereClause(query string) string {
+	if len(qb.conditions) == 0 {
+		return query
+	}
+
+	return query + "\nWHERE " + strings.Join(qb.conditions, " AND ")
+}
+
 // BuildQuery builds the complete SQL query
 func (qb *QueryBuilder) BuildQuery(filters models.CompanySearchFilters) string {
-	baseQuery := `
-	WITH latest_financials AS (
-		SELECT DISTINCT ON (company_number)
-			company_number,
-			turnover,
-			profit_loss as profit_after_tax,
-			total_assets,
-			total_liabilities,
-			net_assets_liabilities as net_worth,
-			0 as profit_margin,
-			0 as current_ratio,
-			period_end
-		FROM staging_financials
-		WHERE period_end IS NOT NULL
-		ORDER BY company_number, period_end DESC
-	),
-	officer_counts AS (
-		SELECT
-			company_number,
-			COUNT(*) FILTER (WHERE resigned_on IS NULL) as active_officers
-		FROM staging_officers
-		GROUP BY company_number
-	)
-	SELECT
-		c.company_number,
-		c.company_name,
-		c.company_status,
-		c.locality,
-		c.region,
-		c.postal_code,
-		array_to_string(c.sic_codes, ',') as sic_code,
-		c.incorporation_date
-	FROM staging_companies c
-	LEFT JOIN latest_financials latest_fin ON c.company_number = latest_fin.company_number
-	LEFT JOIN officer_counts ON c.company_number = officer_counts.company_number
-	`
-
-	if len(qb.conditions) > 0 {
-		baseQuery += "\nWHERE " + strings.Join(qb.conditions, " AND ")
-	}
-
-	// Safe sort column mapping
-	sortMap := map[string]string{
-		"company_name":         "c.company_name",
-		"company_number":       "c.company_number",
-		"incorporation_date":   "c.incorporation_date",
-		"latest_accounts_date": "latest_fin.period_end",
-		"turnover":             "latest_fin.turnover",
-		"net_worth":            "latest_fin.net_worth",
-		"employees":            "active_officers_count",
-		"relevance":            "c.company_name", // Default to name if no similarity score
-	}
+	baseQuery := buildCompanySearchQuery(CompanyProjection())
+	baseQuery = qb.appendWhereClause(baseQuery)
 
 	orderBy := "c.company_name"
 	if filters.OrderBy != "" {
-		if val, ok := sortMap[filters.OrderBy]; ok {
+		if val, ok := companySortMap[filters.OrderBy]; ok {
 			orderBy = val
 		}
 	}
@@ -383,37 +383,8 @@ func (qb *QueryBuilder) BuildQuery(filters models.CompanySearchFilters) string {
 
 // BuildCountQuery builds a query to count total matching records
 func (qb *QueryBuilder) BuildCountQuery() string {
-	baseQuery := `
-	WITH latest_financials AS (
-		SELECT DISTINCT ON (company_number)
-			company_number,
-			turnover,
-			profit_loss as profit_after_tax,
-			total_assets,
-			total_liabilities,
-			net_assets_liabilities as net_worth
-		FROM staging_financials
-		WHERE period_end IS NOT NULL
-		ORDER BY company_number, period_end DESC
-	),
-	officer_counts AS (
-		SELECT
-			company_number,
-			COUNT(*) FILTER (WHERE resigned_on IS NULL) as active_officers
-		FROM staging_officers
-		GROUP BY company_number
-	)
-	SELECT COUNT(*) as total
-	FROM staging_companies c
-	LEFT JOIN latest_financials latest_fin ON c.company_number = latest_fin.company_number
-	LEFT JOIN officer_counts ON c.company_number = officer_counts.company_number
-	`
-
-	if len(qb.conditions) > 0 {
-		baseQuery += "\nWHERE " + strings.Join(qb.conditions, " AND ")
-	}
-
-	return baseQuery
+	baseQuery := buildCompanySearchQuery("COUNT(*) AS total")
+	return qb.appendWhereClause(baseQuery)
 }
 
 // GetArgs returns the query arguments
@@ -450,4 +421,9 @@ func BuildCompanyCountQuery(filters models.CompanySearchFilters) (string, []inte
 
 	query := qb.BuildCountQuery()
 	return query, qb.GetArgs()
+}
+
+// BuildCompanyByNumberQuery builds a query to fetch one company by company_number.
+func BuildCompanyByNumberQuery() string {
+	return "SELECT\n\t" + CompanyProjection() + "\nFROM production_companies c\nWHERE c.company_number = $1"
 }

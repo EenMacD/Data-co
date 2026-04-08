@@ -51,51 +51,12 @@ func (h *CompanyHandler) SearchCompanies(c *gin.Context) {
 
 	log.Printf("Executing search query with filters: %+v (includeTotal=%t)", queryFilters, includeTotal)
 
-	// Execute query
-	rows, err := h.db.Query(query, args...)
+	var companies []models.Company
+	err := h.db.Select(&companies, query, args...)
 	if err != nil {
 		log.Printf("Query error: %v", err)
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Failed to search companies",
-			Message: err.Error(),
-		})
-		return
-	}
-	defer rows.Close()
-
-	// Parse results
-	companies := make([]models.Company, 0, queryFilters.Limit)
-	for rows.Next() {
-		var c models.Company
-		err := rows.Scan(
-			&c.CompanyNumber,
-			&c.CompanyName,
-			&c.CompanyStatus,
-			&c.Locality,
-			&c.Region,
-			&c.PostalCode,
-			&c.SICCode,
-			// &c.IndustryCategory,
-			&c.IncorporationDate,
-			// &c.Turnover,
-			// &c.ProfitAfterTax,
-			// &c.TotalAssets,
-			// &c.NetWorth,
-			// &c.ProfitMargin,
-			// &c.LatestAccountsDate,
-			// &c.ActiveOfficersCount,
-		)
-		if err != nil {
-			log.Printf("Row scan error: %v", err)
-			continue
-		}
-		companies = append(companies, c)
-	}
-
-	if err := rows.Err(); err != nil {
-		log.Printf("Rows iteration error: %v", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Error processing results",
 			Message: err.Error(),
 		})
 		return
@@ -110,7 +71,7 @@ func (h *CompanyHandler) SearchCompanies(c *gin.Context) {
 
 	if includeTotal {
 		countQuery, countArgs := database.BuildCompanyCountQuery(filters)
-		err = h.db.QueryRow(countQuery, countArgs...).Scan(&total)
+		err = h.db.Get(&total, countQuery, countArgs...)
 		if err != nil {
 			log.Printf("Count query error: %v", err)
 			total = len(companies) // Fallback to returned count
@@ -158,7 +119,7 @@ func (h *CompanyHandler) CountCompanies(c *gin.Context) {
 
 	// Execute query
 	var total int
-	err := h.db.QueryRow(query, args...).Scan(&total)
+	err := h.db.Get(&total, query, args...)
 	if err != nil {
 		log.Printf("Count query error: %v", err)
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
@@ -184,52 +145,8 @@ func (h *CompanyHandler) GetCompany(c *gin.Context) {
 
 	log.Printf("Fetching company with company_number: %s", companyNumber)
 
-	// Query for single company
-	query := `
-	WITH latest_financial AS (
-		SELECT
-			turnover,
-			profit_loss as profit_after_tax,
-			total_assets,
-			net_assets_liabilities as net_worth,
-			0 as profit_margin,
-			period_end
-		FROM staging_financials
-		WHERE company_number = $1
-		ORDER BY period_end DESC
-		LIMIT 1
-	),
-	officer_count AS (
-		SELECT COUNT(*) FILTER (WHERE resigned_on IS NULL) as active_officers
-		FROM staging_officers
-		WHERE company_number = $1
-	)
-	SELECT
-		c.company_number,
-		c.company_name,
-		c.company_status,
-		c.locality,
-		c.region,
-		c.postal_code,
-		array_to_string(c.sic_codes, ',') as sic_code,
-		c.incorporation_date
-	FROM staging_companies c
-	LEFT JOIN latest_financial lf ON true
-	LEFT JOIN officer_count oc ON true
-	WHERE c.company_number = $1
-	`
-
 	var company models.Company
-	err := h.db.QueryRow(query, companyNumber).Scan(
-		&company.CompanyNumber,
-		&company.CompanyName,
-		&company.CompanyStatus,
-		&company.Locality,
-		&company.Region,
-		&company.PostalCode,
-		&company.SICCode,
-		&company.IncorporationDate,
-	)
+	err := h.db.Get(&company, database.BuildCompanyByNumberQuery(), companyNumber)
 
 	if err == sql.ErrNoRows {
 		c.JSON(http.StatusNotFound, models.ErrorResponse{

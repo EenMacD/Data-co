@@ -1,9 +1,9 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
 	"data-co/api/config"
@@ -11,7 +11,7 @@ import (
 
 // DB wraps the database connection
 type DB struct {
-	*sql.DB
+	*sqlx.DB
 }
 
 // NewConnection creates a new database connection
@@ -26,7 +26,7 @@ func NewConnection(cfg config.DatabaseConfig) (*DB, error) {
 		cfg.SSLMode,
 	)
 
-	db, err := sql.Open("postgres", connStr)
+	db, err := sqlx.Open("postgres", connStr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}

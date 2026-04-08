@@ -6,17 +6,20 @@ import { searchCompanies } from "./services/fetch-companies";
 
 export default async function DataResultsSection() {
     const response = await searchCompanies({
-        limit: 20,
-        offset: 1,
+        limit: 10,
+        offset: 0,
         orderBy: "company_number",
         includeTotal: false,
     });
     const companies = response.companies;
 
+    console.log(companies);
+    //TODO: now that you got a data response start working on the filters one by one and insure accuracy of the data
+
     const columns = [
         "Company Name",
         "Locality",
-        "Number",
+        "Company Number",
         "Status",
         "SIC Code",
         "Turnover",
