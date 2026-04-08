@@ -34,7 +34,7 @@ func (h *CompanyHandler) SearchCompanies(w http.ResponseWriter, r *http.Request)
 
 	// Set defaults
 	if filters.Limit == 0 {
-		filters.Limit = 100
+		filters.Limit = 10
 	}
 	if filters.CompanyStatus == "" {
 		filters.CompanyStatus = "active"

@@ -1,0 +1,11 @@
+.navbar {
+    display: flex;
+    gap: 1rem;
+    flex-direction: column;
+    width: min-content;
+    height: 100vh;
+    background-color: var(--surface);
+    padding: 3rem 2.4rem;
+    border-right: 2px solid var(--border);
+    z-index: 1000;
+}

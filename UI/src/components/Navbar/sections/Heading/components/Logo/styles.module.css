@@ -1,0 +1,17 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 5rem;
+  color: var(--primary); /* Optional: add some color if defined, otherwise defaults */
+}
+
+.title {
+  font-size: 3.2rem;
+  font-family: var(--albert_sans);
+  color: var(--primary);
+}

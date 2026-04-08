@@ -1,0 +1,23 @@
+.tableHeader {
+    font-size: var(--font-xs);
+    font-family: var(--font-albert_sans);
+    color: var(--primary-light);
+    text-transform: capitalize;
+    letter-spacing: 0.05rem;
+    text-align: left;
+}
+
+.tableHeader th {
+    padding: var(--margin-xs) var(--margin-sm);
+}
+
+.tableHeader th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background-color: var(--surface);
+}
+
+.tableHeader th:nth-child(2) {
+    padding-left: var(--margin-sm);
+}

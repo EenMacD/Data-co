@@ -289,7 +289,7 @@ func (qb *QueryBuilder) AddDebtLevelFilter(debtLevel string) {
 }
 
 // AddSearchTerm adds full-text search on company name
-func (qb *QueryBuilder) AddSearchTerm(searchTerm string) {
+func (qb *QueryBuilder) AddSearchTerm(searchTerm string)  {
 	if searchTerm == "" {
 		return
 	}
@@ -301,8 +301,8 @@ func (qb *QueryBuilder) AddSearchTerm(searchTerm string) {
 func (qb *QueryBuilder) BuildQuery(filters models.CompanySearchFilters) string {
 	baseQuery := `
 	WITH latest_financials AS (
-		SELECT DISTINCT ON (staging_company_id)
-			staging_company_id as company_id,
+		SELECT DISTINCT ON (company_number)
+			company_number as company_id,
 			turnover,
 			profit_loss as profit_after_tax,
 			total_assets,
@@ -313,14 +313,14 @@ func (qb *QueryBuilder) BuildQuery(filters models.CompanySearchFilters) string {
 			period_end
 		FROM staging_financials
 		WHERE period_end IS NOT NULL
-		ORDER BY staging_company_id, period_end DESC
+		ORDER BY company_number, period_end DESC
 	),
 	officer_counts AS (
 		SELECT
-			staging_company_id as company_id,
+			company_number as company_id,
 			COUNT(*) FILTER (WHERE resigned_on IS NULL) as active_officers
 		FROM staging_officers
-		GROUP BY staging_company_id
+		GROUP BY company_number
 	)
 	SELECT
 		c.id,
