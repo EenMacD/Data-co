@@ -30,17 +30,19 @@ export default function ResultsFooter({
                 <CustomButton
                     leadingIcon={<ChevronsUpDown />}
                     text="5"
+                    aria-label="Select rows per page"
                     textStyle={{ fontSize: "1.4rem", fontWeight: "700" }}
                 />
-                <CustomButton leadingIcon={<ChevronFirst />} />
-                <CustomButton leadingIcon={<ChevronLeft />} />
+                <CustomButton leadingIcon={<ChevronFirst />} aria-label="First page" />
+                <CustomButton leadingIcon={<ChevronLeft />} aria-label="Previous page" />
                 <CustomButton
                     text="16"
+                    aria-label="Current page 16"
                     textStyle={{ fontSize: "1.4rem", fontWeight: "700" }}
                     buttonStyle={{ padding: "0 2.4rem" }}
                 />
-                <CustomButton leadingIcon={<ChevronRight />} />
-                <CustomButton leadingIcon={<ChevronLast />} />
+                <CustomButton leadingIcon={<ChevronRight />} aria-label="Next page" />
+                <CustomButton leadingIcon={<ChevronLast />} aria-label="Last page" />
             </div>
         </div>
     );

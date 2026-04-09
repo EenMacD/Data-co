@@ -1,0 +1,47 @@
+{
+  "England": {
+    "London": {
+      "Croydon": {},
+      "Richmond": {}
+    },
+    "Manchester": {
+      "Stockport": {},
+      "Sale": {}
+    },
+    "Bristol": {
+      "Keynsham": {}
+    }
+  },
+  "Scotland": {
+    "Glasgow": {
+      "Bearsden": {},
+      "Springburn": {}
+    },
+    "Edinburgh": {
+      "Leith": {},
+      "Musselburgh": {}
+    },
+    "Aberdeen": {
+      "Stonehaven": {}
+    }
+  },
+  "Wales": {
+    "Cardiff": {
+      "Penarth": {},
+      "Barry": {}
+    },
+    "Swansea": {
+      "Mumbles": {},
+      "Neath": {}
+    }
+  },
+  "Northern Ireland": {
+    "Belfast": {
+      "Bangor": {},
+      "Lisburn": {}
+    },
+    "Derry/Londonderry": {
+      "Strabane": {}
+    }
+  }
+}

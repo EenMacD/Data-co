@@ -35,7 +35,8 @@
         ".next/types/**/*.ts",
         ".next/dev/types/**/*.ts",
         "**/*.mts",
-        "src/components/Navbar/sections/Heading/Heading.jsx"
+        "src/components/Navbar/sections/Heading/Heading.jsx",
+        "src/app/companies/sections/TopBarSection/FiltersSection/components/Filters/data/locality.js"
     ],
     "exclude": ["node_modules"]
 }

@@ -20,3 +20,13 @@
 .even td:first-child {
     background-color: var(--card);
 }
+
+.emptyRow {
+    height: 8rem;
+}
+
+.emptyCell {
+    text-align: center;
+    color: var(--secondary);
+    font-size: var(--font-md);
+}

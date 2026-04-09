@@ -1,5 +1,10 @@
-import type { ReactElement } from "react";
-import styles from "./styles.module.css"; // "./CustomButton.module.css";
+import type {
+    ButtonHTMLAttributes,
+    CSSProperties,
+    ReactElement,
+    ReactNode,
+} from "react";
+import styles from "./styles.module.css";
 
 interface TextStyle {
     fontSize?: string;
@@ -19,40 +24,63 @@ interface ButtonStyle {
 
 interface CustomButtonProps {
     text?: string;
-    trailingIcon?: React.ReactNode;
-    leadingIcon?: React.ReactNode;
+    trailingIcon?: ReactNode;
+    leadingIcon?: ReactNode;
+    variant?: "default" | "primary";
+    shape?: "default" | "round";
     isRound?: boolean;
     isPrimary?: boolean;
     textStyle?: TextStyle;
     trailingIconStyle?: IconStyle;
     leadingIconStyle?: IconStyle;
     buttonStyle?: ButtonStyle;
+    className?: string;
+    style?: CSSProperties;
 }
+
+type NativeButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "style">;
+
+type CustomButtonWithNativeProps = CustomButtonProps & NativeButtonProps;
 
 export default function CustomButton({
     text,
     trailingIcon,
     leadingIcon,
+    variant,
+    shape,
     isRound,
     isPrimary,
     textStyle,
     trailingIconStyle,
     leadingIconStyle,
     buttonStyle,
-}: CustomButtonProps): ReactElement {
+    className = "",
+    style,
+    type = "button",
+    ...buttonProps
+}: CustomButtonWithNativeProps): ReactElement {
+    const resolvedVariant: "default" | "primary" =
+        variant ?? (isPrimary ? "primary" : "default");
+    const resolvedShape: "default" | "round" =
+        shape ?? (isRound ? "round" : "default");
+    const hasText: boolean = Boolean(text);
+
     return (
-        <div
-            className={`${styles.container} ${isRound ? styles.round : ""} ${
-                isPrimary ? styles.primary : ""
-            }`}
+        <button
+            type={type}
+            className={`${styles.container} ${
+                resolvedShape === "round" ? styles.round : ""
+            } ${resolvedVariant === "primary" ? styles.primary : ""} ${className}`}
             style={{
                 background: buttonStyle?.background,
                 padding: buttonStyle?.padding,
+                ...style,
             }}
+            {...buttonProps}
         >
             {leadingIcon && (
-                <div
-                    className={`${styles.icon} ${!text ? styles.iconOnly : ""}`}
+                <span
+                    className={`${styles.icon} ${!hasText ? styles.iconOnly : ""}`}
                     style={{
                         width: leadingIconStyle?.size,
                         height: leadingIconStyle?.size,
@@ -60,10 +88,10 @@ export default function CustomButton({
                     }}
                 >
                     {leadingIcon}
-                </div>
+                </span>
             )}
-            {text && (
-                <p
+            {hasText && (
+                <span
                     className={styles.text}
                     style={{
                         fontSize: textStyle?.fontSize,
@@ -72,11 +100,11 @@ export default function CustomButton({
                     }}
                 >
                     {text}
-                </p>
+                </span>
             )}
             {trailingIcon && (
-                <div
-                    className={`${styles.icon} ${!text ? styles.iconOnly : ""}`}
+                <span
+                    className={`${styles.icon} ${!hasText ? styles.iconOnly : ""}`}
                     style={{
                         width: trailingIconStyle?.size,
                         height: trailingIconStyle?.size,
@@ -84,8 +112,8 @@ export default function CustomButton({
                     }}
                 >
                     {trailingIcon}
-                </div>
+                </span>
             )}
-        </div>
+        </button>
     );
 }

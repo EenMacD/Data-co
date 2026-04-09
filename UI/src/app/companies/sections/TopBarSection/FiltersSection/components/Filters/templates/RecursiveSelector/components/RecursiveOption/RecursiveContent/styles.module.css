@@ -1,0 +1,6 @@
+.wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+/* TODO: improve design and fix left arrow taking space issue */

@@ -15,8 +15,7 @@ export default async function DataResultsSection(): Promise<ReactElement> {
         includeTotal: false,
     });
     const companies: Company[] = response.companies ?? [];
-
-    console.log(companies);
+    const emptyMessage: string = response.error ?? "No data available.";
 
     const columns: string[] = [
         "Company Name",
@@ -42,7 +41,7 @@ export default async function DataResultsSection(): Promise<ReactElement> {
                         )}
                     </colgroup>
                     <ResultsHeader columns={columns} />
-                    <ResultsBody data={companies} />
+                    <ResultsBody data={companies} emptyMessage={emptyMessage} />
                 </table>
             </ScrollableTableArea>
         </div>

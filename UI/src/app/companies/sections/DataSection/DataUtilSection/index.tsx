@@ -18,7 +18,7 @@ export default function DataUtilSection(): ReactElement {
 
             <div className={styles.utilWrapper}>
                 <CustomButton leadingIcon={<DownloadIcon />} text="Export" />
-                <CustomButton leadingIcon={<Menu />} isPrimary />
+                <CustomButton leadingIcon={<Menu />} isPrimary aria-label="Open menu" />
             </div>
         </div>
     );

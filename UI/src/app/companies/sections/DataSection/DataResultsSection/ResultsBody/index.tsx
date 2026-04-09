@@ -7,27 +7,39 @@ import TdContent from "./components/TdContent";
 
 interface ResultsBodyProps {
     data: Company[];
+    emptyMessage?: string;
 }
 
-export default function ResultsBody({ data }: ResultsBodyProps): ReactElement {
+export default function ResultsBody({
+    data,
+    emptyMessage = "No data available.",
+}: ResultsBodyProps): ReactElement {
     return (
         <tbody className={styles.tableBody}>
-            {data.map(
-                (item: Company, index: number): ReactElement => (
-                    <tr
-                        key={index}
-                        className={`${styles.tableRow} ${index % 2 === 0 ? styles.even : ""}`}
-                    >
-                        <TdContent>{item.company_name}</TdContent>
-                        <TdContent>{item.company_number}</TdContent>
-                        <TdContent>{getString(item.locality)}</TdContent>
-                        <TdContent>{item.company_status}</TdContent>
-                        {/* <td>{getString(item.sic_code)}</td>
+            {data?.length ? (
+                data.map(
+                    (item: Company, index: number): ReactElement => (
+                        <tr
+                            key={index}
+                            className={`${styles.tableRow} ${index % 2 === 0 ? styles.even : ""}`}
+                        >
+                            <TdContent>{item.company_name}</TdContent>
+                            <TdContent>{item.company_number}</TdContent>
+                            <TdContent>{getString(item.locality)}</TdContent>
+                            <TdContent>{item.company_status}</TdContent>
+                            {/* <td>{getString(item.sic_code)}</td>
                     <td>{formatCurrency(item.turnover)}</td>
                     <td>{item.active_officers_count}</td>
                     <td>{item.incorporation_date}</td> */}
-                    </tr>
-                ),
+                        </tr>
+                    ),
+                )
+            ) : (
+                <tr className={styles.emptyRow}>
+                    <td className={styles.emptyCell} colSpan={4}>
+                        {emptyMessage}
+                    </td>
+                </tr>
             )}
         </tbody>
     );

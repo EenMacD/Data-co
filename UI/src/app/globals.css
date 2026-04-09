@@ -19,6 +19,7 @@
     --divider: rgba(203, 213, 225, 0.3);
     /* === Styles */
     --rounded-sm: 0.6rem;
+    --rounded-md: 1.2rem;
     --rounded-lg: 20rem;
 
     /* ====== margin */

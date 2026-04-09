@@ -6,4 +6,5 @@ export interface SearchResponse {
     limit: number;
     offset: number;
     has_more: boolean;
+    error?: string;
 }
