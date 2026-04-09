@@ -11,12 +11,8 @@ const companySearchCTEs = `WITH latest_financials AS (
 	SELECT DISTINCT ON (company_number)
 		company_number,
 		turnover,
-		profit_after_tax,
 		total_assets,
 		total_liabilities,
-		net_worth,
-		profit_margin,
-		current_ratio,
 		period_end
 	FROM production_financials
 	WHERE period_end IS NOT NULL

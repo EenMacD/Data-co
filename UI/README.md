@@ -23,9 +23,18 @@ The frontend application for the Data Co platform, built with Next.js. This appl
     ```
 
 2.  **Configure Environment:**
-    Create a `.env.local` file if you need to override default settings (e.g., API URL).
+    Create `UI/.env` for local development:
     ```env
-    NEXT_PUBLIC_API_URL=http://localhost:{API_PORT}/api
+    # API URL for the external frontend (Next.js) to connect to
+    # Option 1: Local development (default)
+    API_URL=http://localhost:{API_PORT}/api
+    # Option 2: Production / Tunnel
+    # API_URL=https://api.insitebase.com/api
+    ```
+    If the UI runs inside Docker, you can additionally set:
+    ```env
+    # Only for Docker-to-Docker calls from the Next.js server
+    DOCKER_API_URL=http://api:{API_PORT}/api
     ```
 
 ## Development

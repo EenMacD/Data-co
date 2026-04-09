@@ -59,6 +59,10 @@ func (h *CompanyHandler) SearchCompanies(c *gin.Context) {
 		return
 	}
 
+	if companies == nil {
+		companies = make([]models.Company, 0)
+	}
+
 	var total int
 	hasMore := false
 	if !includeTotal && len(companies) > filters.Limit {

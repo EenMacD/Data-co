@@ -14,7 +14,7 @@ export default async function DataResultsSection(): Promise<ReactElement> {
         orderBy: "company_number",
         includeTotal: false,
     });
-    const companies: Company[] = response.companies;
+    const companies: Company[] = response.companies ?? [];
 
     console.log(companies);
 

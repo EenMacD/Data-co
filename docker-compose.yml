@@ -61,13 +61,14 @@ services:
   ui:
     build:
       context: ./UI
-      args:
-        - NEXT_PUBLIC_API_URL=${API_URL:-http://${HOST_IP}:${API_PORT}/api}
     container_name: data-co-ui
     ports:
       - "${UI_PORT}:${UI_PORT}"
     environment:
-      - NEXT_PUBLIC_API_URL=${API_URL:-http://${HOST_IP}:${API_PORT}/api}
+      - API_URL=${API_URL:-http://${HOST_IP}:${API_PORT}/api}
+      - DOCKER_API_URL=${DOCKER_API_URL:-http://api:${API_PORT}/api}
+      - UI_PORT=${UI_PORT}
+      - PORT=${UI_PORT}
     depends_on:
       - api
     networks:
@@ -142,5 +143,3 @@ networks:
 volumes:
   postgres-staging-data:
   postgres-production-data:
-
-

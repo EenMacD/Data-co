@@ -4,7 +4,12 @@ import { SearchResponse } from "../models/search-response";
 export async function searchCompanies(
     filters: CompanySearchFilters,
 ): Promise<SearchResponse> {
-    const apiRoute: string | undefined = process.env.API_URL;
+    const apiRoute: string | undefined =
+        process.env.DOCKER_API_URL ?? process.env.API_URL;
+
+    if (!apiRoute) {
+        throw new Error("API URL is not configured");
+    }
 
     const response: Response = await fetch(`${apiRoute}/companies/search`, {
         method: "POST",
