@@ -3,7 +3,6 @@
 }
 
 .td:first-child {
-    max-width: 12rem;
     position: sticky;
     left: 0;
     z-index: 5;

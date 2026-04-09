@@ -11,10 +11,10 @@ interface PinnedFilter {
 
 export default function Filters(): ReactElement {
     const pinnedFilters: PinnedFilter[] = [
-        { label: "Location", text: "Select Option" },
-        { label: "SIC Code", text: "Select Option" },
-        { label: "Company Status", text: "Select Option" },
-        { label: "Revenue", text: "Select Option" },
+        { label: "Location", text: "Select Location" }, //TODO: you are creating the location filter
+        // { label: "SIC Code", text: "Select Option" },
+        // { label: "Company Status", text: "Select Option" },
+        // { label: "Revenue", text: "Select Option" },
     ];
 
     return (

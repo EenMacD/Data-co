@@ -12,6 +12,7 @@
 }
 
 .tableHeader th:first-child {
+    width: 14rem;
     position: sticky;
     left: 0;
     z-index: 10;

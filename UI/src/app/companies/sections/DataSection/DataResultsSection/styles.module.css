@@ -21,9 +21,14 @@
 
 .table {
     width: 100%;
+    table-layout: fixed;
     white-space: nowrap;
     border-collapse: separate;
     border-spacing: 0;
+}
+
+.firstColumn {
+    width: 32rem;
 }
 
 /* Removed sidePanel style as it is no longer used */

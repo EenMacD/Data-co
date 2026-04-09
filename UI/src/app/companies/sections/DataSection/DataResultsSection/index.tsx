@@ -17,7 +17,6 @@ export default async function DataResultsSection(): Promise<ReactElement> {
     const companies: Company[] = response.companies;
 
     console.log(companies);
-    //TODO: now that you got a data response start working on the filters one by one and insure accuracy of the data
 
     const columns: string[] = [
         "Company Name",
@@ -34,6 +33,14 @@ export default async function DataResultsSection(): Promise<ReactElement> {
         <div className={styles.container}>
             <ScrollableTableArea>
                 <table className={styles.table}>
+                    <colgroup>
+                        <col className={styles.firstColumn} />
+                        {columns.slice(1).map(
+                            (_column: string, index: number): ReactElement => (
+                                <col key={index} />
+                            ),
+                        )}
+                    </colgroup>
                     <ResultsHeader columns={columns} />
                     <ResultsBody data={companies} />
                 </table>
