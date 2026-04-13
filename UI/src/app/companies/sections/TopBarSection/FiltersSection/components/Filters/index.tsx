@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
-import CustomButton from "@/app/common/components/Buttons/CustomButton";
+import CustomButton from "@/app/common/components/CustomButton";
 import FilterItem from "./components/FilterItem";
 import styles from "./styles.module.css";
 import { ListFilterPlus } from "lucide-react";
@@ -23,7 +23,7 @@ export default function Filters(): ReactElement {
     ];
 
     return (
-        <div className={styles.container}>
+        <div className={styles.filtersWrapper}>
             {pinnedFilters.map(
                 (filter: PinnedFilter, index: number): ReactElement => (
                     <FilterItem key={index} filterData={filter} />

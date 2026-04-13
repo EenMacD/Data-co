@@ -1,0 +1,6 @@
+.line {
+    max-width: 70%;
+    height: 2px;
+    background-color: var(--border);
+    margin: var(--margin-sm) auto;
+}

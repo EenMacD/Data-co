@@ -1,28 +1,53 @@
+import type { ReactElement } from "react";
 import { useState } from "react";
-import { RecursiveNode } from "../../models/recursiveNode";
+import type { RecursiveNode } from "../../models/recursiveNode";
 import RecursiveContent from "./RecursiveContent/RecursiveContent";
+import styles from "./styles.module.css";
 
 type RecursiveOptionProps = {
     node: RecursiveNode;
+    addOption: (id: string) => void;
+    selectedOptions: string[];
+    searchQuery?: string;
 };
 
-export default function RecursiveOption({ node }: RecursiveOptionProps) {
+export default function RecursiveOption({
+    node,
+    addOption,
+    selectedOptions,
+    searchQuery = "",
+}: RecursiveOptionProps): ReactElement {
     const [isExpanded, setIsExpanded] = useState(false);
+    // Auto-open only the path that leads to a deeper match.
+    const shouldAutoExpand: boolean =
+        searchQuery.trim().length > 0 && Boolean(node.hasMatchingDescendant);
+    const isNodeExpanded: boolean = shouldAutoExpand || isExpanded;
+    const isLast: boolean = !node.children;
+    const isSelected: boolean = selectedOptions.includes(node.id);
 
     return (
-        <div>
+        <div
+            className={`${styles.recursiveOption} ${isLast && styles.lastOption}`}
+        >
             <RecursiveContent
+                id={node.id}
                 label={node.label}
                 depth={node.depth}
-                isLast={!node.children}
-                isExpanded={isExpanded}
+                isLast={isLast}
+                isExpanded={isNodeExpanded}
                 setIsExpanded={setIsExpanded}
+                addOption={addOption}
+                isSelected={isSelected}
+                searchQuery={searchQuery}
             />
-            {isExpanded &&
-                node.children?.map((child) => (
+            {isNodeExpanded &&
+                node.children?.map((child: RecursiveNode) => (
                     <RecursiveOption
                         key={child.id}
                         node={child}
+                        addOption={addOption}
+                        selectedOptions={selectedOptions}
+                        searchQuery={searchQuery}
                     ></RecursiveOption>
                 ))}
         </div>

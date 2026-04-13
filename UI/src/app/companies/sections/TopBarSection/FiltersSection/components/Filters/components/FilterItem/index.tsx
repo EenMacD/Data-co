@@ -3,7 +3,7 @@
 import { useState, type ReactElement } from "react";
 import FilterLabel from "../../../common/FilterLabel";
 import styles from "./styles.module.css";
-import CustomButton from "@/app/common/components/Buttons/CustomButton";
+import CustomButton from "@/app/common/components/CustomButton";
 import PinnedFilter from "../../models/pinnedFilters";
 
 export default function FilterItem({

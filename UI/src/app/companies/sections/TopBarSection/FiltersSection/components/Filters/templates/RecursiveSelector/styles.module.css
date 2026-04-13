@@ -1,0 +1,13 @@
+.recursiveOptionsWrapper {
+    overflow: auto;
+    overflow-x: hidden;
+    max-height: 30rem;
+}
+
+.submitButton {
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    margin: var(--margin-sm) auto var(--margin-xs) auto;
+    background-color: var(--primary);
+}

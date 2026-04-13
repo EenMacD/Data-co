@@ -21,9 +21,11 @@ export default function Navigation(): ReactElement {
         <>
             <NavSectionHeading title="Navigation" />
             <ul className={styles.navList}>
-                {navItems.map((navLink: NavItem): ReactElement => (
-                    <NavigationItem key={navLink.title} navLink={navLink} />
-                ))}
+                {navItems.map(
+                    (navLink: NavItem): ReactElement => (
+                        <NavigationItem key={navLink.title} navLink={navLink} />
+                    ),
+                )}
             </ul>
         </>
     );

@@ -1,0 +1,11 @@
+.recursiveOption {
+    padding: 0.8rem var(--padding-xs);
+    margin: 0.8rem 0;
+    background-color: var(--card);
+
+    /* border: 2px solid var(--border); */
+}
+
+.lastOption {
+    margin: 0 0 0 var(--margin-sm);
+}

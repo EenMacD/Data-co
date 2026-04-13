@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import SearchBar from "@/app/common/components/SearchBar";
 import styles from "./styles.module.css";
-import CustomButton from "@/app/common/components/Buttons/CustomButton";
+import CustomButton from "@/app/common/components/CustomButton";
 import { DownloadIcon, Menu } from "lucide-react";
 
 export default function DataUtilSection(): ReactElement {
@@ -18,7 +18,11 @@ export default function DataUtilSection(): ReactElement {
 
             <div className={styles.utilWrapper}>
                 <CustomButton leadingIcon={<DownloadIcon />} text="Export" />
-                <CustomButton leadingIcon={<Menu />} isPrimary aria-label="Open menu" />
+                <CustomButton
+                    leadingIcon={<Menu />}
+                    isPrimary
+                    aria-label="Open menu"
+                />
             </div>
         </div>
     );

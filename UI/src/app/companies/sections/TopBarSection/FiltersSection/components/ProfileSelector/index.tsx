@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import FilterLabel from "../common/FilterLabel";
 import styles from "./styles.module.css";
 import { ChevronDown } from "lucide-react";
-import CustomButton from "@/app/common/components/Buttons/CustomButton";
+import CustomButton from "@/app/common/components/CustomButton";
 
 export default function ProfileSelector(): ReactElement {
     return (

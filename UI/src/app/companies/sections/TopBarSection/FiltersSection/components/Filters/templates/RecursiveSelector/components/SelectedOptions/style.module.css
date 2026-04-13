@@ -1,0 +1,49 @@
+.SelectedOptionsCard {
+    width: 100%;
+    min-height: 7.2rem;
+    max-height: 9rem;
+    overflow-y: auto;
+    background-color: var(--card);
+    margin-top: var(--margin-xs);
+    border-radius: var(--rounded-sm);
+    padding: var(--padding-sm);
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: var(--margin-xs);
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    max-width: 100%;
+    border: none;
+    border-radius: 999px;
+    background-color: var(--surface);
+    color: var(--primary);
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        padding-right 0.2s ease;
+}
+
+.tag:hover {
+    background-color: color-mix(in srgb, var(--danger), var(--surface) 35%);
+    color: var(--primary-dark);
+}
+
+.tagLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tagRemove {
+    width: 1.4rem;
+    height: 1.4rem;
+    overflow: hidden;
+    margin-left: 0.4rem;
+}

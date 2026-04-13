@@ -1,4 +1,5 @@
-.container {
+/* the main container of the filter popup */
+.filtersWrapper {
     display: flex;
     flex-direction: row;
     align-items: end;

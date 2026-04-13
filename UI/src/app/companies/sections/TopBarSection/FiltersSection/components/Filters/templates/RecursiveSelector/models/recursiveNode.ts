@@ -4,4 +4,6 @@ export type RecursiveNode = {
     path: string[];
     depth: number;
     children?: RecursiveNode[];
+    isMatch?: boolean;
+    hasMatchingDescendant?: boolean;
 };
