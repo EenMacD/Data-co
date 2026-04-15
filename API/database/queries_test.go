@@ -84,14 +84,34 @@ func TestBuildCompanyCountQueryUsesSharedFragmentsAndLocationCondition(t *testin
 		"SELECT\n\tCOUNT(*) AS total",
 		"LEFT JOIN latest_financials latest_fin ON c.company_number = latest_fin.company_number",
 		"LEFT JOIN officer_counts ON c.company_number = officer_counts.company_number",
-		"WHERE ((c.locality ILIKE $1 OR c.region ILIKE $2) OR (c.locality ILIKE $3 OR c.region ILIKE $4))",
+		"WHERE ((c.locality ILIKE $1 OR c.region ILIKE $2 OR c.country ILIKE $3) OR (c.locality ILIKE $4 OR c.region ILIKE $5 OR c.country ILIKE $6))",
 	} {
 		if !strings.Contains(query, fragment) {
 			t.Fatalf("query missing fragment %q:\n%s", fragment, query)
 		}
 	}
 
-	expectedArgs := []interface{}{"%London%", "%London%", "%Manchester%", "%Manchester%"}
+	expectedArgs := []interface{}{"%London%", "%London%", "%London%", "%Manchester%", "%Manchester%", "%Manchester%"}
+	if !reflect.DeepEqual(args, expectedArgs) {
+		t.Fatalf("unexpected args: expected %#v, got %#v", expectedArgs, args)
+	}
+}
+
+func TestBuildCompanyCountQueryNormalizesHierarchicalLocations(t *testing.T) {
+	query, args := BuildCompanyCountQuery(models.CompanySearchFilters{
+		Locations: []string{"England/London", "England/West Midlands/Birmingham"},
+	})
+
+	expectedFragments := []string{
+		"WHERE ((c.locality ILIKE $1 OR c.region ILIKE $2 OR c.country ILIKE $3) OR ((c.locality ILIKE $4 OR c.region ILIKE $5 OR c.country ILIKE $6) OR (c.locality ILIKE $7 OR c.region ILIKE $8 OR c.country ILIKE $9)))",
+	}
+	for _, fragment := range expectedFragments {
+		if !strings.Contains(query, fragment) {
+			t.Fatalf("query missing fragment %q:\n%s", fragment, query)
+		}
+	}
+
+	expectedArgs := []interface{}{"%London%", "%London%", "%London%", "%West Midlands%", "%West Midlands%", "%West Midlands%", "%Birmingham%", "%Birmingham%", "%Birmingham%"}
 	if !reflect.DeepEqual(args, expectedArgs) {
 		t.Fatalf("unexpected args: expected %#v, got %#v", expectedArgs, args)
 	}

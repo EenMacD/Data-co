@@ -102,7 +102,7 @@ func (qb *QueryBuilder) AddIndustryFilter(industry string) {
 }
 */
 
-// AddLocationFilter filters by any location in locality or region.
+// AddLocationFilter filters by any location in locality, region, or country.
 func (qb *QueryBuilder) AddLocationFilter(locations []string) {
 	if len(locations) == 0 {
 		return
@@ -110,22 +110,36 @@ func (qb *QueryBuilder) AddLocationFilter(locations []string) {
 
 	locationConditions := make([]string, 0, len(locations))
 	for _, location := range locations {
-		trimmedLocation := strings.TrimSpace(location)
-		if trimmedLocation == "" {
+		searchTerms := normalizeLocationTerms(location)
+		if len(searchTerms) == 0 {
 			continue
 		}
 
-		pattern := "%" + trimmedLocation + "%"
+		termConditions := make([]string, 0, len(searchTerms))
+		for _, term := range searchTerms {
+			pattern := "%" + term + "%"
 
-		qb.argCount++
-		localityArg := qb.argCount
-		qb.args = append(qb.args, pattern)
+			qb.argCount++
+			localityArg := qb.argCount
+			qb.args = append(qb.args, pattern)
 
-		qb.argCount++
-		regionArg := qb.argCount
-		qb.args = append(qb.args, pattern)
+			qb.argCount++
+			regionArg := qb.argCount
+			qb.args = append(qb.args, pattern)
 
-		locationConditions = append(locationConditions, fmt.Sprintf("(c.locality ILIKE $%d OR c.region ILIKE $%d)", localityArg, regionArg))
+			qb.argCount++
+			countryArg := qb.argCount
+			qb.args = append(qb.args, pattern)
+
+			termConditions = append(termConditions, fmt.Sprintf("(c.locality ILIKE $%d OR c.region ILIKE $%d OR c.country ILIKE $%d)", localityArg, regionArg, countryArg))
+		}
+
+		if len(termConditions) == 1 {
+			locationConditions = append(locationConditions, termConditions[0])
+			continue
+		}
+
+		locationConditions = append(locationConditions, "("+strings.Join(termConditions, " OR ")+")")
 	}
 
 	if len(locationConditions) == 0 {
@@ -133,6 +147,40 @@ func (qb *QueryBuilder) AddLocationFilter(locations []string) {
 	}
 
 	qb.conditions = append(qb.conditions, "("+strings.Join(locationConditions, " OR ")+")")
+}
+
+func normalizeLocationTerms(location string) []string {
+	trimmedLocation := strings.TrimSpace(location)
+	if trimmedLocation == "" {
+		return nil
+	}
+
+	parts := strings.Split(trimmedLocation, "/")
+	if len(parts) > 1 {
+		parts = parts[1:]
+	}
+
+	seen := make(map[string]struct{}, len(parts))
+	terms := make([]string, 0, len(parts))
+	for _, part := range parts {
+		term := strings.TrimSpace(part)
+		if term == "" {
+			continue
+		}
+
+		if _, ok := seen[term]; ok {
+			continue
+		}
+
+		seen[term] = struct{}{}
+		terms = append(terms, term)
+	}
+
+	if len(terms) > 0 {
+		return terms
+	}
+
+	return []string{trimmedLocation}
 }
 
 /*

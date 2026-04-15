@@ -16,8 +16,8 @@ type Props = {
 
 export default function RootLayout({ children }: Readonly<Props>) {
     return (
-        <html lang="en">
-            <body className={fontsClassNames}>
+        <html lang="en" className={fontsClassNames}>
+            <body>
                 <StoreProvider>
                     <Navbar />
                     <main>{children}</main>

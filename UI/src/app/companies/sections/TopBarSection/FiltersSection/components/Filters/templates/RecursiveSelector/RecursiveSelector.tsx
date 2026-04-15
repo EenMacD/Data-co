@@ -1,4 +1,3 @@
-import type { ReactElement } from "react";
 import SearchBar from "@/app/common/components/SearchBar";
 import RecursiveOption from "./components/RecursiveOption/RecursiveOption";
 import type { RecursiveNodeModel } from "./models/RecursiveNodeModel";
@@ -20,9 +19,9 @@ type RecursiveSelectorProps = {
 export default function RecursiveSelector({
     data,
     filterId,
-}: RecursiveSelectorProps): ReactElement {
+}: RecursiveSelectorProps) {
     const dispatch = useAppDispatch();
-    const localityTree: LocalityTree = data;
+    const localityTree = data;
     const {
         nodes,
         query,
@@ -33,8 +32,8 @@ export default function RecursiveSelector({
     } = useRecursiveSelector(localityTree, filterId);
     const nodeById: Map<string, RecursiveNodeModel> = new Map();
 
-    function collectNodes(items: RecursiveNodeModel[]): void {
-        items.forEach((item: RecursiveNodeModel) => {
+    function collectNodes(items: RecursiveNodeModel[]) {
+        items.forEach((item) => {
             nodeById.set(item.id, item);
 
             if (item.children) {
@@ -45,12 +44,10 @@ export default function RecursiveSelector({
 
     collectNodes(nodes);
 
-    const selectedNodes: RecursiveNodeModel[] = selectedOptions.flatMap(
-        (id: string): RecursiveNodeModel[] => {
-            const node: RecursiveNodeModel | undefined = nodeById.get(id);
-            return node ? [node] : [];
-        },
-    );
+    const selectedNodes = selectedOptions.flatMap((id) => {
+        const node = nodeById.get(id);
+        return node ? [node] : [];
+    });
 
     return (
         <div className={styles.selectorCard}>
@@ -63,7 +60,7 @@ export default function RecursiveSelector({
 
             <Splitter />
             <div className={styles.recursiveOptionsWrapper}>
-                {visibleNodes.map((node: RecursiveNodeModel) => (
+                {visibleNodes.map((node) => (
                     <RecursiveOption
                         key={node.id}
                         node={node}
@@ -80,12 +77,15 @@ export default function RecursiveSelector({
                 />
                 <CustomButton
                     onClick={() =>
-                        handleSubmit({
-                            selectedValues: selectedNodes.map(
-                                (node: RecursiveNodeModel) => node.id,
-                            ),
-                            filterId,
-                        }, dispatch)
+                        handleSubmit(
+                            {
+                                selectedValues: selectedNodes.map(
+                                    (node) => node.label,
+                                ),
+                                filterId,
+                            },
+                            dispatch,
+                        )
                     }
                     text="Submit"
                     isPrimary

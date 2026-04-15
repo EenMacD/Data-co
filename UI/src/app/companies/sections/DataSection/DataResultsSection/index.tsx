@@ -10,9 +10,11 @@ import { fetchSearchCompanies } from "../../../store/features/searchCompaniesSli
 
 export default function DataResultsSection(): ReactElement {
     const dispatch = useAppDispatch();
-    const { companies = [], error, status } = useAppSelector(
-        (state) => state.companiesSearch,
-    );
+    const {
+        companies = [],
+        error,
+        status,
+    } = useAppSelector((state) => state.companiesSearch);
 
     useEffect(() => {
         if (status === "idle") {
@@ -21,7 +23,9 @@ export default function DataResultsSection(): ReactElement {
     }, [dispatch, status]);
 
     const emptyMessage: string =
-        status === "loading" ? "Loading companies..." : error ?? "No data available.";
+        status === "loading"
+            ? "Loading companies..."
+            : (error ?? "No data available.");
 
     const columns: string[] = [
         "Company Name",

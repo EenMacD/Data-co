@@ -1,7 +1,9 @@
 import type { RecursiveNodeModel } from "./models/RecursiveNodeModel";
 import { SelectedNodesRequestModel } from "./models/SelectedNodesRequest";
-import { applyRecursiveFilter } from "@/app/companies/providers/companiesProvider";
-import { fetchSearchCompanies } from "@/app/companies/store/features/searchCompaniesSlice";
+import {
+    fetchSearchCompanies,
+    setRecursiveFilter,
+} from "@/app/companies/store/features/searchCompaniesSlice";
 import type { AppDispatch } from "@/app/store/store";
 
 export interface LocalityTree {
@@ -81,6 +83,11 @@ export function handleSubmit(
     request: SelectedNodesRequestModel,
     dispatch: AppDispatch,
 ): void {
-    applyRecursiveFilter(request.selectedValues, request.filterId);
+    dispatch(
+        setRecursiveFilter({
+            selectedValues: request.selectedValues,
+            filterKey: request.filterId,
+        }),
+    );
     void dispatch(fetchSearchCompanies());
 }

@@ -1,30 +1,65 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { RootState } from "@/app/store/store";
+import type CompanySearchFilters from "../../models/search-filter";
+import type { RecursiveFilterKey } from "../../models/search-filter";
 import type { SearchResponse } from "../../models/search-response";
 import { searchCompanies } from "../../services/search-companies";
 
-export interface SearchCompaniesState extends SearchResponse {
+export interface SearchCompaniesState {
+    filters: CompanySearchFilters;
+    companies: SearchResponse["companies"];
+    total: number;
+    has_more: boolean;
+    error?: string;
     status: "idle" | "loading" | "succeeded" | "failed";
 }
 
 const initialState: SearchCompaniesState = {
+    filters: {
+        limit: 20,
+        offset: 0,
+        includeTotal: false,
+    },
     companies: [],
     total: 0,
-    limit: 0,
-    offset: 0,
     has_more: false,
     error: undefined,
     status: "idle",
 };
 
-export const fetchSearchCompanies = createAsyncThunk<SearchResponse>(
+export const fetchSearchCompanies = createAsyncThunk<
+    SearchResponse,
+    void,
+    { state: RootState }
+>(
     "searchCompanies/fetchSearchCompanies",
-    searchCompanies,
+    async (_arg, { getState }) => {
+        const { filters } = getState().companiesSearch;
+        return searchCompanies(filters);
+    },
 );
 
 const searchCompaniesSlice = createSlice({
     name: "searchCompanies",
     initialState,
-    reducers: {},
+    reducers: {
+        setOffset: (state, action: PayloadAction<number>) => {
+            state.filters.offset = action.payload;
+        },
+        setLimit: (state, action: PayloadAction<number>) => {
+            state.filters.limit = action.payload;
+        },
+        setRecursiveFilter: (
+            state,
+            action: PayloadAction<{
+                filterKey: RecursiveFilterKey;
+                selectedValues: string[];
+            }>,
+        ) => {
+            state.filters[action.payload.filterKey] = action.payload.selectedValues;
+            state.filters.offset = 0;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchSearchCompanies.pending, (state) => {
@@ -35,8 +70,6 @@ const searchCompaniesSlice = createSlice({
                 state.status = "succeeded";
                 state.companies = action.payload.companies ?? [];
                 state.total = action.payload.total ?? 0;
-                state.limit = action.payload.limit ?? 0;
-                state.offset = action.payload.offset ?? 0;
                 state.has_more = action.payload.has_more ?? false;
                 state.error = action.payload.error;
             })
@@ -44,12 +77,13 @@ const searchCompaniesSlice = createSlice({
                 state.status = "failed";
                 state.companies = [];
                 state.total = 0;
-                state.limit = 0;
-                state.offset = 0;
                 state.has_more = false;
                 state.error = "Unable to load companies right now.";
             });
     },
 });
+
+export const { setOffset, setLimit, setRecursiveFilter } =
+    searchCompaniesSlice.actions;
 
 export default searchCompaniesSlice.reducer;
