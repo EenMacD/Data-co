@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
 import type { Metadata } from "next";
 import { fontsClassNames } from "@/fonts/fonts";
-import "@/fonts/fonts.css";
-import "./globals.css";
 import Navbar from "@/components/Navbar";
+import StoreProvider from "./store/StoreProvider";
+import "./globals.css";
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -14,14 +14,14 @@ type Props = {
     children: React.ReactNode;
 };
 
-export default function RootLayout({
-    children,
-}: Readonly<Props>): ReactElement {
+export default function RootLayout({ children }: Readonly<Props>) {
     return (
         <html lang="en">
             <body className={fontsClassNames}>
-                <Navbar />
-                <main>{children}</main>
+                <StoreProvider>
+                    <Navbar />
+                    <main>{children}</main>
+                </StoreProvider>
             </body>
         </html>
     );

@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { getString } from "@/app/common/helpers/get-string";
-import Company from "../models/company";
+import Company from "../../../../models/company";
 import styles from "./styles.module.css";
 import TdContent from "./components/TdContent";
 // import { formatCurrency } from "@/app/common/helpers/format-currency";

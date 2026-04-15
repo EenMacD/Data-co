@@ -6,6 +6,7 @@ import FilterItem from "./components/FilterItem";
 import styles from "./styles.module.css";
 import { ListFilterPlus } from "lucide-react";
 import PinnedFilter from "./models/pinnedFilters";
+import data from "./data/locality.json";
 
 // templates
 import MultiSelector from "./templates/RecursiveSelector/RecursiveSelector";
@@ -13,9 +14,10 @@ import MultiSelector from "./templates/RecursiveSelector/RecursiveSelector";
 export default function Filters(): ReactElement {
     const pinnedFilters: PinnedFilter[] = [
         {
+            id: "locations",
             label: "Location",
             text: "Select Location",
-            template: <MultiSelector />,
+            template: <MultiSelector filterId="locations" data={data} />,
         },
         // { label: "SIC Code", text: "Select Option" },
         // { label: "Company Status", text: "Select Option" },
@@ -25,8 +27,8 @@ export default function Filters(): ReactElement {
     return (
         <div className={styles.filtersWrapper}>
             {pinnedFilters.map(
-                (filter: PinnedFilter, index: number): ReactElement => (
-                    <FilterItem key={index} filterData={filter} />
+                (filter: PinnedFilter): ReactElement => (
+                    <FilterItem key={filter.id} filterData={filter} />
                 ),
             )}
             <CustomButton

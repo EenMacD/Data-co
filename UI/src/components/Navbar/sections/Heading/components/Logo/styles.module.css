@@ -12,6 +12,6 @@
 
 .title {
   font-size: 3.2rem;
-  font-family: var(--albert_sans);
+  font-family: var(--font-albert_sans);
   color: var(--primary);
 }

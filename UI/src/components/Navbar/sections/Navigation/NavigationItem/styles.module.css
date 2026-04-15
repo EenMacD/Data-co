@@ -1,5 +1,5 @@
 .navItem {
-    font-size: var(--mediumlarge-font-size);
+    font-size: var(--font-md);
     cursor: pointer;
     display: flex;
     align-items: center;

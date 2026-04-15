@@ -20,7 +20,7 @@ export default function FilterItem({
             <FilterLabel label={label} />
             <CustomButton
                 text={text}
-                onClick={() => setIsOpen((prev) => !prev)}
+                onClick={() => setIsOpen((prev: boolean) => !prev)}
             />
             {isOpen && (
                 <div className={styles.popup}>{filterData.template}</div>

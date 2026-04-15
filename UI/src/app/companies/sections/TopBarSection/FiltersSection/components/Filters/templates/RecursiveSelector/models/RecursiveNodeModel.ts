@@ -1,9 +1,9 @@
-export type RecursiveNode = {
+export type RecursiveNodeModel = {
     id: string;
     label: string;
     path: string[];
     depth: number;
-    children?: RecursiveNode[];
+    children?: RecursiveNodeModel[];
     isMatch?: boolean;
     hasMatchingDescendant?: boolean;
 };

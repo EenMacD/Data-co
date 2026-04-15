@@ -1,11 +1,11 @@
 import type { ReactElement } from "react";
 import { useState } from "react";
-import type { RecursiveNode } from "../../models/recursiveNode";
+import type { RecursiveNodeModel } from "../../models/RecursiveNodeModel";
 import RecursiveContent from "./RecursiveContent/RecursiveContent";
 import styles from "./styles.module.css";
 
 type RecursiveOptionProps = {
-    node: RecursiveNode;
+    node: RecursiveNodeModel;
     addOption: (id: string) => void;
     selectedOptions: string[];
     searchQuery?: string;
@@ -41,7 +41,7 @@ export default function RecursiveOption({
                 searchQuery={searchQuery}
             />
             {isNodeExpanded &&
-                node.children?.map((child: RecursiveNode) => (
+                node.children?.map((child: RecursiveNodeModel) => (
                     <RecursiveOption
                         key={child.id}
                         node={child}

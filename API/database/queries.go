@@ -102,37 +102,37 @@ func (qb *QueryBuilder) AddIndustryFilter(industry string) {
 }
 */
 
-// AddLocationFilter filters by location (locality or region)
-func (qb *QueryBuilder) AddLocationFilter(location string) {
-	if location == "" {
+// AddLocationFilter filters by any location in locality or region.
+func (qb *QueryBuilder) AddLocationFilter(locations []string) {
+	if len(locations) == 0 {
 		return
 	}
 
-	locationMap := map[string]string{
-		"london":     "London",
-		"manchester": "Manchester",
-		"birmingham": "Birmingham",
-		"edinburgh":  "Edinburgh",
-		"bristol":    "Bristol",
+	locationConditions := make([]string, 0, len(locations))
+	for _, location := range locations {
+		trimmedLocation := strings.TrimSpace(location)
+		if trimmedLocation == "" {
+			continue
+		}
+
+		pattern := "%" + trimmedLocation + "%"
+
+		qb.argCount++
+		localityArg := qb.argCount
+		qb.args = append(qb.args, pattern)
+
+		qb.argCount++
+		regionArg := qb.argCount
+		qb.args = append(qb.args, pattern)
+
+		locationConditions = append(locationConditions, fmt.Sprintf("(c.locality ILIKE $%d OR c.region ILIKE $%d)", localityArg, regionArg))
 	}
 
-	dbLocation := locationMap[strings.ToLower(location)]
-	if dbLocation == "" {
-		dbLocation = strings.Title(location)
+	if len(locationConditions) == 0 {
+		return
 	}
 
-	// Add pattern matching with wildcards for ILIKE
-	pattern := "%" + dbLocation + "%"
-
-	qb.argCount++
-	firstArg := qb.argCount
-	qb.args = append(qb.args, pattern)
-
-	qb.argCount++
-	secondArg := qb.argCount
-	qb.args = append(qb.args, pattern)
-
-	qb.conditions = append(qb.conditions, fmt.Sprintf("(c.locality ILIKE $%d OR c.region ILIKE $%d)", firstArg, secondArg))
+	qb.conditions = append(qb.conditions, "("+strings.Join(locationConditions, " OR ")+")")
 }
 
 /*
@@ -409,7 +409,7 @@ func (qb *QueryBuilder) GetArgs() []interface{} {
 
 func applyCompanyFilters(qb *QueryBuilder, filters models.CompanySearchFilters) {
 	// qb.AddIndustryFilter(filters.Industry)
-	qb.AddLocationFilter(filters.Location)
+	qb.AddLocationFilter(filters.Locations)
 	// qb.AddRevenueFilter(filters.Revenue)
 	// qb.AddEmployeesFilter(filters.Employees)
 	// qb.AddProfitabilityFilter(filters.Profitability)

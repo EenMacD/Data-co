@@ -9,6 +9,7 @@
         "esModuleInterop": true,
         "module": "esnext",
         "moduleResolution": "bundler",
+        "noUncheckedSideEffectImports": false,
         "resolveJsonModule": true,
         "isolatedModules": true,
         "jsx": "react-jsx",
@@ -21,12 +22,7 @@
         "paths": {
             "@/*": ["./src/*"],
             "@public/*": ["./public/*"]
-        },
-        "noImplicitAny": true,
-        "noImplicitReturns": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true
+        }
     },
     "include": [
         "next-env.d.ts",

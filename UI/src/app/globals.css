@@ -1,3 +1,5 @@
+@import "../fonts/fonts.css";
+
 :root {
     /* ====== Brand Colors */
     --primary: #13415b; /* Dark Slate Blue */

@@ -1,9 +1,7 @@
-import CompanySearchFilters from "../models/search-filter";
+import { appliedFilters } from "../providers/companiesProvider";
 import { SearchResponse } from "../models/search-response";
 
-export async function searchCompanies(
-    filters: CompanySearchFilters,
-): Promise<SearchResponse> {
+export async function searchCompanies(): Promise<SearchResponse> {
     const apiRoute: string | undefined =
         process.env.API_URL ?? process.env.DOCKER_API_URL;
 
@@ -11,12 +9,14 @@ export async function searchCompanies(
         return {
             companies: [],
             total: 0,
-            limit: filters.limit ?? 0,
-            offset: filters.offset ?? 0,
+            limit: appliedFilters.limit ?? 0,
+            offset: appliedFilters.offset ?? 0,
             has_more: false,
             error: "API URL is not configured.",
         };
     }
+
+    console.log(apiRoute);
 
     try {
         const response: Response = await fetch(`${apiRoute}/companies/search`, {
@@ -24,15 +24,15 @@ export async function searchCompanies(
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(filters),
+            body: JSON.stringify(appliedFilters),
         });
 
         if (!response.ok) {
             return {
                 companies: [],
                 total: 0,
-                limit: filters.limit ?? 0,
-                offset: filters.offset ?? 0,
+                limit: appliedFilters.limit ?? 0,
+                offset: appliedFilters.offset ?? 0,
                 has_more: false,
                 error: `Unable to load companies right now (${response.status}).`,
             };
@@ -43,8 +43,8 @@ export async function searchCompanies(
         return {
             companies: [],
             total: 0,
-            limit: filters.limit ?? 0,
-            offset: filters.offset ?? 0,
+            limit: appliedFilters.limit ?? 0,
+            offset: appliedFilters.offset ?? 0,
             has_more: false,
             error: "The companies API is offline right now.",
         };

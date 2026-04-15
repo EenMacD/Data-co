@@ -1,12 +1,14 @@
 import { useState, type ChangeEvent } from "react";
-import type { RecursiveNode } from "../models/recursiveNode";
+import type { RecursiveNodeModel } from "../models/RecursiveNodeModel";
 import type { LocalityTree } from "../utils";
 import { filterRecursiveNodes, toRecursiveNodes } from "../utils";
+import { appliedFilters } from "@/app/companies/providers/companiesProvider";
+import type { RecursiveFilterKey } from "@/app/companies/models/search-filter";
 
 type UseRecursiveSelectorResult = {
-    nodes: RecursiveNode[];
+    nodes: RecursiveNodeModel[];
     query: string;
-    visibleNodes: RecursiveNode[];
+    visibleNodes: RecursiveNodeModel[];
     selectedOptions: string[];
     handleQueryChange: (event: ChangeEvent<HTMLInputElement>) => void;
     toggleOption: (id: string) => void;
@@ -14,13 +16,20 @@ type UseRecursiveSelectorResult = {
 
 export function useRecursiveSelector(
     localityTree: LocalityTree,
+    filterId: RecursiveFilterKey,
 ): UseRecursiveSelectorResult {
     const [query, setQuery] = useState("");
-    const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+    const [selectedOptions, setSelectedOptions] = useState<string[]>(
+        // Reopen the selector with whatever was previously applied for this filter.
+        appliedFilters[filterId] ?? [],
+    );
 
     // Build the full tree once per render, then derive the visible tree from it.
-    const nodes: RecursiveNode[] = toRecursiveNodes(localityTree);
-    const visibleNodes: RecursiveNode[] = filterRecursiveNodes(nodes, query);
+    const nodes: RecursiveNodeModel[] = toRecursiveNodes(localityTree);
+    const visibleNodes: RecursiveNodeModel[] = filterRecursiveNodes(
+        nodes,
+        query,
+    );
 
     function handleQueryChange(event: ChangeEvent<HTMLInputElement>): void {
         setQuery(event.target.value);

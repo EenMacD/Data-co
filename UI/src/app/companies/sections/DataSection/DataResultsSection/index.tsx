@@ -1,21 +1,27 @@
-import type { ReactElement } from "react";
+"use client";
+
+import { useEffect, type ReactElement } from "react";
 import ScrollableTableArea from "./ScrollableTableArea";
 import ResultsHeader from "./ResultsHeader";
 import ResultsBody from "./ResultsBody";
 import styles from "./styles.module.css";
-import { searchCompanies } from "./services/fetch-companies";
-import { SearchResponse } from "./models/search-response";
-import Company from "./models/company";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { fetchSearchCompanies } from "../../../store/features/searchCompaniesSlice";
 
-export default async function DataResultsSection(): Promise<ReactElement> {
-    const response: SearchResponse = await searchCompanies({
-        limit: 20,
-        offset: 0,
-        orderBy: "company_number",
-        includeTotal: false,
-    });
-    const companies: Company[] = response.companies ?? [];
-    const emptyMessage: string = response.error ?? "No data available.";
+export default function DataResultsSection(): ReactElement {
+    const dispatch = useAppDispatch();
+    const { companies = [], error, status } = useAppSelector(
+        (state) => state.companiesSearch,
+    );
+
+    useEffect(() => {
+        if (status === "idle") {
+            void dispatch(fetchSearchCompanies());
+        }
+    }, [dispatch, status]);
+
+    const emptyMessage: string =
+        status === "loading" ? "Loading companies..." : error ?? "No data available.";
 
     const columns: string[] = [
         "Company Name",

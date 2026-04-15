@@ -1,10 +1,10 @@
 import type { ReactElement } from "react";
-import type { RecursiveNode } from "../../models/recursiveNode";
+import type { RecursiveNodeModel } from "../../models/RecursiveNodeModel";
 import { X } from "lucide-react";
 import styles from "./style.module.css";
 
 type SelectedOptionsProps = {
-    selectedNodes: RecursiveNode[];
+    selectedNodes: RecursiveNodeModel[];
     removeOption: (id: string) => void;
 };
 
@@ -14,7 +14,7 @@ export default function SelectedOptions({
 }: SelectedOptionsProps): ReactElement {
     return (
         <div className={styles.SelectedOptionsCard}>
-            {selectedNodes.map((node: RecursiveNode) => (
+            {selectedNodes.map((node: RecursiveNodeModel) => (
                 <button
                     key={node.id}
                     type="button"

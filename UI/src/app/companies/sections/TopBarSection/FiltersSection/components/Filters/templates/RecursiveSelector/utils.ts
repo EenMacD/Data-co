@@ -1,5 +1,8 @@
-import type { RecursiveNode } from "./models/recursiveNode";
-import type { MouseEvent as ReactMouseEvent } from "react";
+import type { RecursiveNodeModel } from "./models/RecursiveNodeModel";
+import { SelectedNodesRequestModel } from "./models/SelectedNodesRequest";
+import { applyRecursiveFilter } from "@/app/companies/providers/companiesProvider";
+import { fetchSearchCompanies } from "@/app/companies/store/features/searchCompaniesSlice";
+import type { AppDispatch } from "@/app/store/store";
 
 export interface LocalityTree {
     [key: string]: LocalityTree;
@@ -9,12 +12,12 @@ export function toRecursiveNodes(
     tree: LocalityTree,
     parentPath: string[] = [],
     depth: number = 0,
-): RecursiveNode[] {
+): RecursiveNodeModel[] {
     // Convert the raw object tree into renderable nodes.
     return Object.entries(tree).map(
         ([label, children]: [string, LocalityTree]) => {
             const path: string[] = [...parentPath, label];
-            const childNodes: RecursiveNode[] = toRecursiveNodes(
+            const childNodes: RecursiveNodeModel[] = toRecursiveNodes(
                 children,
                 path,
                 depth + 1,
@@ -32,17 +35,17 @@ export function toRecursiveNodes(
 }
 
 export function filterRecursiveNodes(
-    nodes: RecursiveNode[],
+    nodes: RecursiveNodeModel[],
     query: string,
-): RecursiveNode[] {
+): RecursiveNodeModel[] {
     const normalizedQuery: string = query.trim().toLowerCase();
 
     if (!normalizedQuery) {
         return nodes;
     }
 
-    return nodes.flatMap((node: RecursiveNode) => {
-        const filteredChildren: RecursiveNode[] | undefined = node.children
+    return nodes.flatMap((node: RecursiveNodeModel) => {
+        const filteredChildren: RecursiveNodeModel[] | undefined = node.children
             ? filterRecursiveNodes(node.children, normalizedQuery)
             : undefined;
         // Match against the current label only.
@@ -75,5 +78,9 @@ export function filterRecursiveNodes(
 }
 
 export function handleSubmit(
-    event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
-): void {}
+    request: SelectedNodesRequestModel,
+    dispatch: AppDispatch,
+): void {
+    applyRecursiveFilter(request.selectedValues, request.filterId);
+    void dispatch(fetchSearchCompanies());
+}

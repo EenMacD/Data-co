@@ -1,10 +1,18 @@
+"use client";
+
 import type { ReactElement } from "react";
 import SearchBar from "@/app/common/components/SearchBar";
 import styles from "./styles.module.css";
 import CustomButton from "@/app/common/components/CustomButton";
 import { DownloadIcon, Menu } from "lucide-react";
+import { useAppSelector } from "@/app/store/hooks";
 
 export default function DataUtilSection(): ReactElement {
+    const { companies = [], total } = useAppSelector(
+        (state) => state.companiesSearch,
+    );
+    const resultsCount: number = total || companies.length;
+
     return (
         <div className={styles.DataUtilSection}>
             <div className={styles.searchWrapper}>
@@ -13,7 +21,9 @@ export default function DataUtilSection(): ReactElement {
                     width="28rem"
                     height="4.8rem"
                 />
-                <p className={styles.resutlsText}>242,384 Results</p>
+                <p className={styles.resutlsText}>
+                    {resultsCount.toLocaleString("en-GB")} Results
+                </p>
             </div>
 
             <div className={styles.utilWrapper}>

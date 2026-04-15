@@ -1,9 +1,7 @@
 import type { ReactElement } from "react";
-import type { MouseEvent as ReactMouseEvent } from "react";
 import SearchBar from "@/app/common/components/SearchBar";
 import RecursiveOption from "./components/RecursiveOption/RecursiveOption";
-import type { RecursiveNode } from "./models/recursiveNode";
-import data from "../../data/locality.json";
+import type { RecursiveNodeModel } from "./models/RecursiveNodeModel";
 import styles from "./styles.module.css";
 import Splitter from "@/app/common/components/Splitter/Splitter";
 import { useRecursiveSelector } from "./hooks/useRecursiveSelector";
@@ -11,8 +9,19 @@ import type { LocalityTree } from "./utils";
 import SelectedOptions from "./components/SelectedOptions";
 import CustomButton from "@/app/common/components/CustomButton";
 import { handleSubmit } from "./utils";
+import type { RecursiveFilterKey } from "@/app/companies/models/search-filter";
+import { useAppDispatch } from "@/app/store/hooks";
 
-export default function RecursiveSelector(): ReactElement {
+type RecursiveSelectorProps = {
+    data: LocalityTree;
+    filterId: RecursiveFilterKey;
+};
+
+export default function RecursiveSelector({
+    data,
+    filterId,
+}: RecursiveSelectorProps): ReactElement {
+    const dispatch = useAppDispatch();
     const localityTree: LocalityTree = data;
     const {
         nodes,
@@ -21,11 +30,11 @@ export default function RecursiveSelector(): ReactElement {
         selectedOptions,
         handleQueryChange,
         toggleOption,
-    } = useRecursiveSelector(localityTree);
-    const nodeById: Map<string, RecursiveNode> = new Map();
+    } = useRecursiveSelector(localityTree, filterId);
+    const nodeById: Map<string, RecursiveNodeModel> = new Map();
 
-    function collectNodes(items: RecursiveNode[]): void {
-        items.forEach((item: RecursiveNode) => {
+    function collectNodes(items: RecursiveNodeModel[]): void {
+        items.forEach((item: RecursiveNodeModel) => {
             nodeById.set(item.id, item);
 
             if (item.children) {
@@ -36,9 +45,9 @@ export default function RecursiveSelector(): ReactElement {
 
     collectNodes(nodes);
 
-    const selectedNodes: RecursiveNode[] = selectedOptions.flatMap(
-        (id: string): RecursiveNode[] => {
-            const node: RecursiveNode | undefined = nodeById.get(id);
+    const selectedNodes: RecursiveNodeModel[] = selectedOptions.flatMap(
+        (id: string): RecursiveNodeModel[] => {
+            const node: RecursiveNodeModel | undefined = nodeById.get(id);
             return node ? [node] : [];
         },
     );
@@ -54,7 +63,7 @@ export default function RecursiveSelector(): ReactElement {
 
             <Splitter />
             <div className={styles.recursiveOptionsWrapper}>
-                {visibleNodes.map((node: RecursiveNode) => (
+                {visibleNodes.map((node: RecursiveNodeModel) => (
                     <RecursiveOption
                         key={node.id}
                         node={node}
@@ -64,14 +73,20 @@ export default function RecursiveSelector(): ReactElement {
                     />
                 ))}
             </div>
-            <Splitter />
             <div className={styles.footer}>
                 <SelectedOptions
                     selectedNodes={selectedNodes}
                     removeOption={toggleOption}
                 />
                 <CustomButton
-                    onClick={handleSubmit}
+                    onClick={() =>
+                        handleSubmit({
+                            selectedValues: selectedNodes.map(
+                                (node: RecursiveNodeModel) => node.id,
+                            ),
+                            filterId,
+                        }, dispatch)
+                    }
                     text="Submit"
                     isPrimary
                     className={styles.submitButton}

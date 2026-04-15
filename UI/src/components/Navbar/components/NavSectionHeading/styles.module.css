@@ -6,7 +6,7 @@
 
 .title {
     font-size: 1.6rem;
-    font-family: var(--albert_sans);
+    font-family: var(--font-albert_sans);
     font-weight: 500;
     color: var(--primary-light);
 }
