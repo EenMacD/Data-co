@@ -139,6 +139,28 @@ func TestBuildCompanyCountQueryNormalizesHierarchicalLocations(t *testing.T) {
 	}
 }
 
+func TestBuildCompanyQueryFiltersCompanyStatuses(t *testing.T) {
+	query, args := BuildCompanyQuery(models.CompanySearchFilters{
+		Status: []string{"active", "liquidation"},
+		Limit:  20,
+		Offset: 0,
+	})
+
+	expectedFragment := "WHERE (LOWER(c.company_status) = $1 OR LOWER(c.company_status) = $2)"
+	if !strings.Contains(query, expectedFragment) {
+		t.Fatalf("query missing fragment %q:\n%s", expectedFragment, query)
+	}
+
+	if !strings.Contains(query, "LIMIT $3 OFFSET $4") {
+		t.Fatalf("query should place limit and offset after status args:\n%s", query)
+	}
+
+	expectedArgs := []interface{}{"active", "liquidation", 20, 0}
+	if !reflect.DeepEqual(args, expectedArgs) {
+		t.Fatalf("unexpected args: expected %#v, got %#v", expectedArgs, args)
+	}
+}
+
 func TestBuildCompanyByNumberQueryUsesSharedProjection(t *testing.T) {
 	query := BuildCompanyByNumberQuery()
 

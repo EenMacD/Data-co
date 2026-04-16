@@ -6,8 +6,6 @@ export async function searchCompanies(
 ): Promise<SearchResponse> {
     const apiRoute = "http://localhost:8080/api";
 
-    console.log(JSON.stringify(filters));
-
     try {
         const response: Response = await fetch(`${apiRoute}/companies/search`, {
             method: "POST",

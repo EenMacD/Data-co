@@ -1,15 +1,18 @@
-"use client";
-
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import FilterLabel from "../../../common/FilterLabel";
 import styles from "./styles.module.css";
 import CustomButton from "@/app/common/components/CustomButton";
-import PinnedFilter from "../../models/pinnedFilters";
+import type {
+    FilterTemplateRenderer,
+    PinnedFilter,
+} from "../../models/pinnedFilters";
 
 export default function FilterItem({
     filterData,
+    renderTemplate,
 }: {
     filterData: PinnedFilter;
+    renderTemplate: FilterTemplateRenderer;
 }): ReactElement {
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -21,7 +24,7 @@ export default function FilterItem({
             return;
         }
 
-        function handlePointerDown(event: PointerEvent) {
+        function handlePointerDown(event: PointerEvent): void {
             if (!wrapperRef.current?.contains(event.target as Node)) {
                 setIsOpen(false);
             }
@@ -34,6 +37,10 @@ export default function FilterItem({
         };
     }, [isOpen]);
 
+    function handleClose(): void {
+        setIsOpen(false);
+    }
+
     return (
         <div ref={wrapperRef} className={styles.wrapper}>
             <FilterLabel label={label} />
@@ -42,7 +49,9 @@ export default function FilterItem({
                 onClick={() => setIsOpen((prev: boolean) => !prev)}
             />
             {isOpen && (
-                <div className={styles.popup}>{filterData.template}</div>
+                <div className={styles.popup}>
+                    {renderTemplate({ onClose: handleClose })}
+                </div>
             )}
         </div>
     );

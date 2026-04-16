@@ -30,11 +30,11 @@ type Company struct {
 type CompanySearchFilters struct {
 	Industry  []string `json:"industry"`
 	Locations []string `json:"locations"`
+	Status    []string `json:"status"`
 	// Revenue       string `json:"revenue"`
 	// Employees     string `json:"employees"`
 	// Profitability string `json:"profitability"`
 	// CompanySize   string `json:"companySize"`
-	// CompanyStatus string `json:"companyStatus"`
 	// NetAssets     string `json:"netAssets"`
 	// DebtLevel     string `json:"debtLevel"`
 	// SearchTerm    string `json:"searchTerm"`

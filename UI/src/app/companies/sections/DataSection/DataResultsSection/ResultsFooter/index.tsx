@@ -8,13 +8,13 @@ import CustomButton from "@/app/common/components/CustomButton";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 
 // icons
-import { ChevronLeft, ChevronRight, ChevronsUpDown } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
     fetchSearchCompanies,
     setLimit,
     setOffset,
 } from "@/app/companies/store/features/searchCompaniesSlice";
-import PageSelector from "./components/PageSelector/PageSelector";
+import RPPSelector from "./components/PageSelector/RPPSelector";
 
 interface ResultsFooterProps {
     scrollContainerRef: RefObject<HTMLDivElement | null>;
@@ -56,7 +56,10 @@ export default function ResultsFooter({
             </div>
             <div className={styles.actions}>
                 <p className={styles.rowsPerPageText}>Rows Per Page</p>
-                <PageSelector limit={5} handleChange={handleChangeLimit} />
+                <RPPSelector
+                    limit={limit}
+                    handleChangeAction={handleChangeLimit}
+                />
 
                 {/* <CustomButton
                     leadingIcon={<ChevronFirst />}

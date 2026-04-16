@@ -310,17 +310,35 @@ func (qb *QueryBuilder) AddCompanyAgeFilter(ageRange string) {
 }
 */
 
-/*
 // AddCompanyStatusFilter filters by company status
-func (qb *QueryBuilder) AddCompanyStatusFilter(status string) {
-	normalizedStatus := strings.ToLower(strings.TrimSpace(status))
-	if normalizedStatus == "" || normalizedStatus == "all" {
+func (qb *QueryBuilder) AddCompanyStatusFilter(statuses []string) {
+	if len(statuses) == 0 {
 		return
 	}
 
-	qb.addCondition("c.company_status = $%d", normalizedStatus)
+	seen := make(map[string]struct{}, len(statuses))
+	conditions := make([]string, 0, len(statuses))
+	for _, status := range statuses {
+		normalizedStatus := strings.ToLower(strings.TrimSpace(status))
+		if normalizedStatus == "" || normalizedStatus == "all" {
+			continue
+		}
+		if _, ok := seen[normalizedStatus]; ok {
+			continue
+		}
+
+		seen[normalizedStatus] = struct{}{}
+		qb.argCount++
+		qb.args = append(qb.args, normalizedStatus)
+		conditions = append(conditions, fmt.Sprintf("LOWER(c.company_status) = $%d", qb.argCount))
+	}
+
+	if len(conditions) == 0 {
+		return
+	}
+
+	qb.conditions = append(qb.conditions, "("+strings.Join(conditions, " OR ")+")")
 }
-*/
 
 /*
 // AddNetAssetsFilter filters by net assets/net worth
@@ -451,11 +469,11 @@ func (qb *QueryBuilder) GetArgs() []interface{} {
 func applyCompanyFilters(qb *QueryBuilder, filters models.CompanySearchFilters) {
 	qb.AddIndustryFilter(filters.Industry)
 	qb.AddLocationFilter(filters.Locations)
+	qb.AddCompanyStatusFilter(filters.Status)
 	// qb.AddRevenueFilter(filters.Revenue)
 	// qb.AddEmployeesFilter(filters.Employees)
 	// qb.AddProfitabilityFilter(filters.Profitability)
 	// qb.AddCompanySizeFilter(filters.CompanySize)
-	// qb.AddCompanyStatusFilter(filters.CompanyStatus)
 	// qb.AddNetAssetsFilter(filters.NetAssets)
 	// qb.AddDebtLevelFilter(filters.DebtLevel)
 	// qb.AddSearchTerm(filters.SearchTerm)

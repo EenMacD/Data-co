@@ -41,8 +41,6 @@
 .square,
 .selectedSquare {
     color: var(--secondary);
-    width: 100%;
-    height: 100%;
 }
 
 .selectedSquare {

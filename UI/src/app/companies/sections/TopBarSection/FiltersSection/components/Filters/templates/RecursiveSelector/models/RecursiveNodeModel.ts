@@ -7,3 +7,7 @@ export type RecursiveNodeModel = {
     isMatch?: boolean;
     hasMatchingDescendant?: boolean;
 };
+
+export interface RecursiveTree {
+    [key: string]: RecursiveTree;
+}

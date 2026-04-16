@@ -1,12 +1,12 @@
 export default interface CompanySearchFilters {
     // searchTerm?: string;
     industry?: string[];
-    locations?: string[];
+    location?: string[];
+    status?: string[];
     // revenue?: string;
     // employees?: string;
     // profitability?: string;
     // companySize?: string;
-    // companyStatus?: string;
     // netAssets?: string;
     // debtLevel?: string;
     limit?: number;
@@ -23,3 +23,14 @@ export type RecursiveFilterKey = {
         ? Key
         : never;
 }[keyof CompanySearchFilters];
+
+export type MultiSelectorFilterKey = {
+    // Keep only filter keys whose values can store Multi Selector value.
+    [Key in keyof CompanySearchFilters]-?: CompanySearchFilters[Key] extends
+        | string[]
+        | undefined
+        ? Key
+        : never;
+}[keyof CompanySearchFilters];
+
+export type StringArrayFilterKey = RecursiveFilterKey | MultiSelectorFilterKey;

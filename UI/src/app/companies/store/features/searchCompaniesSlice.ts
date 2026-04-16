@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "@/app/store/store";
 import type CompanySearchFilters from "../../models/search-filter";
-import type { RecursiveFilterKey } from "../../models/search-filter";
+import type { StringArrayFilterKey } from "../../models/search-filter";
 import type { SearchResponse } from "../../models/search-response";
 import { searchCompanies } from "../../services/search-companies";
 
@@ -49,10 +49,10 @@ const searchCompaniesSlice = createSlice({
         setLimit: (state, action: PayloadAction<number>) => {
             state.filters.limit = action.payload;
         },
-        setRecursiveFilter: (
+        setStringArrayFilter: (
             state,
             action: PayloadAction<{
-                filterKey: RecursiveFilterKey;
+                filterKey: StringArrayFilterKey;
                 selectedValues: string[];
             }>,
         ) => {
@@ -83,7 +83,7 @@ const searchCompaniesSlice = createSlice({
     },
 });
 
-export const { setOffset, setLimit, setRecursiveFilter } =
+export const { setOffset, setLimit, setStringArrayFilter } =
     searchCompaniesSlice.actions;
 
 export default searchCompaniesSlice.reducer;

@@ -1,0 +1,97 @@
+.selectorCard {
+    min-width: 28rem;
+}
+
+.optionsWrapper {
+    overflow: auto;
+    overflow-x: hidden;
+    max-height: 30rem;
+}
+
+.option {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    margin: 0.2rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-align: left;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.iconWrapper {
+    position: relative;
+    width: 2.4rem;
+    height: 2.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.square,
+.selectedSquare {
+    color: var(--secondary);
+}
+
+.selectedSquare {
+    fill: var(--secondary);
+}
+
+.check {
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    color: var(--surface);
+}
+
+.label {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.selectedOptionsCard {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: var(--margin-sm);
+}
+
+.tag {
+    border: none;
+    border-radius: var(--rounded-sm);
+    background: var(--input);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+}
+
+.tagLabel {
+    max-width: 18rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tagRemove {
+    width: 1.4rem;
+    height: 1.4rem;
+    flex-shrink: 0;
+}
+
+.submitButton {
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    margin: var(--margin-sm) auto var(--margin-xs) auto;
+    background-color: var(--primary);
+}

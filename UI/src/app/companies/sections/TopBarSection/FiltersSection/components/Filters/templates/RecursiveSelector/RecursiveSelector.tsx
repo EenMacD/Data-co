@@ -1,31 +1,44 @@
 import SearchBar from "@/app/common/components/SearchBar";
 import RecursiveOption from "./components/RecursiveOption/RecursiveOption";
-import type { RecursiveNodeModel } from "./models/RecursiveNodeModel";
+import type {
+    RecursiveNodeModel,
+    RecursiveTree,
+} from "./models/RecursiveNodeModel";
 import styles from "./styles.module.css";
 import Splitter from "@/app/common/components/Splitter/Splitter";
 import { useRecursiveSelector } from "./hooks/useRecursiveSelector";
-import type { LocalityTree } from "./utils";
+import type { GetRecursiveNodeSubmitValue } from "./utils";
 import SelectedOptions from "./components/SelectedOptions";
 import CustomButton from "@/app/common/components/CustomButton";
-import { getRecursiveNodeSubmitValue, handleSubmit } from "./utils";
-import type { RecursiveFilterKey } from "@/app/companies/models/search-filter";
-import { useAppDispatch } from "@/app/store/hooks";
+import {
+    createRecursiveNodeLookup,
+    getDefaultRecursiveNodeSubmitValue,
+} from "./utils";
+import { type CSSProperties, type ReactElement, useMemo } from "react";
 
 type RecursiveSelectorProps = {
-    data: LocalityTree;
-    filterId: RecursiveFilterKey;
-    searchPlaceholder?: string;
+    data: RecursiveTree;
+    selectedValues: string[];
+    searchPlaceholder: string;
+    onApply: (selectedValues: string[]) => void;
+    getSubmitValue?: GetRecursiveNodeSubmitValue;
     disableFirstNodeSelection?: boolean;
+    submitOnOptionSelect?: boolean;
+    onClose?: () => void;
+    cardStyles?: CSSProperties;
 };
 
 export default function RecursiveSelector({
     data,
-    filterId,
-    searchPlaceholder = "Search Country, City or Town",
+    selectedValues,
+    searchPlaceholder,
+    onApply,
+    getSubmitValue = getDefaultRecursiveNodeSubmitValue,
     disableFirstNodeSelection = false,
-}: RecursiveSelectorProps) {
-    const dispatch = useAppDispatch();
-    const localityTree = data;
+    submitOnOptionSelect = false,
+    onClose,
+    cardStyles,
+}: RecursiveSelectorProps): ReactElement {
     const {
         nodes,
         query,
@@ -33,32 +46,56 @@ export default function RecursiveSelector({
         selectedOptions,
         handleQueryChange,
         toggleOption,
-    } = useRecursiveSelector(localityTree, filterId);
-    const nodeById: Map<string, RecursiveNodeModel> = new Map();
+    } = useRecursiveSelector({
+        tree: data,
+        selectedValues,
+        getSubmitValue,
+    });
+    const nodeById: Map<string, RecursiveNodeModel> = useMemo(
+        () => createRecursiveNodeLookup(nodes),
+        [nodes],
+    );
 
-    function collectNodes(items: RecursiveNodeModel[]) {
-        items.forEach((item) => {
-            nodeById.set(item.id, item);
-
-            if (item.children) {
-                collectNodes(item.children);
+    function getSelectedNodes(optionIds: string[]): RecursiveNodeModel[] {
+        return optionIds.flatMap((id) => {
+            const node = nodeById.get(id);
+            if (!node || (disableFirstNodeSelection && node.depth === 0)) {
+                return [];
             }
+
+            return [node];
         });
     }
 
-    collectNodes(nodes);
+    function submitOptions(optionIds: string[]): void {
+        onApply(
+            Array.from(
+                new Set(getSelectedNodes(optionIds).map(getSubmitValue)),
+            ),
+        );
+    }
 
-    const selectedNodes = selectedOptions.flatMap((id) => {
-        const node = nodeById.get(id);
-        if (!node || (disableFirstNodeSelection && node.depth === 0)) {
-            return [];
+    function handleButtonSubmit(): void {
+        submitOptions(selectedOptions);
+        onClose?.();
+    }
+
+    function handleOptionToggle(id: string): void {
+        const nextSelectedOptions: string[] = selectedOptions.includes(id)
+            ? selectedOptions.filter((optionId: string) => optionId !== id)
+            : [...selectedOptions, id];
+
+        toggleOption(id);
+
+        if (submitOnOptionSelect) {
+            submitOptions(nextSelectedOptions);
         }
+    }
 
-        return [node];
-    });
+    const selectedNodes = getSelectedNodes(selectedOptions);
 
     return (
-        <div className={styles.selectorCard}>
+        <div style={cardStyles} className={styles.selectorCard}>
             <SearchBar
                 placeholder={searchPlaceholder}
                 width="100%"
@@ -72,7 +109,7 @@ export default function RecursiveSelector({
                     <RecursiveOption
                         key={node.id}
                         node={node}
-                        addOption={toggleOption}
+                        addOption={handleOptionToggle}
                         selectedOptions={selectedOptions}
                         disableFirstNodeSelection={disableFirstNodeSelection}
                         searchQuery={query}
@@ -82,28 +119,16 @@ export default function RecursiveSelector({
             <div className={styles.footer}>
                 <SelectedOptions
                     selectedNodes={selectedNodes}
-                    removeOption={toggleOption}
+                    removeOption={handleOptionToggle}
                 />
-                <CustomButton
-                    onClick={() =>
-                        handleSubmit(
-                            {
-                                selectedValues: Array.from(
-                                    new Set(
-                                        selectedNodes.map(
-                                            getRecursiveNodeSubmitValue,
-                                        ),
-                                    ),
-                                ),
-                                filterId,
-                            },
-                            dispatch,
-                        )
-                    }
-                    text="Submit"
-                    isPrimary
-                    className={styles.submitButton}
-                />
+                {!submitOnOptionSelect && (
+                    <CustomButton
+                        onClick={handleButtonSubmit}
+                        text="Submit"
+                        isPrimary
+                        className={styles.submitButton}
+                    />
+                )}
             </div>
         </div>
     );
