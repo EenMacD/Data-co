@@ -5,7 +5,7 @@ export default interface Company {
     locality: { String: string; Valid: boolean } | null;
     region: { String: string; Valid: boolean } | null;
     postal_code: { String: string; Valid: boolean } | null;
-    // sic_code: { String: string; Valid: boolean } | null;
+    sic_code: { String: string; Valid: boolean } | null;
     // industry_category: { String: string; Valid: boolean } | null;
     // incorporation_date: string | null;
     // turnover: { Float64: number; Valid: boolean } | null;

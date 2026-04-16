@@ -13,20 +13,23 @@ export interface LocalityTree {
 export function toRecursiveNodes(
     tree: LocalityTree,
     parentPath: string[] = [],
+    parentIndexPath: number[] = [],
     depth: number = 0,
 ): RecursiveNodeModel[] {
     // Convert the raw object tree into renderable nodes.
     return Object.entries(tree).map(
-        ([label, children]: [string, LocalityTree]) => {
+        ([label, children]: [string, LocalityTree], index: number) => {
             const path: string[] = [...parentPath, label];
+            const indexPath: number[] = [...parentIndexPath, index];
             const childNodes: RecursiveNodeModel[] = toRecursiveNodes(
                 children,
                 path,
+                indexPath,
                 depth + 1,
             );
 
             return {
-                id: path.join("/"),
+                id: indexPath.join("."),
                 label,
                 path,
                 depth,
@@ -34,6 +37,39 @@ export function toRecursiveNodes(
             };
         },
     );
+}
+
+export function getRecursiveNodeSubmitValue(node: RecursiveNodeModel): string {
+    const codeMatch: RegExpMatchArray | null = node.label.match(/^(\d+)\s+/);
+    return codeMatch?.[1] ?? node.label;
+}
+
+export function getNodeIdsForSubmitValues(
+    nodes: RecursiveNodeModel[],
+    submitValues: string[],
+): string[] {
+    if (!submitValues.length) {
+        return [];
+    }
+
+    const submitValueSet: Set<string> = new Set(submitValues);
+    const ids: string[] = [];
+
+    function collectMatchingIds(items: RecursiveNodeModel[]): void {
+        items.forEach((node: RecursiveNodeModel) => {
+            if (submitValueSet.has(getRecursiveNodeSubmitValue(node))) {
+                ids.push(node.id);
+            }
+
+            if (node.children) {
+                collectMatchingIds(node.children);
+            }
+        });
+    }
+
+    collectMatchingIds(nodes);
+
+    return ids;
 }
 
 export function filterRecursiveNodes(

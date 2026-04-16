@@ -13,6 +13,7 @@ type RecursiveContentProps = {
     depth: number;
     isLast: boolean;
     isSelected: boolean;
+    isSelectable: boolean;
     isExpanded: boolean;
     setIsExpanded: Dispatch<SetStateAction<boolean>>;
     addOption: (id: string) => void;
@@ -25,6 +26,7 @@ export default function RecursiveContent({
     depth,
     isLast,
     isSelected,
+    isSelectable,
     isExpanded,
     setIsExpanded,
     addOption,
@@ -37,6 +39,17 @@ export default function RecursiveContent({
         }
 
         setIsExpanded((prev: boolean) => !prev);
+    }
+
+    function handleClick(): void {
+        if (isSelectable) {
+            addOption(id);
+            return;
+        }
+
+        if (!isLast) {
+            setIsExpanded((prev: boolean) => !prev);
+        }
     }
 
     function renderHighlightedLabel(): ReactElement | string {
@@ -69,8 +82,8 @@ export default function RecursiveContent({
     return (
         <div
             style={{ marginLeft: `${depth * 12}px` }}
-            className={`${styles.contentWrapper} ${isLast && styles.lastOption}`}
-            onClick={() => addOption(id)}
+            className={`${styles.contentWrapper} ${isLast && styles.lastOption} ${!isSelectable && styles.notSelectable}`}
+            onClick={handleClick}
         >
             <span
                 className={styles.arrowWrapper}
@@ -84,14 +97,16 @@ export default function RecursiveContent({
                         <ChevronDown className={styles.arrow} />
                     ))}
             </span>
-            <span className={styles.iconWrapper}>
-                <Square
-                    className={
-                        isSelected ? styles.selectedSquare : styles.square
-                    }
-                />
-                {isSelected && <Check className={styles.check} />}
-            </span>
+            {isSelectable && (
+                <span className={styles.iconWrapper}>
+                    <Square
+                        className={
+                            isSelected ? styles.selectedSquare : styles.square
+                        }
+                    />
+                    {isSelected && <Check className={styles.check} />}
+                </span>
+            )}
             <h4 className={styles.label}>{renderHighlightedLabel()}</h4>
         </div>
     );

@@ -1,7 +1,11 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import type { RecursiveNodeModel } from "../models/RecursiveNodeModel";
 import type { LocalityTree } from "../utils";
-import { filterRecursiveNodes, toRecursiveNodes } from "../utils";
+import {
+    filterRecursiveNodes,
+    getNodeIdsForSubmitValues,
+    toRecursiveNodes,
+} from "../utils";
 import type { RecursiveFilterKey } from "@/app/companies/models/search-filter";
 import { useAppSelector } from "@/app/store/hooks";
 
@@ -14,23 +18,32 @@ type UseRecursiveSelectorResult = {
     toggleOption: (id: string) => void;
 };
 
+const EMPTY_SELECTED_OPTIONS: string[] = [];
+
 export function useRecursiveSelector(
     localityTree: LocalityTree,
     filterId: RecursiveFilterKey,
 ): UseRecursiveSelectorResult {
     const appliedOptions: string[] = useAppSelector((state) => {
-        return state.companiesSearch.filters[filterId] ?? [];
+        return state.companiesSearch.filters[filterId] ?? EMPTY_SELECTED_OPTIONS;
     });
+    const nodes: RecursiveNodeModel[] = useMemo(
+        () => toRecursiveNodes(localityTree),
+        [localityTree],
+    );
+    const appliedOptionIds: string[] = useMemo(
+        () => getNodeIdsForSubmitValues(nodes, appliedOptions),
+        [appliedOptions, nodes],
+    );
     const [query, setQuery] = useState("");
     const [selectedOptions, setSelectedOptions] =
-        useState<string[]>(appliedOptions);
+        useState<string[]>(appliedOptionIds);
 
     useEffect(() => {
-        setSelectedOptions(appliedOptions);
-    }, [appliedOptions]);
+        setSelectedOptions(appliedOptionIds);
+    }, [appliedOptionIds]);
 
     // Build the full tree once per render, then derive the visible tree from it.
-    const nodes: RecursiveNodeModel[] = toRecursiveNodes(localityTree);
     const visibleNodes: RecursiveNodeModel[] = filterRecursiveNodes(
         nodes,
         query,

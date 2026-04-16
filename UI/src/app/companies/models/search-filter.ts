@@ -1,6 +1,6 @@
 export default interface CompanySearchFilters {
     // searchTerm?: string;
-    // industry?: string;
+    industry?: string[];
     locations?: string[];
     // revenue?: string;
     // employees?: string;

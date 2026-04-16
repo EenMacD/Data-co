@@ -7,18 +7,22 @@ import { useRecursiveSelector } from "./hooks/useRecursiveSelector";
 import type { LocalityTree } from "./utils";
 import SelectedOptions from "./components/SelectedOptions";
 import CustomButton from "@/app/common/components/CustomButton";
-import { handleSubmit } from "./utils";
+import { getRecursiveNodeSubmitValue, handleSubmit } from "./utils";
 import type { RecursiveFilterKey } from "@/app/companies/models/search-filter";
 import { useAppDispatch } from "@/app/store/hooks";
 
 type RecursiveSelectorProps = {
     data: LocalityTree;
     filterId: RecursiveFilterKey;
+    searchPlaceholder?: string;
+    disableFirstNodeSelection?: boolean;
 };
 
 export default function RecursiveSelector({
     data,
     filterId,
+    searchPlaceholder = "Search Country, City or Town",
+    disableFirstNodeSelection = false,
 }: RecursiveSelectorProps) {
     const dispatch = useAppDispatch();
     const localityTree = data;
@@ -46,13 +50,17 @@ export default function RecursiveSelector({
 
     const selectedNodes = selectedOptions.flatMap((id) => {
         const node = nodeById.get(id);
-        return node ? [node] : [];
+        if (!node || (disableFirstNodeSelection && node.depth === 0)) {
+            return [];
+        }
+
+        return [node];
     });
 
     return (
         <div className={styles.selectorCard}>
             <SearchBar
-                placeholder="Search Country, City or Town"
+                placeholder={searchPlaceholder}
                 width="100%"
                 value={query}
                 onChange={handleQueryChange}
@@ -66,6 +74,7 @@ export default function RecursiveSelector({
                         node={node}
                         addOption={toggleOption}
                         selectedOptions={selectedOptions}
+                        disableFirstNodeSelection={disableFirstNodeSelection}
                         searchQuery={query}
                     />
                 ))}
@@ -79,8 +88,12 @@ export default function RecursiveSelector({
                     onClick={() =>
                         handleSubmit(
                             {
-                                selectedValues: selectedNodes.map(
-                                    (node) => node.label,
+                                selectedValues: Array.from(
+                                    new Set(
+                                        selectedNodes.map(
+                                            getRecursiveNodeSubmitValue,
+                                        ),
+                                    ),
                                 ),
                                 filterId,
                             },

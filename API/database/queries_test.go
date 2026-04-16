@@ -74,6 +74,28 @@ func TestBuildCompanyQueryUsesSharedFragmentsAndProjection(t *testing.T) {
 	}
 }
 
+func TestBuildCompanyQueryFiltersIndustryPrefixes(t *testing.T) {
+	query, args := BuildCompanyQuery(models.CompanySearchFilters{
+		Industry: []string{"01", "02", "03"},
+		Limit:    20,
+		Offset:   0,
+	})
+
+	expectedFragment := "WHERE EXISTS (SELECT 1 FROM unnest(c.sic_codes) AS sic WHERE sic ILIKE $1 OR sic ILIKE $2 OR sic ILIKE $3)"
+	if !strings.Contains(query, expectedFragment) {
+		t.Fatalf("query missing fragment %q:\n%s", expectedFragment, query)
+	}
+
+	if !strings.Contains(query, "LIMIT $4 OFFSET $5") {
+		t.Fatalf("query should place limit and offset after industry args:\n%s", query)
+	}
+
+	expectedArgs := []interface{}{"01%", "02%", "03%", 20, 0}
+	if !reflect.DeepEqual(args, expectedArgs) {
+		t.Fatalf("unexpected args: expected %#v, got %#v", expectedArgs, args)
+	}
+}
+
 func TestBuildCompanyCountQueryUsesSharedFragmentsAndLocationCondition(t *testing.T) {
 	query, args := BuildCompanyCountQuery(models.CompanySearchFilters{
 		Locations: []string{"London", "Manchester"},

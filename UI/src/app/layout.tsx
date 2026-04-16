@@ -1,4 +1,3 @@
-import type { ReactElement } from "react";
 import type { Metadata } from "next";
 import { fontsClassNames } from "@/fonts/fonts";
 import Navbar from "@/components/Navbar";
@@ -17,7 +16,7 @@ type Props = {
 export default function RootLayout({ children }: Readonly<Props>) {
     return (
         <html lang="en" className={fontsClassNames}>
-            <body>
+            <body suppressHydrationWarning>
                 <StoreProvider>
                     <Navbar />
                     <main>{children}</main>

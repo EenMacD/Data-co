@@ -8,6 +8,7 @@ type RecursiveOptionProps = {
     node: RecursiveNodeModel;
     addOption: (id: string) => void;
     selectedOptions: string[];
+    disableFirstNodeSelection?: boolean;
     searchQuery?: string;
 };
 
@@ -15,6 +16,7 @@ export default function RecursiveOption({
     node,
     addOption,
     selectedOptions,
+    disableFirstNodeSelection = false,
     searchQuery = "",
 }: RecursiveOptionProps): ReactElement {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -23,7 +25,10 @@ export default function RecursiveOption({
         searchQuery.trim().length > 0 && Boolean(node.hasMatchingDescendant);
     const isNodeExpanded: boolean = shouldAutoExpand || isExpanded;
     const isLast: boolean = !node.children;
-    const isSelected: boolean = selectedOptions.includes(node.id);
+    const isSelectable: boolean = !(
+        disableFirstNodeSelection && node.depth === 0
+    );
+    const isSelected: boolean = isSelectable && selectedOptions.includes(node.id);
 
     return (
         <div
@@ -38,6 +43,7 @@ export default function RecursiveOption({
                 setIsExpanded={setIsExpanded}
                 addOption={addOption}
                 isSelected={isSelected}
+                isSelectable={isSelectable}
                 searchQuery={searchQuery}
             />
             {isNodeExpanded &&
@@ -47,6 +53,7 @@ export default function RecursiveOption({
                         node={child}
                         addOption={addOption}
                         selectedOptions={selectedOptions}
+                        disableFirstNodeSelection={disableFirstNodeSelection}
                         searchQuery={searchQuery}
                     ></RecursiveOption>
                 ))}

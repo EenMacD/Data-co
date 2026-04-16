@@ -28,7 +28,7 @@ type Company struct {
 
 // CompanySearchFilters represents the filter criteria from frontend
 type CompanySearchFilters struct {
-	// Industry      string `json:"industry"`
+	Industry  []string `json:"industry"`
 	Locations []string `json:"locations"`
 	// Revenue       string `json:"revenue"`
 	// Employees     string `json:"employees"`

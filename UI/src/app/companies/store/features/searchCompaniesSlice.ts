@@ -18,7 +18,7 @@ const initialState: SearchCompaniesState = {
     filters: {
         limit: 20,
         offset: 0,
-        includeTotal: false,
+        includeTotal: true,
     },
     companies: [],
     total: 0,

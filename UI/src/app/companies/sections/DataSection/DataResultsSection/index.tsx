@@ -32,7 +32,7 @@ export default function DataResultsSection(): ReactElement {
         "Company Number",
         "Locality",
         "Status",
-        // "SIC Code",
+        "Industry",
         // "Turnover",
         // "Officers",
         // "Date",

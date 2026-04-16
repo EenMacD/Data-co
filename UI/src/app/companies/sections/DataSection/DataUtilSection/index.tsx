@@ -8,10 +8,8 @@ import { DownloadIcon, Menu } from "lucide-react";
 import { useAppSelector } from "@/app/store/hooks";
 
 export default function DataUtilSection(): ReactElement {
-    const { companies = [], total } = useAppSelector(
-        (state) => state.companiesSearch,
-    );
-    const resultsCount: number = total || companies.length;
+    const { total } = useAppSelector((state) => state.companiesSearch);
+    const resultsCount: number = total;
 
     return (
         <div className={styles.DataUtilSection}>

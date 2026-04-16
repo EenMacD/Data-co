@@ -9,6 +9,10 @@
     -webkit-user-select: none;
 }
 
+.notSelectable {
+    cursor: default;
+}
+
 .arrowWrapper {
     background-color: var(--input);
     padding: 0.3rem;

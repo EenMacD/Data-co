@@ -27,6 +27,7 @@ export default function ResultsBody({
                             <TdContent>{item.company_number}</TdContent>
                             <TdContent>{getString(item.locality)}</TdContent>
                             <TdContent>{item.company_status}</TdContent>
+                            <TdContent>{getString(item.sic_code)}</TdContent>
                             {/* <td>{getString(item.sic_code)}</td>
                     <td>{formatCurrency(item.turnover)}</td>
                     <td>{item.active_officers_count}</td>
