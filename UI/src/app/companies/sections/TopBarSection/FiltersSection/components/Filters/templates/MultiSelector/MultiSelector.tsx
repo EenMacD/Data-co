@@ -93,6 +93,32 @@ export default function MultiSelector({
         onClose?.();
     }
 
+    function renderHighlightedLabel(label: string): ReactElement | string {
+        const normalizedQuery: string = query.trim().toLowerCase();
+
+        if (!normalizedQuery) {
+            return label;
+        }
+
+        const matchIndex: number = label.toLowerCase().indexOf(normalizedQuery);
+
+        if (matchIndex === -1) {
+            return label;
+        }
+
+        const matchEnd: number = matchIndex + normalizedQuery.length;
+
+        return (
+            <>
+                {label.slice(0, matchIndex)}
+                <span className={styles.highlight}>
+                    {label.slice(matchIndex, matchEnd)}
+                </span>
+                {label.slice(matchEnd)}
+            </>
+        );
+    }
+
     const selectedOptions: MultiSelectorOptionModel[] =
         getSelectedOptions(selectedOptionIds);
 
@@ -129,7 +155,9 @@ export default function MultiSelector({
                                     <Check className={styles.check} />
                                 )}
                             </span>
-                            <h4 className={styles.label}>{option.label}</h4>
+                            <h3 className={styles.label}>
+                                {renderHighlightedLabel(option.label)}
+                            </h3>
                         </button>
                     );
                 })}

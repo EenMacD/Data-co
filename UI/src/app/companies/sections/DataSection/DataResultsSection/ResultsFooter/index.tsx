@@ -15,6 +15,7 @@ import {
     setOffset,
 } from "@/app/companies/store/features/searchCompaniesSlice";
 import RPPSelector from "./components/PageSelector/RPPSelector";
+import Splitter from "@/app/common/components/Splitter/Splitter";
 
 interface ResultsFooterProps {
     scrollContainerRef: RefObject<HTMLDivElement | null>;
@@ -25,11 +26,13 @@ export default function ResultsFooter({
 }: ResultsFooterProps): ReactElement {
     const dispatch = useAppDispatch();
 
-    const { filters } = useAppSelector((state) => state.companiesSearch);
+    const { filters, total } = useAppSelector((state) => state.companiesSearch);
     const limit = filters.limit ?? 0;
     const offset = filters.offset ?? 0;
 
     const currentPage = limit > 0 ? Math.floor(offset / limit) + 1 : 1;
+    const hasPreviousPage = currentPage > 1;
+    const hasNextPage = limit > 0 && offset + limit < total;
 
     function handlePreviousPage(): void {
         const prevOffset = Math.max(0, offset - limit);
@@ -38,6 +41,10 @@ export default function ResultsFooter({
     }
 
     function handleNextPage(): void {
+        if (!hasNextPage) {
+            return;
+        }
+
         const nextOffset = offset + limit;
         dispatch(setOffset(nextOffset));
         void dispatch(fetchSearchCompanies());
@@ -61,11 +68,13 @@ export default function ResultsFooter({
                     handleChangeAction={handleChangeLimit}
                 />
 
+                <Splitter isVertical />
+
                 {/* <CustomButton
                     leadingIcon={<ChevronFirst />}
                     aria-label="First page"
                 /> */}
-                {currentPage > 1 && (
+                {hasPreviousPage && (
                     <CustomButton
                         leadingIcon={<ChevronLeft />}
                         aria-label="Previous page"
@@ -78,11 +87,13 @@ export default function ResultsFooter({
                     textStyle={{ fontSize: "1.4rem", fontWeight: "700" }}
                     buttonStyle={{ padding: "0 2.4rem" }}
                 />
-                <CustomButton
-                    leadingIcon={<ChevronRight />}
-                    aria-label="Next page"
-                    onClick={handleNextPage}
-                />
+                {hasNextPage && (
+                    <CustomButton
+                        leadingIcon={<ChevronRight />}
+                        aria-label="Next page"
+                        onClick={handleNextPage}
+                    />
+                )}
                 {/* <CustomButton
                     leadingIcon={<ChevronLast />}
                     aria-label="Last page"

@@ -4,3 +4,9 @@
     background-color: var(--border);
     margin: var(--margin-sm) auto;
 }
+
+.vertical {
+    height: 4rem;
+    width: 2px;
+    margin: auto var(--margin-xs);
+}

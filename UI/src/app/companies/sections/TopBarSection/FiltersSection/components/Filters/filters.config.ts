@@ -42,7 +42,7 @@ const pinnedFilters: PinnedFilter[] = [
         searchPlaceholder: "Search industry or SIC code",
         getSubmitValue: getSicCodeSubmitValue,
         disableFirstNodeSelection: true,
-        submitOnOptionSelect: false,
+        submitOnOptionSelect: true,
         cardStyles: { width: "40rem" },
     },
     {
@@ -54,7 +54,6 @@ const pinnedFilters: PinnedFilter[] = [
         searchPlaceholder: "Search company status",
         getSubmitValue: getStatusSubmitValue,
         submitOnOptionSelect: true,
-        cardStyles: { width: "40rem" },
     },
 ];
 

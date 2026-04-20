@@ -11,10 +11,10 @@
 .option {
     width: 100%;
     border: none;
-    background: transparent;
+    background: var(--card);
     color: inherit;
-    padding: 0;
-    margin: 0.2rem 0;
+    padding: var(--padding-sm);
+    margin: 0.4rem 0.2rem;
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -53,6 +53,10 @@
 .label {
     user-select: none;
     -webkit-user-select: none;
+}
+
+.highlight {
+    color: var(--accent);
 }
 
 .selectedOptionsCard {
