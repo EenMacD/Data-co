@@ -98,7 +98,7 @@ func TestBuildCompanyQueryFiltersIndustryPrefixes(t *testing.T) {
 
 func TestBuildCompanyCountQueryUsesSharedFragmentsAndLocationCondition(t *testing.T) {
 	query, args := BuildCompanyCountQuery(models.CompanySearchFilters{
-		Locations: []string{"London", "Manchester"},
+		Location: []string{"London", "Manchester"},
 	})
 
 	for _, fragment := range []string{
@@ -121,7 +121,7 @@ func TestBuildCompanyCountQueryUsesSharedFragmentsAndLocationCondition(t *testin
 
 func TestBuildCompanyCountQueryNormalizesHierarchicalLocations(t *testing.T) {
 	query, args := BuildCompanyCountQuery(models.CompanySearchFilters{
-		Locations: []string{"England/London", "England/West Midlands/Birmingham"},
+		Location: []string{"England/London", "England/West Midlands/Birmingham"},
 	})
 
 	expectedFragments := []string{

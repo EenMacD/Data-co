@@ -468,7 +468,7 @@ func (qb *QueryBuilder) GetArgs() []interface{} {
 
 func applyCompanyFilters(qb *QueryBuilder, filters models.CompanySearchFilters) {
 	qb.AddIndustryFilter(filters.Industry)
-	qb.AddLocationFilter(filters.Locations)
+	qb.AddLocationFilter(filters.Location)
 	qb.AddCompanyStatusFilter(filters.Status)
 	// qb.AddRevenueFilter(filters.Revenue)
 	// qb.AddEmployeesFilter(filters.Employees)
